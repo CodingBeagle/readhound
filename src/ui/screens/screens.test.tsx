@@ -220,8 +220,10 @@ describe('profile: lists, categories and notes', () => {
     await user.type(await screen.findByLabelText(t.screens.profile.goal.books), '24')
     await user.click(within(screen.getByRole('heading', { name: t.screens.profile.goal.title(year) }).closest('section')!).getByRole('button', { name: t.common.save }))
     // Saving a goal re-runs the goal pace and achievements over the whole library, so allow more than the
-    // default second for the write and the confirmation on a busy test runner.
-    expect(await screen.findByText(t.screens.profile.goal.saved, {}, { timeout: 4000 })).toBeInTheDocument()
+    // default second for the write and the confirmation on a busy test runner. The form re-mounts once the
+    // saved goal reads back, which can swap the status line for a new one between finding it and checking
+    // it, so query afresh inside waitFor rather than holding on to the first element found.
+    await waitFor(() => expect(screen.getByText(t.screens.profile.goal.saved)).toBeInTheDocument(), { timeout: 4000 })
     expect(await services.db.goals.get(year)).toEqual({ year, targetBooks: 24 })
   })
 })
