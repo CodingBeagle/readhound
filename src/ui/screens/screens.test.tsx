@@ -431,3 +431,35 @@ describe('series screens', () => {
     expect(await services.db.entries.count()).toBe(2)
   })
 })
+
+describe('recommendations', () => {
+  it('suggests more by a loved author, adds one to To read and dismisses another', async () => {
+    const user = userEvent.setup()
+    const entryId = await addManual('Project Hail Mary', 'Andy Weir', 'finished')
+    await services.library.setRating(entryId, 5)
+    renderAt('/for-you')
+
+    expect(await screen.findByText(t.recommendations.tasteTitle)).toBeInTheDocument()
+    const martian = (await screen.findAllByText('The Martian', {}, { timeout: 5000 }))[0]!.closest('li')!
+    expect(within(martian).getByText(t.recommendations.because.author('Andy Weir', 'Project Hail Mary'))).toBeInTheDocument()
+    expect(screen.queryByText('Project Hail Mary', { selector: 'a' })).not.toBeInTheDocument()
+
+    await user.click(within(martian).getByRole('button', { name: `${t.recommendations.addToRead}: The Martian` }))
+    expect(await screen.findByText(t.recommendations.added('The Martian'))).toBeInTheDocument()
+    const added = await services.db.entries.where('status').equals('to_read').toArray()
+    expect(added).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: `${t.recommendations.addToRead}: The Martian` })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: `${t.recommendations.dismiss}: Artemis` }))
+    expect(await screen.findByText(t.recommendations.dismissed('Artemis'))).toBeInTheDocument()
+    await act(async () => {})
+    expect(screen.queryByRole('button', { name: `${t.recommendations.dismiss}: Artemis` })).not.toBeInTheDocument()
+    expect((await services.db.settings.get('recommendationsDismissed'))?.value).toHaveLength(1)
+  })
+
+  it('asks for ratings before it has anything to go on', async () => {
+    await addManual('Unread', 'Someone')
+    renderAt('/for-you')
+    expect(await screen.findByText(t.recommendations.needRatings)).toBeInTheDocument()
+  })
+})

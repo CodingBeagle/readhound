@@ -27,6 +27,7 @@ export interface OlSearchDoc {
   language?: string[]
   number_of_pages_median?: number
   cover_i?: number
+  subject?: string[]
 }
 
 export interface OlSearchResponse {
@@ -144,6 +145,7 @@ export function mapSearchDoc(doc: OlSearchDoc): SearchResult {
     medianPageCount: doc.number_of_pages_median,
     coverUrl: doc.cover_i && doc.cover_i > 0 ? coverUrl(doc.cover_i) : undefined,
     languages: doc.language ?? [],
+    ...(doc.subject && { subjects: doc.subject.slice(0, 40) }),
   }
 }
 

@@ -302,7 +302,7 @@ Series tracking shows how far I am through a series, which book comes next, and 
 - **Library filter:** "All series" or one series.
 - **Home:** "Next in series" lists up to three series continued in the last 120 days, most recent first, with one tap to start reading an owned book or to find a missing one.
 
-**Rules** (`src/domain/series.ts`): order by position, then unnumbered members by title. A book counts as read if any of its reads finished, so a reread in progress still counts. Total is `max(totalBooks, members)`. A series is complete when it has at least two books and all are read. The next book is the first unread member after the furthest one read (or the first unread one before it), and none while that book is being read or before any book is finished. `nextInSeries` and `preferredNextWorks` give recommendations the works (by `workId` or `olWorkId`) to rank first.
+**Rules** (`src/domain/series.ts`): order by position, then unnumbered members by title. A book counts as read if any of its reads finished, so a reread in progress still counts. Total is `max(totalBooks, members)`. A series is complete when it has at least two books and all are read. The next book is the first unread member after the furthest one read (or the first unread one before it), and none while that book is being read or before any book is finished. `nextInSeries` and `preferredNextWorks` give recommendations the works (by `workId` or `olWorkId`) to rank first; the For you ranking uses them (see Recommendations).
 
 **Backup:** the backup format moves to version 2 with `series` and `seriesMembers`; version 1 files still import with no series. The library CSV has a Series column ("Afdeling Q #2").
 
@@ -440,6 +440,62 @@ Achievements gamify reading. They are worked out purely from the stats model, th
 - **Points and levels**: bronze 10, silver 25, gold 50, platinum 100, special 25. Levels: Puppy 0, Fetcher 100, Sniffer 300, Tracker 700, Bloodhound 1,300, Readhound 2,100.
 - **Where it shows**: a level card on Home, Stats and Profile links to the Achievements screen (`/achievements`), which lists families by group with tier pips, next goal and progress, then the specials grid. Filters: All, Unlocked, Still to earn.
 - **Unlock moments**: the only stored state is the setting `achievementsSeen` ({ ids, level }). A newly earned achievement or level shows a toast with a confetti burst, once. The first run on a database (and in demo mode) is silent apart from a single welcome toast summarising what is already earned. Toasts honour reduced motion.
+
+## Recommendations
+
+"For you" suggests books to read next from a taste profile. Everything is worked out on the device (`src/domain/recommendations.ts`). The only network calls are ordinary Open Library searches.
+
+**Taste profile.** Each book gets a weight:
+
+- A rated book counts rating − 2.5, so 5 stars is +2.5 and 1 star is −1.5.
+- A favourite adds 1, or counts 1.5 if it is unrated.
+- An unrated finished book counts 0.5, and an unrated DNF counts −1.
+- A reread adds 0.5.
+- Books still to read or in progress don't count.
+
+The weights add up per author, per subject, per decade, per length band (under 200, 200–399, 400–599, 600+ pages) and per edition language. Subjects come from two places. The reader's own genre categories count in full. Open Library work subjects count half, after tags, codes and filler such as "Fiction" are dropped.
+
+**Candidates.** Six searches run, one at a time, through the rate-limited HTTP client:
+
+- The three strongest liked authors: `author=<name>`.
+- The three strongest liked subjects: `q=subject_key:<key>`.
+
+All six sort by rating and ask for each work's subjects. They are cached like any search (24 hours). Logging pages or rating books re-ranks the picks without fetching again, and the searches only change when the top authors or subjects change.
+
+**Ranking.** A weighted sum of how well a candidate fits:
+
+- 1.2 × author fit
+- subject matches (capped at 1.5)
+- 0.3 × decade fit
+- 0.3 × length fit
+- 0.2 × language fit
+- 0.2 × a small popularity term
+
+Each part of the profile is scaled to ±1 first. The ranking leaves out:
+
+- books already in the library, matched by Open Library work id or by title plus any author
+- dismissed books
+- box sets and omnibus titles
+- books with no liked author or subject
+
+**Series first:** a candidate whose Open Library work id is the next unread, not-owned book of a series in progress (`nextInSeries` in `src/domain/series.ts`) skips the liked-author/subject test, goes to the top, and doesn't count toward the per-author cap. Its reason reads "Next in <series>: book <n>".
+
+No author gets more than two picks (series picks aside), and there are up to 12 picks in all. More signals, such as text-embedding similarity in the browser, can be added later as further terms in `scoreCandidate`.
+
+**Reasons.** Each pick shows why it was chosen: "Because you loved <best-rated book by that author>", or "Because you like <subject>, such as <best-liked book in it>".
+
+**Where it shows:**
+
+- The For you screen (`/for-you`), with a "Your taste" summary of the top authors and subjects.
+- The top three picks on Home, shown only when there are picks.
+- A link at the top of Search.
+
+**Actions:**
+
+- **Add to To read** picks an edition (preferred language first, then one with a page count and a cover) and adds it with status to_read. If there is no edition, it opens the edition picker.
+- **Not for me** stores the work id in the setting `recommendationsDismissed` and offers Undo. The dismissed books can be shown again from the For you screen.
+
+**Other states.** Offline, error and "rate a few books first" states are covered. Demo mode works from the sample library's ratings and genres.
 
 ## Danger zone
 
@@ -583,3 +639,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Danger zone at the bottom of Profile: deletes the whole personal database (settings and cache included) after an export offer and typing DELETE; keeps the theme; hidden in demo mode and never touches the demo database |
 | 2026-11-25 | Achievement system replaces milestones: 14 tiered families (bronze to platinum), 13 specials, points and six dog-themed reader levels; derived from the data, only the seen state is stored so each unlock toasts once |
 | 2026-11-25 | Series tracking: series linked per work with decimal positions and not-owned gaps; detection from Wikidata (P179/P1545 by Open Library ID) with Open Library's series label as fallback, offered as one-tap suggestions plus a library scan; Library > Series, a series filter, Next in series on Home; Completionist, Trilogy and Back to back achievements; backup format version 2 |
+| 2026-11-25 | Recommendations from an on-device taste profile, built from ratings, favourites, finishes and DNFs. Open Library searches by the top authors and subjects, ranked by a weighted fit with a reason per pick; dismissals are stored in settings. Smarter in-browser similarity can come later as an extra ranking term |

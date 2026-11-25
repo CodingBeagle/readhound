@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { ChevronRight, Sparkles } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 
 import { useServices } from '@/app/services'
@@ -45,6 +46,13 @@ export function SearchScreen() {
         className="mb-4"
       />
 
+      {query.length < 2 && (
+        <Link to="/for-you" className="surface mb-4 flex min-h-11 items-center gap-2 p-3 text-sm font-medium">
+          <Sparkles aria-hidden className="size-4 text-primary" />
+          <span className="flex-1">{t.recommendations.searchLink}</span>
+          <ChevronRight aria-hidden className="size-4" />
+        </Link>
+      )}
       {!online && <EmptyState>{t.screens.search.offline}</EmptyState>}
       {online && showLoading && (
         <p role="status" className="mb-3 text-sm text-muted-foreground">

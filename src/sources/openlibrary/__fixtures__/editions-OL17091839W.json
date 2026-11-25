@@ -1,0 +1,1071 @@
+{
+  "links": {
+    "self": "/works/OL17091839W/editions.json?limit=20&offset=0",
+    "work": "/works/OL17091839W",
+    "next": "/works/OL17091839W/editions.json?limit=20&offset=20"
+  },
+  "size": 74,
+  "entries": [
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "local_id": [
+        "urn:bwbsku:KV-010-486"
+      ],
+      "publish_date": "2014",
+      "publishers": [
+        "Akurat"
+      ],
+      "source_records": [
+        "promise:bwb_daily_pallets_2024-12-19:KV-010-486"
+      ],
+      "title": "Marsjanin",
+      "full_title": "Marsjanin",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL60319902M",
+      "covers": [
+        15206857
+      ],
+      "identifiers": {
+        "amazon": [
+          "837758817X"
+        ],
+        "goodreads": [
+          "23291340"
+        ],
+        "storygraph": [
+          "8e6aced4-a9ed-41ca-ba43-2f112958eea8"
+        ]
+      },
+      "isbn_10": [
+        "837758817X"
+      ],
+      "isbn_13": [
+        "9788377588178"
+      ],
+      "oclc_numbers": [
+        "1512290799"
+      ],
+      "publish_places": [
+        "Warszawa, Poland"
+      ],
+      "edition_name": "Wydanie I",
+      "contributors": [
+        {
+          "role": "Translator",
+          "name": "Marcin Ring"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/pol"
+        }
+      ],
+      "translation_of": "The Martian",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "description": {
+        "type": "/type/text",
+        "value": "Mark Watney kilka dni temu by\u0142 jednym z pierwszych ludzi, kt\u00f3rzy stan\u0119li na Marsie.\r\nTeraz jest pewien, \u017ce b\u0119dzie pierwszym, kt\u00f3ry tam umrze!\r\n\r\nStraszliwa burza piaskowa sprawia, \u017ce marsja\u0144ska ekspedycja, w kt\u00f3rej sk\u0142ad wchodzi Mark Watney, musi ratowa\u0107 si\u0119 ucieczk\u0105 z Czerwonej Planety. Kiedy ci\u0119\u017cko ranny Mark odzyskuje przytomno\u015b\u0107, stwierdza, \u017ce zosta\u0142 na Marsie sam w zdewastowanym przez wichur\u0119 obozie, z minimalnymi zapasami powietrza i \u017cywno\u015bci, a na dodatek bez \u0142\u0105czno\u015bci z Ziemi\u0105. Co gorsza, zar\u00f3wno pozostali cz\u0142onkowie ekspedycji, jak i sztab w Houston uwa\u017caj\u0105 go za martwego, nikt wi\u0119c nie zorganizuje wyprawy ratunkowej; zreszt\u0105, nawet gdyby wyruszyli po niego niemal natychmiast, dotarliby na Marsa d\u0142ugo po tym, jak zabraknie mu powietrza, wody i \u017cywno\u015bci. Czy\u017cby to by\u0142 koniec? Nic z tego. Mark rozpoczyna heroiczn\u0105 walk\u0119 o przetrwanie, w kt\u00f3rej r\u00f3wnie wa\u017cn\u0105 rol\u0119 co naukowa wiedza, zdolno\u015bci techniczne i pomys\u0142owo\u015b\u0107 odgrywaj\u0105 niez\u0142omna determinacja i umiej\u0119tno\u015b\u0107 zachowania dystansu wobec siebie i \u015bwiata, kt\u00f3ry nie zawsze gra fair..."
+      },
+      "physical_format": "Paperback",
+      "number_of_pages": 384,
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2025-10-01T10:48:19.660681"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-04-07T19:30:39.347302"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "publish_date": "2014",
+      "publish_country": "is",
+      "languages": [
+        {
+          "key": "/languages/heb"
+        }
+      ],
+      "work_titles": [
+        "Martian"
+      ],
+      "title": "\u05dc\u05d1\u05d3 \u05e2\u05dc \u05de\u05d0\u05d3\u05d9\u05dd",
+      "other_titles": [
+        "Levad \u02bbal Ma\u02bcadim; Levad \u02bbal ma\u02bcadim"
+      ],
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "series": [
+        "Prozah"
+      ],
+      "contributions": [
+        "\u1e24anokh, Didi"
+      ],
+      "subjects": [
+        "Astronauts",
+        "Fiction",
+        "Survival"
+      ],
+      "subject_places": [
+        "Mars (Planet)"
+      ],
+      "publishers": [
+        "\u05d9\u05d3\u05d9\u05e2\u05d5\u05ea \u05d0\u05d7\u05e8\u05d5\u05e0\u05d5\u05ea",
+        "\u05e1\u05e4\u05e8\u05d9 \u05d7\u05de\u05d3"
+      ],
+      "publish_places": [
+        "\u05ea\u05dc \u05d0\u05d1\u05d9\u05d1"
+      ],
+      "pagination": "432 p.",
+      "number_of_pages": 432,
+      "source_records": [
+        "marc:harvard_bibliographic_metadata/ab.bib.14.20150123.full.mrc:314725877:879"
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL53066809M",
+      "identifiers": {
+        "goodreads": [
+          "35378698"
+        ]
+      },
+      "isbn_13": [
+        "9789655458213"
+      ],
+      "oclc_numbers": [
+        "894869122"
+      ],
+      "isbn_10": [
+        "9655458210"
+      ],
+      "contributors": [
+        {
+          "role": "Author name as appears on this edition",
+          "name": "\u05d0\u05e0\u05d3\u05d9 \u05d5\u05d9\u05d9\u05e8"
+        },
+        {
+          "role": "Translator",
+          "name": "\u05d3\u05d9\u05d3\u05d9 \u05d7\u05e0\u05d5\u05da"
+        }
+      ],
+      "translation_of": "The Martian",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "description": {
+        "type": "/type/text",
+        "value": "\u05dc\u05e4\u05e0\u05d9 \u05e9\u05d9\u05e9\u05d4 \u05d9\u05de\u05d9\u05dd \u05d4\u05e4\u05da \u05d4\u05d0\u05e1\u05d8\u05e8\u05d5\u05e0\u05d0\u05d5\u05d8 \u05de\u05d0\u05e8\u05e7 \u05d5\u05d5\u05d0\u05d8\u05e0\u05d9 \u05dc\u05d0\u05d7\u05d3 \u05d4\u05d0\u05e0\u05e9\u05d9\u05dd \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd \u05dc\u05e6\u05e2\u05d5\u05d3 \u05e2\u05dc \u05de\u05d0\u05d3\u05d9\u05dd.\r\n\r\n\u05db\u05e2\u05ea \u05d4\u05d5\u05d0 \u05d1\u05d8\u05d5\u05d7 \u05e9\u05d9\u05d4\u05d9\u05d4 \u05d4\u05d0\u05d3\u05dd \u05d4\u05e8\u05d0\u05e9\u05d5\u05df \u05dc\u05de\u05d5\u05ea \u05e9\u05dd.\r\n\r\n\u05dc\u05d0\u05d7\u05e8 \u05e9\u05e1\u05d5\u05e4\u05ea \u05d0\u05d1\u05e7 \u05d7\u05de\u05d5\u05e8\u05d4 \u05de\u05d0\u05dc\u05e6\u05ea \u05d0\u05ea \u05d7\u05d1\u05e8\u05d9\u05d5 \u05dc\u05e6\u05d5\u05d5\u05ea \u05dc\u05d4\u05ea\u05e4\u05e0\u05d5\u05ea \u05de\u05d4\u05de\u05e7\u05d5\u05dd \u05db\u05e9\u05d4\u05dd \u05d1\u05d8\u05d5\u05d7\u05d9\u05dd \u05db\u05d9 \u05d4\u05d5\u05d0 \u05de\u05ea, \u05de\u05d0\u05e8\u05e7 \u05de\u05d5\u05e6\u05d0 \u05d0\u05ea \u05e2\u05e6\u05de\u05d5 \u05e0\u05d8\u05d5\u05e9 \u05d5\u05d1\u05d5\u05d3\u05d3 \u05dc\u05d4\u05e4\u05dc\u05d9\u05d0 \u05dc\u05dc\u05d0 \u05db\u05dc \u05d3\u05e8\u05da \u05d0\u05e4\u05d9\u05dc\u05d5 \u05dc\u05d0\u05d5\u05ea\u05ea \u05dc\u05db\u05d3\u05d5\u05e8 \u05d4\u05d0\u05e8\u05e5 \u05e9\u05d4\u05d5\u05d0 \u05d1\u05d7\u05d9\u05d9\u05dd. \u05d0\u05d1\u05dc \u05d2\u05dd \u05dc\u05d5 \u05d4\u05d9\u05d4 \u05d9\u05db\u05d5\u05dc \u05dc\u05d0\u05d5\u05ea\u05ea, \u05e8\u05d5\u05d1 \u05d4\u05e1\u05d9\u05db\u05d5\u05d9\u05d9\u05dd \u05e9\u05d4\u05de\u05d6\u05d5\u05df \u05e9\u05d1\u05e8\u05e9\u05d5\u05ea\u05d5 \u05d9\u05d0\u05d6\u05dc \u05d4\u05e8\u05d1\u05d4 \u05dc\u05e4\u05e0\u05d9 \u05e9\u05de\u05e9\u05dc\u05d7\u05ea \u05d4\u05d4\u05e6\u05dc\u05d4 \u05ea\u05d2\u05d9\u05e2. \u05d1\u05db\u05dc\u05dc, \u05e8\u05d5\u05d1 \u05d4\u05e1\u05d9\u05db\u05d5\u05d9\u05d9\u05dd \u05e9\u05dc\u05d0 \u05d9\u05e1\u05e4\u05d9\u05e7 \u05d0\u05e4\u05d9\u05dc\u05d5 \u05dc\u05d2\u05d5\u05d5\u05e2 \u05d1\u05e8\u05e2\u05d1 \u2013 \u05e1\u05d1\u05d9\u05e8 \u05d9\u05d5\u05ea\u05e8 \u05dc\u05d4\u05e0\u05d9\u05d7 \u05e9\u05ea\u05e7\u05dc\u05d5\u05ea \u05d1\u05de\u05db\u05e9\u05d5\u05e8, \u05d4\u05e1\u05d1\u05d9\u05d1\u05d4 \u05d4\u05e2\u05d5\u05d9\u05e0\u05ea \u05d0\u05d5 \u05d8\u05e2\u05d5\u05ea \u05d0\u05e0\u05d5\u05e9 \u05e7\u05d8\u05e0\u05d4 \u05d9\u05d7\u05e1\u05dc\u05d5 \u05d0\u05d5\u05ea\u05d5 \u05d4\u05e8\u05d1\u05d4 \u05e7\u05d5\u05d3\u05dd.\r\n\r\n\u05d0\u05d1\u05dc \u05de\u05d0\u05e8\u05e7 \u05dc\u05d0 \u05de\u05d5\u05db\u05df \u05e2\u05d3\u05d9\u05d9\u05df \u05dc\u05d4\u05e8\u05d9\u05dd \u05d9\u05d3\u05d9\u05d9\u05dd. \u05d1\u05e2\u05e7\u05e9\u05e0\u05d5\u05ea \u05d1\u05dc\u05ea\u05d9-\u05e0\u05dc\u05d0\u05d9\u05ea, \u05ea\u05d5\u05da \u05e9\u05d9\u05de\u05d5\u05e9 \u05d9\u05e6\u05d9\u05e8\u05ea\u05d9 \u05d1\u05db\u05d9\u05e9\u05d5\u05e8\u05d9\u05d5 \u05d4\u05e8\u05d1\u05d9\u05dd, \u05d4\u05d5\u05d0 \u05de\u05ea\u05de\u05d5\u05d3\u05d3 \u05e2\u05dd \u05d0\u05ea\u05d2\u05e8\u05d9\u05dd \u05d1\u05dc\u05ea\u05d9-\u05d0\u05e4\u05e9\u05e8\u05d9\u05d9\u05dd \u05d1\u05d6\u05d4 \u05d0\u05d7\u05e8 \u05d6\u05d4, \u05d5\u05d9\u05db\u05d5\u05dc \u05dc\u05d4\u05dd. \u05d4\u05d0\u05dd \u05ea\u05e1\u05d9\u05d9\u05e2 \u05dc\u05d5 \u05ea\u05d5\u05e9\u05d9\u05d9\u05ea\u05d5 \u05d4\u05e8\u05d1\u05d4 \u05dc\u05d4\u05d9\u05e0\u05e6\u05dc \u05db\u05e0\u05d2\u05d3 \u05db\u05dc \u05d4\u05e1\u05d9\u05db\u05d5\u05d9\u05d9\u05dd?"
+      },
+      "physical_format": "Paperback",
+      "covers": [
+        15206836,
+        15206834
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2024-08-09T14:50:19.490869"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-04-07T19:30:39.347302"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "title": "\u041c\u0430\u0440\u0441\u0456\u044f\u043d\u0456\u043d",
+      "publishers": [
+        "Gutenberg"
+      ],
+      "publish_date": "2024",
+      "key": "/books/OL58661519M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "isbn_13": [
+        "9788368016185"
+      ],
+      "physical_dimensions": "23 x 17 x 3 centimeters",
+      "weight": "0.505 kilos",
+      "publish_places": [
+        "Krakow"
+      ],
+      "copyright_date": "2024",
+      "contributors": [
+        {
+          "role": "Author name as appears on this edition",
+          "name": "\u042d\u043d\u0434\u0437\u0456 \u040e\u0456\u0440"
+        },
+        {
+          "role": "Translator",
+          "name": "\u0422\u043e\u0434\u0430\u0440 \u0421\u043e\u043c"
+        }
+      ],
+      "languages": [
+        {
+          "key": "/languages/bel"
+        }
+      ],
+      "translation_of": "The Martian",
+      "translated_from": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "physical_format": "Paperback",
+      "number_of_pages": 489,
+      "first_sentence": {
+        "type": "/type/text",
+        "value": "\u0417\u0434\u0430\u0435\u0446\u0446\u0430, \u044f \u045e \u0441\u0440\u0430\u0446\u044b."
+      },
+      "covers": [
+        14909152
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2025-04-27T08:20:31.590973"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-03-29T20:02:33.205370"
+      }
+    },
+    {
+      "title": "Marsjanin",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "2016",
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": [
+        "urn:bwbsku:W8-AJN-667"
+      ],
+      "publishers": [
+        "Akurat"
+      ],
+      "source_records": [
+        "promise:bwb_daily_pallets_2023-04-11:W8-AJN-667"
+      ],
+      "full_title": "Marsjanin",
+      "key": "/books/OL47698466M",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "identifiers": {},
+      "ocaid": "marsjanin0000andy",
+      "isbn_10": [
+        "8328703645"
+      ],
+      "isbn_13": [
+        "9788328703643"
+      ],
+      "languages": [
+        {
+          "key": "/languages/pol"
+        }
+      ],
+      "covers": [
+        15136038
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-05-04T02:00:11.513030"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-10-26T04:32:34.043868"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "El marciano",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "May 13, 2021",
+      "source_records": [
+        "amazon:8413143780"
+      ],
+      "number_of_pages": 408,
+      "publishers": [
+        "B de Bolsillo"
+      ],
+      "isbn_10": [
+        "8413143780"
+      ],
+      "isbn_13": [
+        "9788413143781"
+      ],
+      "physical_format": "mass market paperback",
+      "full_title": "El marciano",
+      "covers": [
+        14149827
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL47533478M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-04-19T00:24:29.193999"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-09-27T17:25:55.635497"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "isbn_13": [
+        "9781448177202"
+      ],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "pagination": "384",
+      "publish_date": "2014",
+      "publishers": [
+        "Ebury Publishing"
+      ],
+      "source_records": [
+        "bwb:9781448177202"
+      ],
+      "subjects": [
+        "Fiction, science fiction, action & adventure"
+      ],
+      "title": "Martian",
+      "full_title": "Martian",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL48151354M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-06-17T04:58:02.264891"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-09-27T17:25:26.862837"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "El marciano",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "May 13, 2021",
+      "source_records": [
+        "amazon:8413143780"
+      ],
+      "number_of_pages": 408,
+      "publishers": [
+        "B de Bolsillo"
+      ],
+      "isbn_10": [
+        "8413143780"
+      ],
+      "isbn_13": [
+        "9788413143781"
+      ],
+      "physical_format": "mass market paperback",
+      "full_title": "El marciano",
+      "covers": [
+        14149828
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL47533477M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-04-19T00:24:29.223201"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-09-27T17:25:26.862837"
+      }
+    },
+    {
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "title": "Sopravvissuto. The martian",
+      "publishers": [
+        "Newton Compton Editori"
+      ],
+      "publish_date": "2017",
+      "key": "/books/OL46835429M",
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "covers": [
+        13325361
+      ],
+      "isbn_13": [
+        "9788822709196"
+      ],
+      "classifications": {},
+      "number_of_pages": 380,
+      "languages": [
+        {
+          "key": "/languages/ita"
+        }
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-02-20T09:30:39.308070"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-09-27T16:43:38.907526"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Martian",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        },
+        {
+          "key": "/authors/OL7942953A"
+        }
+      ],
+      "publish_date": "Oct 28, 2014",
+      "source_records": [
+        "amazon:1491523220"
+      ],
+      "number_of_pages": 9,
+      "publishers": [
+        "Podium Publishing on Brilliance Audio"
+      ],
+      "isbn_10": [
+        "1491523220"
+      ],
+      "isbn_13": [
+        "9781491523223"
+      ],
+      "physical_format": "audio cd",
+      "full_title": "The Martian",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL37224404M",
+      "covers": [
+        13832054
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-02-27T06:20:24.612248"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2024-09-27T16:42:00.486466"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "local_id": [
+        "urn:bwbsku:KQ-312-723"
+      ],
+      "publish_date": "2015-01-01",
+      "publishers": [
+        "Del Rey Publishing"
+      ],
+      "source_records": [
+        "promise:bwb_daily_pallets_2022-03-17"
+      ],
+      "title": "The Martian :",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL43124796M",
+      "identifiers": {},
+      "isbn_10": [
+        "1785033824"
+      ],
+      "isbn_13": [
+        "9781785033827"
+      ],
+      "classifications": {},
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-12-07T12:21:56.483338"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-10-07T18:08:10.516636"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Martian",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "Oct 28, 2014",
+      "source_records": [
+        "amazon:0606367209"
+      ],
+      "number_of_pages": 400,
+      "publishers": [
+        "Turtleback Books",
+        "Turtleback"
+      ],
+      "physical_format": "library binding",
+      "notes": "Source title: The Martian (Turtleback School & Library Binding Edition)",
+      "full_title": "The Martian",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL40431553M",
+      "covers": [
+        13212741
+      ],
+      "identifiers": {},
+      "classifications": {},
+      "isbn_10": [
+        "0606367209"
+      ],
+      "isbn_13": [
+        "9780606367202"
+      ],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-11-18T18:46:11.348684"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-10-07T18:07:19.323645"
+      }
+    },
+    {
+      "title": "The Martian",
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": [
+        "urn:bwbsku:O8-ANR-484"
+      ],
+      "source_records": [
+        "promise:bwb_daily_pallets_2022-06-30"
+      ],
+      "isbn_10": [
+        "1529100445"
+      ],
+      "isbn_13": [
+        "9781529100440"
+      ],
+      "key": "/books/OL42946573M",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2022-12-05T01:09:11.692900"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-10-10T01:08:13.071744"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "isbn_13": [
+        "9781473582323"
+      ],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "publish_date": "2020",
+      "publishers": [
+        "Penguin Random House"
+      ],
+      "source_records": [
+        "bwb:9781473582323"
+      ],
+      "title": "Martian",
+      "subtitle": "Stranded on Mars, One Astronaut Fights to Survive",
+      "full_title": "Martian Stranded on Mars, One Astronaut Fights to Survive",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL34765621M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-10-07T22:03:52.219591"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-02-23T20:06:37.514626"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "isbn_13": [
+        "9781473582330"
+      ],
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "publish_date": "2020",
+      "publishers": [
+        "Penguin Random House"
+      ],
+      "source_records": [
+        "bwb:9781473582330"
+      ],
+      "title": "Martian",
+      "subtitle": "Young Readers Edition",
+      "full_title": "Martian Young Readers Edition",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL34778131M",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-10-08T00:21:43.241297"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-02-23T20:06:37.514626"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Martian",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        },
+        {
+          "key": "/authors/OL7942953A"
+        }
+      ],
+      "publish_date": "Aug 18, 2015",
+      "source_records": [
+        "amazon:1491590165"
+      ],
+      "publishers": [
+        "Podium Publishing on Brilliance Audio"
+      ],
+      "physical_format": "audio cd",
+      "full_title": "The Martian",
+      "covers": [
+        12504759
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL36305215M",
+      "identifiers": {},
+      "isbn_10": [
+        "1491590165"
+      ],
+      "isbn_13": [
+        "9781491590164"
+      ],
+      "classifications": {},
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-12-30T07:22:45.382211"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-02-23T20:06:37.514626"
+      }
+    },
+    {
+      "notes": "Source title: Seul sur Mars (Science-Fiction) (French Edition)",
+      "title": "Seul sur Mars",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "Oct 16, 2015",
+      "type": {
+        "key": "/type/edition"
+      },
+      "source_records": [
+        "amazon:2811215727",
+        "ia:seulsurmars0000weir_t8y0",
+        "promise:bwb_daily_pallets_2022-03-17"
+      ],
+      "publishers": [
+        "BRAGELONNE"
+      ],
+      "physical_format": "pocket book",
+      "full_title": "Seul sur Mars",
+      "covers": [
+        11950614
+      ],
+      "key": "/books/OL33313289M",
+      "number_of_pages": 480,
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "local_id": [
+        "urn:bwbsku:P6-CEJ-084"
+      ],
+      "identifiers": {},
+      "ocaid": "seulsurmars0000weir_t8y0",
+      "isbn_10": [
+        "2811215727"
+      ],
+      "isbn_13": [
+        "9782811215729"
+      ],
+      "languages": [
+        {
+          "key": "/languages/fre"
+        }
+      ],
+      "latest_revision": 6,
+      "revision": 6,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-09-13T19:57:11.021839"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2025-03-26T16:55:50.812252"
+      }
+    },
+    {
+      "subtitle": "filmeditie Mars",
+      "source_records": [
+        "amazon:9045210843"
+      ],
+      "title": "The Martian",
+      "notes": "Source title: The Martian: filmeditie Mars",
+      "covers": [
+        10331621
+      ],
+      "physical_format": "paperback",
+      "full_title": "The Martian filmeditie Mars",
+      "key": "/books/OL28670107M",
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "identifiers": {},
+      "isbn_10": [
+        "9045210843"
+      ],
+      "isbn_13": [
+        "9789045210841"
+      ],
+      "classifications": {},
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2020-08-10T04:25:51.904035"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-02-23T20:06:37.514626"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "The Martian",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "publish_date": "Apr 13, 2021",
+      "source_records": [
+        "amazon:9401614032"
+      ],
+      "publishers": [
+        "Xander Uitgevers B.V."
+      ],
+      "physical_format": "paperback",
+      "full_title": "The Martian",
+      "covers": [
+        12496636
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "key": "/books/OL35794494M",
+      "identifiers": {},
+      "classifications": {},
+      "languages": [
+        {
+          "key": "/languages/eng"
+        }
+      ],
+      "isbn_10": [
+        "9401614032"
+      ],
+      "isbn_13": [
+        "9789401614030"
+      ],
+      "latest_revision": 4,
+      "revision": 4,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2021-12-25T15:53:50.567028"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2022-01-21T20:23:11.573447"
+      }
+    },
+    {
+      "publishers": [
+        "Arqueiro"
+      ],
+      "source_records": [
+        "amazon:8580414482"
+      ],
+      "title": "Perdido em Marte",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: Perdido em Marte (Em Portuguese do Brasil)"
+      },
+      "isbn_13": [
+        "9788580414486"
+      ],
+      "covers": [
+        10362442
+      ],
+      "physical_format": "paperback",
+      "isbn_10": [
+        "8580414482"
+      ],
+      "publish_date": "Jan 01, 2015",
+      "key": "/books/OL28942541M",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2020-08-18T07:42:50.911745"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2021-07-17T21:40:21.865909"
+      }
+    },
+    {
+      "publishers": [
+        "Ediciones B Mexico"
+      ],
+      "classifications": {},
+      "source_records": [
+        "amazon:6074808716",
+        "promise:bwb_daily_pallets_2022-05-23"
+      ],
+      "title": "Marciano, El",
+      "identifiers": {
+        "amazon": [
+          "6074808716"
+        ]
+      },
+      "isbn_13": [
+        "9786074808711"
+      ],
+      "covers": [
+        8999404
+      ],
+      "physical_format": "paperback",
+      "isbn_10": [
+        "6074808716"
+      ],
+      "publish_date": "2015",
+      "key": "/books/OL27543853M",
+      "authors": [
+        {
+          "key": "/authors/OL7234434A"
+        }
+      ],
+      "works": [
+        {
+          "key": "/works/OL17091839W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "local_id": [
+        "urn:bwbsku:P6-BVI-314"
+      ],
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2019-10-24T18:21:07.278993"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2023-01-14T06:27:15.457171"
+      }
+    }
+  ]
+}

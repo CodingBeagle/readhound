@@ -17,6 +17,12 @@ export interface SearchQuery {
   title?: string
   author?: string
   isbn?: string
+  /** A subject, matched on the source's normalised subject key (e.g. "science fiction"). */
+  subject?: string
+  /** Most popular first (Open Library: by rating) instead of by relevance. */
+  popular?: boolean
+  /** Also return each work's subjects (used by recommendations). */
+  withSubjects?: boolean
   limit?: number
 }
 
@@ -36,6 +42,8 @@ export interface SearchResult {
   coverUrl?: string
   /** ISO 639-2/B codes, e.g. "dan", "eng". */
   languages: string[]
+  /** Only when asked for with `withSubjects`. */
+  subjects?: string[]
 }
 
 export interface EditionDetails {
