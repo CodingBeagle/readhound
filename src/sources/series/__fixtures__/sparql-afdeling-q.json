@@ -1,0 +1,173 @@
+{
+ "head": {
+  "vars": []
+ },
+ "results": {
+  "bindings": [
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1093045"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Afdeling Q"
+    },
+    "ordinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "member": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100"
+    },
+    "memberLabel": {
+     "type": "literal",
+     "value": "Kvinden i buret"
+    },
+    "memberOrdinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "memberOl": {
+     "type": "literal",
+     "value": "OL100W"
+    },
+    "authorLabel": {
+     "type": "literal",
+     "value": "Jussi Adler-Olsen"
+    }
+   },
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1093045"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Afdeling Q"
+    },
+    "ordinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "member": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100"
+    },
+    "memberLabel": {
+     "type": "literal",
+     "value": "Kvinden i buret"
+    },
+    "memberOrdinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "memberOl": {
+     "type": "literal",
+     "value": "OL100W"
+    },
+    "authorLabel": {
+     "type": "literal",
+     "value": "Jussi Adler-Olsen"
+    }
+   },
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1093045"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Afdeling Q"
+    },
+    "ordinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "member": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q200"
+    },
+    "memberLabel": {
+     "type": "literal",
+     "value": "Fasandræberne"
+    },
+    "memberOrdinal": {
+     "type": "literal",
+     "value": "2"
+    },
+    "memberOl": {
+     "type": "literal",
+     "value": "OL200W"
+    },
+    "authorLabel": {
+     "type": "literal",
+     "value": "Jussi Adler-Olsen"
+    }
+   },
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1093045"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Afdeling Q"
+    },
+    "ordinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "member": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q300"
+    },
+    "memberLabel": {
+     "type": "literal",
+     "value": "Flaskepost fra P"
+    },
+    "memberOrdinal": {
+     "type": "literal",
+     "value": "3"
+    },
+    "authorLabel": {
+     "type": "literal",
+     "value": "Jussi Adler-Olsen"
+    }
+   },
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1093045"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Afdeling Q"
+    },
+    "ordinal": {
+     "type": "literal",
+     "value": "1"
+    },
+    "member": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q999"
+    },
+    "memberLabel": {
+     "type": "literal",
+     "value": "Q999"
+    }
+   },
+   {
+    "series": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5"
+    },
+    "seriesLabel": {
+     "type": "literal",
+     "value": "Q5"
+    }
+   }
+  ]
+ }
+}

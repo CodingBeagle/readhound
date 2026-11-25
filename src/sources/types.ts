@@ -57,6 +57,14 @@ export interface EditionDetails {
   coverUrl?: string
   subjects: string[]
   description?: string
+  /** Series the catalog lists for the edition. A hint only: often missing or messy. */
+  series?: SeriesHint[]
+}
+
+/** A series name and number as parsed from a catalog label. */
+export interface SeriesHint {
+  name: string
+  position?: number
 }
 
 export interface WorkDetails {

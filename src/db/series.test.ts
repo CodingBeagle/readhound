@@ -10,6 +10,8 @@ import { LibraryRepository } from './library'
 import { loadBook, loadLibrary, loadSeriesView, loadSeriesViews } from './queries'
 import { ReadhoundDB } from './schema'
 import { SeriesRepository } from './series'
+import { scanLibraryForSeries } from './seriesScan'
+import type { SeriesDetector } from '@/sources/series'
 
 const clock: Clock = { now: () => new Date('2026-11-25T09:00:00Z'), timeZone: () => 'Europe/Copenhagen' }
 const ol = new OpenLibrarySource(new HttpClient({ fetch: fixtureFetch, sleep: async () => {} }))
@@ -155,5 +157,79 @@ describe('series in backups', () => {
     expect(parsed.data.series).toEqual([])
     await restoreBackup(db, parsed)
     expect(await db.entries.count()).toBe(1)
+  })
+})
+
+describe('applying detected series', () => {
+  const candidate = {
+    name: 'Afdeling Q',
+    position: 1,
+    totalBooks: 10,
+    wikidataId: 'Q1093045',
+    origin: 'wikidata' as const,
+    members: [
+      { title: 'Kvinden i buret', position: 1, wikidataId: 'Q100', olWorkId: 'OL100W' },
+      { title: 'Fasandræberne', position: 2, wikidataId: 'Q200', olWorkId: 'OL200W' },
+      { title: 'Flaskepost fra P', position: 3, wikidataId: 'Q300' },
+    ],
+  }
+
+  it('places the book and adds the rest of the series as not owned, once', async () => {
+    const { workId } = await addBook('Kvinden i buret')
+    const id = await series.applyCandidate(workId, candidate)
+    await series.applyCandidate(workId, candidate)
+    const view = (await loadSeriesView(db, id))!
+    expect(view.members.map((m) => [m.title, m.member.position, m.state])).toEqual([
+      ['Kvinden i buret', 1, 'to_read'],
+      ['Fasandræberne', 2, 'missing'],
+      ['Flaskepost fra P', 3, 'missing'],
+    ])
+    expect(view.series).toMatchObject({ wikidataId: 'Q1093045', totalBooks: 10, origin: 'wikidata' })
+  })
+
+  it('keeps a number the user set by hand', async () => {
+    const { workId } = await addBook('Kvinden i buret')
+    const s = await series.createSeries({ name: 'Afdeling Q' })
+    await series.setWorkSeries(workId, s, { position: 7, origin: 'manual' })
+    await series.applyCandidate(workId, candidate)
+    const members = await series.members(s)
+    expect(members.find((m) => m.workId === workId)!.position).toBe(7)
+    expect(members).toHaveLength(3)
+  })
+
+  it('remembers dismissed suggestions', async () => {
+    await series.dismissSuggestions('w1')
+    await series.dismissSuggestions('w1')
+    expect([...(await series.dismissedWorks())]).toEqual(['w1'])
+  })
+})
+
+describe('scanning the library for series', () => {
+  it('looks up each Open Library book without a series and applies the best match', async () => {
+    const edition = (await ol.lookupIsbn('9780593135204'))!
+    await library.addFromSource({ edition })
+    await addBook('Manual book')
+    const asked: unknown[] = []
+    const detector = {
+      detect: async (refs: unknown) => {
+        asked.push(refs)
+        return [{ name: 'Hail Mary', position: 1, origin: 'openlibrary' as const, members: [] }]
+      },
+    } as unknown as SeriesDetector
+    const progress: number[] = []
+    const result = await scanLibraryForSeries(db, series, detector, { onProgress: (p) => progress.push(p.done) })
+    expect(result).toEqual({ found: 1, failed: 0 })
+    expect(asked).toHaveLength(1)
+    expect(progress).toEqual([0, 1])
+    expect((await loadSeriesViews(db))[0]).toMatchObject({ series: { name: 'Hail Mary' }, owned: 1 })
+    // A second scan has nothing left to do.
+    expect(await scanLibraryForSeries(db, series, detector)).toEqual({ found: 0, failed: 0 })
+  })
+
+  it('counts failed lookups and carries on', async () => {
+    const edition = (await ol.lookupIsbn('9780593135204'))!
+    await library.addFromSource({ edition })
+    const detector = { detect: async () => Promise.reject(new TypeError('offline')) } as unknown as SeriesDetector
+    expect(await scanLibraryForSeries(db, series, detector)).toEqual({ found: 0, failed: 1 })
   })
 })

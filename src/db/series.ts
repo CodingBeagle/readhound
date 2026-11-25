@@ -5,9 +5,13 @@
  */
 import { compareMembers, seriesKey } from '@/domain/series'
 import type { Series, SeriesMember, SeriesOrigin, Work } from '@/domain/types'
+import type { SeriesCandidate } from '@/sources/series'
 
 import { newId, systemClock, type Clock } from './clock'
 import type { ReadhoundDB } from './schema'
+
+/** Works whose series suggestions the user dismissed. */
+export const SETTING_SERIES_DISMISSED = 'seriesSuggestionsDismissed'
 
 export interface MemberInput {
   position?: number
@@ -178,6 +182,72 @@ export class SeriesRepository {
 
   async removeMember(memberId: string): Promise<void> {
     await this.db.seriesMembers.delete(memberId)
+  }
+
+  // ---------- Detection ----------
+
+  /**
+   * Applies a detected series to a work: finds or creates the series, places
+   * the work at its number and adds the series' other books as not-owned
+   * members (linked to library works with the same Open Library ID). A
+   * membership the user set by hand keeps its number.
+   */
+  async applyCandidate(workId: string, candidate: SeriesCandidate): Promise<string> {
+    return this.db.transaction('rw', [this.db.works, this.db.series, this.db.seriesMembers], async () => {
+      const seriesId = await this.findOrCreateSeries({
+        name: candidate.name,
+        totalBooks: candidate.totalBooks,
+        wikidataId: candidate.wikidataId,
+        origin: candidate.origin,
+      })
+      const mine = (await this.db.seriesMembers.where('seriesId').equals(seriesId).toArray()).find((m) => m.workId === workId)
+      if (!mine || mine.origin !== 'manual') {
+        const self = candidate.members.find((m) => m.position === candidate.position && m.position !== undefined)
+        await this.setWorkSeries(workId, seriesId, { position: candidate.position, wikidataId: self?.wikidataId, origin: candidate.origin })
+      }
+
+      const works = await this.db.works.toArray()
+      const workByOl = new Map(works.flatMap((w) => (w.sourceRef?.source === 'openlibrary' ? [[w.sourceRef.id, w] as const] : [])))
+      const thisWork = works.find((w) => w.id === workId)
+      for (const m of candidate.members) {
+        const members = await this.db.seriesMembers.where('seriesId').equals(seriesId).toArray()
+        const owned = m.olWorkId ? workByOl.get(m.olWorkId) : undefined
+        const isThis = (owned && owned.id === workId) || (!!m.olWorkId && thisWork?.sourceRef?.id === m.olWorkId) || (!!thisWork && !owned && seriesKey(m.title) === seriesKey(thisWork.title))
+        if (isThis) continue
+        const known = members.find(
+          (x) =>
+            (m.wikidataId && x.wikidataId === m.wikidataId) ||
+            (m.olWorkId && x.olWorkId === m.olWorkId) ||
+            (owned && x.workId === owned.id) ||
+            (seriesKey(x.title) === seriesKey(m.title) && (x.position === m.position || x.position === undefined || m.position === undefined)),
+        )
+        if (known) {
+          // Fill in catalog IDs so the book links up when it is added later.
+          if (known.origin !== 'manual')
+            await this.db.seriesMembers.update(known.id, {
+              ...(m.wikidataId && !known.wikidataId && { wikidataId: m.wikidataId }),
+              ...(m.olWorkId && !known.olWorkId && { olWorkId: m.olWorkId }),
+              ...(known.position === undefined && m.position !== undefined && { position: m.position }),
+            })
+          continue
+        }
+        if (owned) await this.setWorkSeries(owned.id, seriesId, { position: m.position, wikidataId: m.wikidataId, origin: candidate.origin })
+        else await this.addMissingMember(seriesId, { ...m, origin: candidate.origin })
+      }
+      return seriesId
+    })
+  }
+
+  /** Remembers that the user turned down series suggestions for a work. */
+  async dismissSuggestions(workId: string): Promise<void> {
+    await this.db.transaction('rw', this.db.settings, async () => {
+      const current = ((await this.db.settings.get(SETTING_SERIES_DISMISSED))?.value as string[] | undefined) ?? []
+      if (!current.includes(workId)) await this.db.settings.put({ key: SETTING_SERIES_DISMISSED, value: [...current, workId] })
+    })
+  }
+
+  async dismissedWorks(): Promise<Set<string>> {
+    return new Set(((await this.db.settings.get(SETTING_SERIES_DISMISSED))?.value as string[] | undefined) ?? [])
   }
 
   /** Members of a series in series order. */

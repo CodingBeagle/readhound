@@ -13,9 +13,14 @@ import { HttpClient } from '@/sources/http'
 import { fixtureFetch } from '@/sources/openlibrary/fixtureFetch'
 import { OpenLibrarySource } from '@/sources/openlibrary/OpenLibrarySource'
 import { SourceRegistry } from '@/sources/registry'
+import { SeriesDetector, WikidataSeriesLookup } from '@/sources/series'
+import wikidataAfdelingQ from '@/sources/series/__fixtures__/sparql-afdeling-q.json'
 
 let services: Services
 let demoDbName: string
+/** What the fake Wikidata query service answers; empty by default. */
+let wikidataAnswer: unknown
+const wikidataFetch: typeof fetch = async () => new Response(JSON.stringify(wikidataAnswer), { status: 200 })
 
 beforeEach(async () => {
   const db = new ReadhoundDB(`ui-${crypto.randomUUID()}`)
@@ -27,7 +32,13 @@ beforeEach(async () => {
   } catch {
     // ignore
   }
-  services = { ...createServices(db), sources: new SourceRegistry([new OpenLibrarySource(http)]) }
+  wikidataAnswer = { results: { bindings: [] } }
+  const sources = new SourceRegistry([new OpenLibrarySource(http)])
+  const seriesDetector = new SeriesDetector({
+    wikidata: new WikidataSeriesLookup(new HttpClient({ fetch: wikidataFetch, sleep: async () => {} })),
+    getEdition: async (ref) => (await sources.get(ref.source)?.getEdition(ref)) ?? null,
+  })
+  services = { ...createServices(db), sources, seriesDetector }
 })
 afterEach(async () => {
   await services.db.delete()
@@ -305,5 +316,43 @@ describe('year in review', () => {
 
     await user.keyboard('{Escape}')
     expect(router.state.location.pathname).toBe('/stats')
+  })
+})
+
+describe('series', () => {
+  it('adds a book to a new series with a number, then renumbers it', async () => {
+    const user = userEvent.setup()
+    const entryId = await addManual('Kvinden i buret', 'Jussi Adler-Olsen')
+    renderAt(`/book/${entryId}`)
+    await user.click(await screen.findByRole('button', { name: t.series.add }))
+    await user.type(await screen.findByLabelText(t.series.newName), 'Afdeling Q')
+    await user.type(screen.getByLabelText(t.series.position), '1')
+    await user.click(screen.getByRole('button', { name: t.common.save }))
+    expect(await screen.findByRole('link', { name: 'Afdeling Q #1' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: `${t.series.edit} Afdeling Q` }))
+    const position = await screen.findByLabelText(t.series.position)
+    await user.clear(position)
+    await user.type(position, 'x')
+    await user.click(screen.getByRole('button', { name: t.common.save }))
+    expect(await screen.findByText(t.series.invalidPosition)).toBeInTheDocument()
+    await user.clear(position)
+    await user.type(position, '1,5')
+    await user.click(screen.getByRole('button', { name: t.common.save }))
+    expect(await screen.findByRole('link', { name: 'Afdeling Q #1.5' })).toBeInTheDocument()
+  })
+
+  it('suggests the series Wikidata knows for a book from Open Library', async () => {
+    wikidataAnswer = wikidataAfdelingQ
+    const user = userEvent.setup()
+    const edition = (await services.sources.lookupIsbn('9780593135204'))!.edition
+    const { entryId } = await services.library.addFromSource({ edition })
+    renderAt(`/book/${entryId}`)
+    const suggestion = await screen.findByRole('region', { name: t.series.suggestion }, { timeout: 3000 })
+    expect(within(suggestion).getByText('Afdeling Q, book 1')).toBeInTheDocument()
+    await user.click(within(suggestion).getByRole('button', { name: t.series.accept }))
+    expect(await screen.findByRole('link', { name: 'Afdeling Q #1' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: t.series.suggestion })).not.toBeInTheDocument()
+    expect(await services.db.seriesMembers.count()).toBe(3)
   })
 })

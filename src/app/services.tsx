@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { CollectionsRepository, db as defaultDb, IndexedDbCache, LibraryRepository, ReadhoundDB, SeriesRepository, systemClock, type Clock } from '@/db'
 import { DEMO_DB_NAME, seedDemo } from '@/demo/seed'
-import { createDefaultRegistry, type SourceRegistry } from '@/sources'
+import { createDefaultRegistry, createSeriesDetector, type SeriesDetector, type SourceRegistry } from '@/sources'
 
 export interface Services {
   db: ReadhoundDB
@@ -11,6 +11,8 @@ export interface Services {
   collections: CollectionsRepository
   series: SeriesRepository
   sources: SourceRegistry
+  /** Finds the series of a book on Wikidata and Open Library. */
+  seriesDetector: SeriesDetector
   clock: Clock
 }
 
@@ -49,13 +51,16 @@ function writeDemoFlag(on: boolean) {
 
 // oxlint-disable-next-line only-export-components
 export function createServices(db: ReadhoundDB = defaultDb, clock: Clock = systemClock): Services {
+  const cache = new IndexedDbCache(db)
+  const sources = createDefaultRegistry(cache)
   return {
     db,
     clock,
     library: new LibraryRepository(db, clock),
     collections: new CollectionsRepository(db, clock),
     series: new SeriesRepository(db, clock),
-    sources: createDefaultRegistry(new IndexedDbCache(db)),
+    sources,
+    seriesDetector: createSeriesDetector(sources, cache),
   }
 }
 
@@ -66,7 +71,7 @@ export function createServices(db: ReadhoundDB = defaultDb, clock: Clock = syste
  */
 export function ServicesProvider({ services, demoDbName = DEMO_DB_NAME, children }: { services?: Services; demoDbName?: string; children: ReactNode }) {
   const [real] = useState(() => services ?? createServices())
-  const [value, setValue] = useState(() => (!services && readDemoFlag() ? { ...createServices(new ReadhoundDB(demoDbName), real.clock), sources: real.sources } : real))
+  const [value, setValue] = useState(() => (!services && readDemoFlag() ? { ...createServices(new ReadhoundDB(demoDbName), real.clock), sources: real.sources, seriesDetector: real.seriesDetector } : real))
   const active = value !== real
   const [queryClient] = useState(
     () =>
@@ -91,7 +96,7 @@ export function ServicesProvider({ services, demoDbName = DEMO_DB_NAME, children
       const demoDb = new ReadhoundDB(demoDbName)
       if ((await demoDb.entries.count()) === 0) await seedDemo(demoDb, real.clock)
       writeDemoFlag(true)
-      setValue({ ...createServices(demoDb, real.clock), sources: real.sources })
+      setValue({ ...createServices(demoDb, real.clock), sources: real.sources, seriesDetector: real.seriesDetector })
     },
     leave() {
       writeDemoFlag(false)
