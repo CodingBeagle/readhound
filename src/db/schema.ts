@@ -11,6 +11,8 @@ import type {
   Note,
   Read,
   ReadingSession,
+  Series,
+  SeriesMember,
   Setting,
   Work,
 } from '@/domain/types'
@@ -35,6 +37,8 @@ export class ReadhoundDB extends Dexie {
   goals!: EntityTable<Goal, 'year'>
   settings!: EntityTable<Setting, 'key'>
   httpCache!: EntityTable<HttpCacheRow, 'key'>
+  series!: EntityTable<Series, 'id'>
+  seriesMembers!: EntityTable<SeriesMember, 'id'>
 
   constructor(name = 'readhound') {
     super(name)
@@ -53,6 +57,11 @@ export class ReadhoundDB extends Dexie {
       goals: 'year',
       settings: 'key',
       httpCache: 'key',
+    })
+    // Series tracking: a series and its members, linked to works (design doc, Series).
+    this.version(2).stores({
+      series: 'id, name, wikidataId',
+      seriesMembers: 'id, seriesId, workId, olWorkId, wikidataId',
     })
   }
 }

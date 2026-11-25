@@ -22,6 +22,7 @@ import type { AuthorRef, EditionDetails, SearchResult } from '@/sources/types'
 
 import { newId, systemClock, today, type Clock } from './clock'
 import type { ReadhoundDB } from './schema'
+import { linkWorkToMembers } from './series'
 
 export interface AddOptions {
   /** Initial status, default `to_read`. */
@@ -106,7 +107,8 @@ export class LibraryRepository {
   /** Adds a catalog edition, reusing existing work, author and edition records (deduplicated by source ref). */
   async addFromSource(input: AddFromSourceInput, options: AddOptions = {}): Promise<AddResult> {
     const { edition: details, work: workInfo, fallbackCoverUrl } = input
-    return this.db.transaction('rw', [this.db.works, this.db.authors, this.db.editions, this.db.entries, this.db.reads, this.db.listItems], async () => {
+    const tables = [this.db.works, this.db.authors, this.db.editions, this.db.entries, this.db.reads, this.db.listItems, this.db.seriesMembers]
+    return this.db.transaction('rw', tables, async () => {
       const existingEdition = await this.findBySourceRef('editions', details.edition)
       if (existingEdition) {
         const entry = await this.db.entries.where('editionId').equals(existingEdition.id).first()
@@ -115,6 +117,8 @@ export class LibraryRepository {
 
       const authorIds = await this.upsertAuthors(details.authors)
       const workId = await this.upsertWork(details, authorIds, workInfo)
+      // A series gap for this book (found by detection) now points at the owned work.
+      await linkWorkToMembers(this.db, { id: workId, sourceRef: details.work, title: details.title })
 
       let editionId = existingEdition?.id
       if (!editionId) {
@@ -451,15 +455,25 @@ export class LibraryRepository {
     })
   }
 
-  /** Garbage-collects works, editions and authors no library entry uses any more. */
+  /**
+   * Garbage-collects works, editions and authors no library entry uses any
+   * more. Series members of removed works stay as not-owned books.
+   */
   async pruneOrphans(): Promise<void> {
-    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.works, this.db.authors], async () => {
+    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.works, this.db.authors, this.db.seriesMembers], async () => {
       const usedEditions = new Set((await this.db.entries.toArray()).map((e) => e.editionId))
       const editions = await this.db.editions.toArray()
       await this.db.editions.bulkDelete(editions.filter((e) => !usedEditions.has(e.id)).map((e) => e.id))
       const usedWorks = new Set(editions.filter((e) => usedEditions.has(e.id)).map((e) => e.workId))
       const works = await this.db.works.toArray()
-      await this.db.works.bulkDelete(works.filter((w) => !usedWorks.has(w.id)).map((w) => w.id))
+      const removedWorks = works.filter((w) => !usedWorks.has(w.id)).map((w) => w.id)
+      await this.db.works.bulkDelete(removedWorks)
+      await this.db.seriesMembers
+        .where('workId')
+        .anyOf(removedWorks)
+        .modify((m) => {
+          delete m.workId
+        })
       const usedAuthors = new Set(works.filter((w) => usedWorks.has(w.id)).flatMap((w) => w.authorIds))
       const authors = await this.db.authors.toCollection().primaryKeys()
       await this.db.authors.bulkDelete(authors.filter((id) => !usedAuthors.has(id)))

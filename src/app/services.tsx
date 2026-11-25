@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-import { CollectionsRepository, db as defaultDb, IndexedDbCache, LibraryRepository, ReadhoundDB, systemClock, type Clock } from '@/db'
+import { CollectionsRepository, db as defaultDb, IndexedDbCache, LibraryRepository, ReadhoundDB, SeriesRepository, systemClock, type Clock } from '@/db'
 import { DEMO_DB_NAME, seedDemo } from '@/demo/seed'
 import { createDefaultRegistry, type SourceRegistry } from '@/sources'
 
@@ -9,6 +9,7 @@ export interface Services {
   db: ReadhoundDB
   library: LibraryRepository
   collections: CollectionsRepository
+  series: SeriesRepository
   sources: SourceRegistry
   clock: Clock
 }
@@ -53,6 +54,7 @@ export function createServices(db: ReadhoundDB = defaultDb, clock: Clock = syste
     clock,
     library: new LibraryRepository(db, clock),
     collections: new CollectionsRepository(db, clock),
+    series: new SeriesRepository(db, clock),
     sources: createDefaultRegistry(new IndexedDbCache(db)),
   }
 }

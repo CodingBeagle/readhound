@@ -113,7 +113,7 @@ describe('CSV export', () => {
     const lib = libraryCsv(books, await db.lists.toArray(), await db.listItems.toArray(), await db.categories.toArray())
     const [header, row] = lib.replace('﻿', '').trim().split('\r\n')
     expect(header).toContain('Title,Subtitle,Authors')
-    expect(row).toBe('Frøken Smillas fornemmelse for sne,,Peter Høeg,9788702034516,,,,435,,,reading,,2026-11-25,0,,Danske klassikere,Krimi')
+    expect(row).toBe('Frøken Smillas fornemmelse for sne,,Peter Høeg,9788702034516,,,,435,,,reading,,2026-11-25,0,,Danske klassikere,Krimi,')
 
     const reads = readsCsv(books, await db.sessions.toArray()).trim().split('\r\n')
     expect(reads[1]).toBe('Frøken Smillas fornemmelse for sne,Peter Høeg,9788702034516,2026-11-25,,in progress,,180,2,')

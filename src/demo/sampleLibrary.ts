@@ -413,6 +413,8 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       // Counts as backed up today, so the backup reminder doesn't greet the demo.
       { key: 'lastBackupAt', value: now },
     ],
+    series: [],
+    seriesMembers: [],
   }
   return { data, ranOutAfter }
 }
