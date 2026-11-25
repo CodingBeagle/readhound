@@ -1,12 +1,14 @@
 import { HttpClient, type ResponseCache } from './http'
 import { OpenLibrarySource } from './openlibrary/OpenLibrarySource'
 import { SourceRegistry } from './registry'
+import { WikidataGenreLookup } from './genres/wikidataGenres'
 import { SeriesDetector, WikidataSeriesLookup } from './series'
 
 export { SourceRegistry, type SearchOutcome } from './registry'
 export { parseIsbn } from './isbn'
 export type * from './types'
 export { SeriesDetector, WikidataSeriesLookup, type SeriesCandidate } from './series'
+export { WikidataGenreLookup } from './genres/wikidataGenres'
 
 /**
  * Open Library asks apps to identify themselves with
@@ -48,4 +50,12 @@ export function createSeriesDetector(registry: SourceRegistry, cache?: ResponseC
     getEdition: async (ref) => (await registry.get(ref.source)?.getEdition(ref)) ?? null,
     listEditions: async (ref) => (await registry.get(ref.source)?.listEditions(ref, { limit: 50 })) ?? [],
   })
+}
+
+/** Genre lookup on Wikidata, paced and cached like series detection. */
+export function createGenreLookup(cache?: ResponseCache): WikidataGenreLookup {
+  const inBrowser = typeof window !== 'undefined'
+  return new WikidataGenreLookup(
+    new HttpClient({ maxRequestsPerSecond: 2, cache, timeoutMs: 20_000, ...(!inBrowser && { headers: { 'User-Agent': openLibraryUserAgent() } }) }),
+  )
 }

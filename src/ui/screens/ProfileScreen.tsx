@@ -1,10 +1,11 @@
-import { ArrowDown, ArrowUp, Pencil, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { backupCounts, BackupError, parseBackup, restoreBackup, SETTING_PREFERRED_LANGUAGES, type Backup } from '@/db/backup'
+import { entriesWithoutGenre } from '@/db/genres'
 import { getSetting } from '@/db/queries'
 import { DEFAULT_PREFERRED_LANGUAGES } from '@/domain/editions'
 import type { Category } from '@/domain/types'
@@ -356,6 +357,24 @@ type FictionChoice = keyof typeof p.categories.fictionOptions
 const fictionChoice = (c: CategoryDraft): FictionChoice => (c.isFiction === undefined ? 'unset' : c.isFiction ? 'fiction' : 'nonfiction')
 const fromChoice = (choice: FictionChoice) => (choice === 'unset' ? undefined : choice === 'fiction')
 
+/** "Suggest genres for my library", with how many books still have no genre. */
+function GenreBackfillLink() {
+  const { db } = useServices()
+  const missing = useLiveQuery(async () => (await entriesWithoutGenre(db)).length, [db])
+  if (missing === undefined) return null
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-3">
+      <Button asChild variant="outline" size="sm">
+        <Link to="/genres/suggest">
+          <Sparkles aria-hidden />
+          {t.genres.backfill.open}
+        </Link>
+      </Button>
+      <span className="text-xs text-muted-foreground">{t.genres.backfill.openHint(missing)}</span>
+    </div>
+  )
+}
+
 function CategoriesSection() {
   const { collections } = useServices()
   const data = useCollections()
@@ -367,6 +386,7 @@ function CategoriesSection() {
   return (
     <Section title={p.categories.title}>
       <p className="mb-3 text-sm text-muted-foreground">{p.categories.intro}</p>
+      <GenreBackfillLink />
       {data.categories.length === 0 && <p className="mb-3 text-sm">{p.categories.empty}</p>}
       <ul className="mb-3 flex flex-col divide-y surface">
         {data.categories.map((c) => (

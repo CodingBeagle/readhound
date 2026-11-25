@@ -1,0 +1,19 @@
+{
+  "head": { "vars": ["genre", "genreLabel"] },
+  "results": {
+    "bindings": [
+      {
+        "genre": { "type": "uri", "value": "http://www.wikidata.org/entity/Q208505" },
+        "genreLabel": { "xml:lang": "en", "type": "literal", "value": "crime novel" }
+      },
+      {
+        "genre": { "type": "uri", "value": "http://www.wikidata.org/entity/Q182015" },
+        "genreLabel": { "xml:lang": "en", "type": "literal", "value": "thriller" }
+      },
+      {
+        "genre": { "type": "uri", "value": "http://www.wikidata.org/entity/Q99999999" },
+        "genreLabel": { "type": "literal", "value": "Q99999999" }
+      }
+    ]
+  }
+}

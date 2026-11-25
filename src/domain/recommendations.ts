@@ -12,7 +12,10 @@
  */
 import type { SearchQuery, SearchResult } from '@/sources/types'
 
+import { GENRE_BY_ID, genreForCategory, genresOfSubject, type GenreId } from './genres'
+
 import type { StatBook, StatsModel } from './stats/model'
+import { normalizeTerm, usefulSubject } from './terms'
 
 export type LengthBand = 'short' | 'medium' | 'long' | 'epic'
 
@@ -20,6 +23,8 @@ export interface ProfileEntry {
   /** As first seen, for display. */
   label: string
   score: number
+  /** For a subject that is one of the reader's genre categories: the genre it stands for. */
+  genre?: GenreId
   /** The best-liked book behind this entry, for "because you loved …". */
   loved?: { title: string; weight: number }
 }
@@ -61,48 +66,7 @@ export interface Recommendation {
   reason: Reason
 }
 
-const SUBJECT_STOPLIST = new Set([
-  'fiction',
-  'general',
-  'literature',
-  'novel',
-  'novels',
-  'roman',
-  'romaner',
-  'romans',
-  'romans nouvelles',
-  'fiction general',
-  'english fiction',
-  'american fiction',
-  'danish fiction',
-  'accessible book',
-  'protected daisy',
-  'in library',
-  'large type books',
-  'lending library',
-  'new york times bestseller',
-  'new york times reviewed',
-  'open library staff picks',
-  'translations into english',
-  'long now manual for civilization',
-])
-
-/** Lower case, punctuation to spaces, single spaces ("Science-Fiction" → "science fiction"). */
-export function normalizeTerm(text: string): string {
-  return text
-    .normalize('NFC')
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .trim()
-}
-
-/** A source subject worth learning from, normalised, or undefined for tags, codes and filler. */
-export function usefulSubject(subject: string): string | undefined {
-  if (/[:=]/.test(subject)) return undefined
-  const term = normalizeTerm(subject)
-  if (term.length < 3 || term.length > 40 || SUBJECT_STOPLIST.has(term) || term.startsWith('reading level')) return undefined
-  return term
-}
+export { normalizeTerm, usefulSubject } from './terms'
 
 export function lengthBand(pages: number | undefined): LengthBand | undefined {
   if (!pages) return undefined
@@ -182,8 +146,9 @@ export function tasteProfile(model: StatsModel): TasteProfile {
     }
     // Genres the reader picked count fully, source subjects half.
     for (const [term, label] of terms) {
-      const isGenre = book.genres.some((g) => normalizeTerm(g.name) === term)
-      addEntry(profile.subjects, term, label, isGenre ? weight : weight / 2, book.title)
+      const category = book.genres.find((g) => normalizeTerm(g.name) === term)
+      addEntry(profile.subjects, term, label, category ? weight : weight / 2, book.title)
+      if (category) profile.subjects.get(term)!.genre ??= genreForCategory(category.name)
     }
     add(profile.decades, book.firstPublishYear === undefined ? undefined : Math.floor(book.firstPublishYear / 10) * 10, weight)
     add(profile.lengths, lengthBand(book.pageCount), weight)
@@ -203,7 +168,10 @@ function top(map: Map<string, ProfileEntry>, n: number): ProfileEntry[] {
 export function seedsFor(profile: TasteProfile, { authors = 3, subjects = 3 } = {}): Seed[] {
   return [
     ...top(profile.authors, authors).map((e): Seed => ({ kind: 'author', label: e.label, query: { author: e.label, popular: true, withSubjects: true, limit: 10 } })),
-    ...top(profile.subjects, subjects).map((e): Seed => ({ kind: 'subject', label: e.label, query: { subject: e.label, popular: true, withSubjects: true, limit: 15 } })),
+    // A genre category searches Open Library's own subject for it ("Krimi" → mystery and detective stories).
+    ...top(profile.subjects, subjects).map(
+      (e): Seed => ({ kind: 'subject', label: e.label, query: { subject: e.genre ? GENRE_BY_ID.get(e.genre)!.olSubject : e.label, popular: true, withSubjects: true, limit: 15 } }),
+    ),
   ]
 }
 
@@ -215,7 +183,8 @@ function scaled<K>(map: Map<K, number>): Map<K, number> {
 
 interface Scales {
   authors: Map<string, number>
-  subjects: [string, number][]
+  /** Subject key, scaled score, and the genre it stands for when it is a genre category. */
+  subjects: [string, number, GenreId | undefined][]
   decades: Map<number, number>
   lengths: Map<LengthBand, number>
   languages: Map<string, number>
@@ -227,7 +196,10 @@ function scalesFor(profile: TasteProfile): Scales {
   return {
     authors,
     // The 30 strongest subjects either way, so a match check stays cheap.
-    subjects: [...subjects].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 30),
+    subjects: [...subjects]
+      .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+      .slice(0, 30)
+      .map(([k, v]) => [k, v, profile.subjects.get(k)?.genre]),
     decades: scaled(profile.decades),
     lengths: scaled(profile.lengths),
     languages: scaled(profile.languages),
@@ -250,10 +222,12 @@ function scoreCandidate(result: SearchResult, s: Scales): Score {
   }
 
   const terms = (result.subjects ?? []).map((x) => ` ${normalizeTerm(x)} `)
+  // The candidate's genres, so a "Krimi" category matches "Detective and mystery stories".
+  const genres = new Set((result.subjects ?? []).flatMap(genresOfSubject))
   let subjectSum = 0
   let subject: Score['subject']
-  for (const [key, value] of s.subjects) {
-    if (!terms.some((t) => t.includes(` ${key} `))) continue
+  for (const [key, value, genre] of s.subjects) {
+    if (!(genre && genres.has(genre)) && !terms.some((t) => t.includes(` ${key} `))) continue
     subjectSum += value
     if (!subject || value > subject.value) subject = { key, value }
   }
