@@ -216,7 +216,9 @@ describe('profile: lists, categories and notes', () => {
     const year = new Date().getFullYear()
     await user.type(await screen.findByLabelText(t.screens.profile.goal.books), '24')
     await user.click(within(screen.getByRole('heading', { name: t.screens.profile.goal.title(year) }).closest('section')!).getByRole('button', { name: t.common.save }))
-    expect(await screen.findByText(t.screens.profile.goal.saved)).toBeInTheDocument()
+    // Saving a goal re-runs the goal pace and achievements over the whole library, so allow more than the
+    // default second for the write and the confirmation on a busy test runner.
+    expect(await screen.findByText(t.screens.profile.goal.saved, {}, { timeout: 4000 })).toBeInTheDocument()
     expect(await services.db.goals.get(year)).toEqual({ year, targetBooks: 24 })
   })
 })
@@ -452,8 +454,8 @@ describe('recommendations', () => {
 
     await user.click(screen.getByRole('button', { name: `${t.recommendations.dismiss}: Artemis` }))
     expect(await screen.findByText(t.recommendations.dismissed('Artemis'))).toBeInTheDocument()
-    await act(async () => {})
-    expect(screen.queryByRole('button', { name: `${t.recommendations.dismiss}: Artemis` })).not.toBeInTheDocument()
+    // The pick leaves once the dismissed list is read back from the database, which can take more than one tick.
+    await waitFor(() => expect(screen.queryByRole('button', { name: `${t.recommendations.dismiss}: Artemis` })).not.toBeInTheDocument())
     expect((await services.db.settings.get('recommendationsDismissed'))?.value).toHaveLength(1)
   })
 
