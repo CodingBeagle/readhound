@@ -4,7 +4,7 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 }
 
-/** A fake clock whose sleep advances time instantly, so throttling is observable. */
+/** A fake clock: sleeps resolve at once and are recorded; time moves only on `advance`. */
 function fakeClock() {
   let time = 0
   const sleeps: number[] = []
@@ -12,6 +12,8 @@ function fakeClock() {
     now: () => time,
     sleep: async (ms: number) => {
       sleeps.push(ms)
+    },
+    advance: (ms: number) => {
       time += ms
     },
     sleeps,
@@ -94,7 +96,7 @@ describe('HttpClient', () => {
 
     expect(await http.getJson('https://x.test/a', { cacheTtlMs: 1000 })).toEqual({ n: 1 })
     expect(await http.getJson('https://x.test/a', { cacheTtlMs: 1000 })).toEqual({ n: 1 })
-    await clock.sleep(1000)
+    clock.advance(1000)
     expect(await http.getJson('https://x.test/a', { cacheTtlMs: 1000 })).toEqual({ n: 2 })
     expect(await http.getJson('https://x.test/a')).toEqual({ n: 3 }) // no TTL → no cache
   })
