@@ -35,6 +35,7 @@ import {
   startedVsFinished,
   timeToFinish,
   toReadPile,
+  ownedShelf,
   topAuthors,
   waitBeforeStarting,
   whereIStop,
@@ -43,6 +44,7 @@ import {
   type PeriodPreset,
   type StatsModel,
 } from '@/domain/stats'
+import type { EditionFormat } from '@/domain/types'
 import { t } from '@/i18n'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
@@ -445,12 +447,15 @@ function WhatIRead({ model, period, includeDnf }: { model: StatsModel; period: P
   )
 }
 
+const formatName = (format: string) => (format in t.formats ? t.formats[format as EditionFormat] : t.owned.unknownFormat)
+
 const labelBucket = (bucket: string) => (bucket.length === 7 ? monthLabel(bucket) : bucket)
 
 // ---------- My library ----------
 
 function MyLibrary({ model, period, today }: { model: StatsModel; period: Period; today: string }) {
   const pile = toReadPile(model, today)
+  const shelf = ownedShelf(model, today)
   const wait = waitBeforeStarting(model, period)
   const flow = startedVsFinished(model, period)
   const stops = whereIStop(model, period)
@@ -484,6 +489,46 @@ function MyLibrary({ model, period, today }: { model: StatsModel; period: Period
             </li>
           ))}
         </ol>
+      </ChartCard>
+      <ChartCard
+        title={s.ownedShelf}
+        summary={shelf.owned ? `${s.ownedSummary(shelf.unread, shelf.owned)} · ${s.ownedPages(formatNumber(shelf.unreadPages))}` : undefined}
+        table={shelf.owned ? { headers: [s.format, s.books], rows: shelf.byFormat.map((f) => [formatName(f.format), f.count]) } : undefined}
+      >
+        {shelf.owned === 0 ? (
+          <p className="text-sm text-muted-foreground">{s.ownedNone}</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <SplitBar
+              parts={[
+                { name: s.ownedRead, value: shelf.owned - shelf.unread, color: SERIES[0]! },
+                { name: s.ownedUnread, value: shelf.unread, color: SERIES[1]! },
+              ]}
+            />
+            {shelf.unread === 0 ? (
+              <p className="text-sm text-muted-foreground">{s.ownedAllRead}</p>
+            ) : (
+              <ol className="flex flex-col gap-1 text-sm">
+                {shelf.oldestUnread.map(({ book, waitingDays }) => (
+                  <li key={book.entry.id} className="flex justify-between gap-2">
+                    <Link to={`/book/${book.entry.id}`} className="truncate underline-offset-4 hover:underline">
+                      {book.title}
+                    </Link>
+                    <span className="shrink-0 text-muted-foreground tabular-nums">{s.days(waitingDays)}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {s.ownedFormats}: {shelf.byFormat.map((f) => `${formatName(f.format)}\u00a0${f.count}`).join(' · ')}
+            </p>
+            {shelf.unread > 0 && (
+              <Link to="/library?status=to_read&owned=1" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+                {s.ownedShow}
+              </Link>
+            )}
+          </div>
+        )}
       </ChartCard>
       <ChartCard
         title={s.waitBeforeStarting}

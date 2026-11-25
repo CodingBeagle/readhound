@@ -181,13 +181,13 @@ export function libraryCsv(books: readonly BookView[], lists: readonly List[], l
   }
   const header = [
     'Title', 'Subtitle', 'Authors', 'ISBN-13', 'ISBN-10', 'Publisher', 'Year', 'Pages', 'Language', 'Format',
-    'Status', 'Rating', 'Added', 'Times finished', 'Last finished', 'Lists', 'Categories', 'Series',
+    'Status', 'Owned', 'Rating', 'Added', 'Times finished', 'Last finished', 'Lists', 'Categories', 'Series',
   ]
   const rows = books.map((b) => {
     const e = b.edition
     return [
       e.title, e.subtitle, joinNames(b.authorNames), e.isbn13, e.isbn10, e.publisher, e.publishYear, e.pageCount, e.language, e.format,
-      b.entry.status, b.entry.rating, b.entry.addedAt.slice(0, 10),
+      b.entry.status, b.entry.owned ? 'yes' : '', b.entry.rating, b.entry.addedAt.slice(0, 10),
       b.reads.filter((r) => r.outcome === 'finished').length, b.lastFinishedOn,
       joinNames(listsByEntry.get(b.entry.id) ?? []),
       joinNames(b.entry.categoryIds.flatMap((id) => categoryName.get(id) ?? [])),

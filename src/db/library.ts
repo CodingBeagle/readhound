@@ -32,6 +32,8 @@ export interface AddOptions {
   endedOn?: string
   listIds?: string[]
   categoryIds?: string[]
+  /** I own a copy (default false). */
+  owned?: boolean
 }
 
 export interface AddResult {
@@ -201,6 +203,7 @@ export class LibraryRepository {
       statusChangedAt: now,
       categoryIds: options.categoryIds ?? [],
       favourite: false,
+      owned: options.owned ?? false,
     }
     await this.db.entries.add(entry)
 
@@ -355,6 +358,11 @@ export class LibraryRepository {
     if (rating !== undefined && (rating < 0.5 || rating > 5 || rating * 2 !== Math.round(rating * 2)))
       throw new Error('Ratings go from 0.5 to 5 in steps of 0.5.')
     await this.db.entries.update(entryId, { rating })
+  }
+
+  /** Marks whether I own a copy; works with any status. */
+  async setOwned(entryId: string, owned: boolean): Promise<void> {
+    await this.db.entries.update(entryId, { owned })
   }
 
   /** The entry's read in progress, if any. */

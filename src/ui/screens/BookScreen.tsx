@@ -15,6 +15,7 @@ import { BookCover } from '@/ui/books/BookCover'
 import { LogPageForm } from '@/ui/books/LogPageForm'
 import { Notes } from '@/ui/books/Notes'
 import { Organise } from '@/ui/books/Organise'
+import { OwnedBadge, OwnedControl } from '@/ui/books/OwnedControl'
 import { SeriesSection } from '@/ui/books/SeriesSection'
 import { SeriesSuggestion } from '@/ui/books/SeriesSuggestion'
 import { SessionForm } from '@/ui/books/SessionForm'
@@ -52,14 +53,19 @@ export function BookScreen() {
           <h1 className="text-xl leading-tight title">{book.edition.title}</h1>
           {book.edition.subtitle && <p className="text-sm">{book.edition.subtitle}</p>}
           <p className="text-muted-foreground">{book.authorNames.join(', ') || t.common.unknownAuthor}</p>
-          <div>
+          <div className="flex flex-wrap gap-1.5">
             <StatusBadge status={book.entry.status} />
+            {book.entry.owned && <OwnedBadge />}
           </div>
         </div>
       </header>
 
       <Section title={b.statusLabel}>
         <StatusControl book={book} />
+      </Section>
+
+      <Section title={t.owned.section}>
+        <MyCopy book={book} rawEdition={rawEdition} />
       </Section>
 
       {book.entry.status === 'reading' && (
@@ -180,6 +186,19 @@ function StatusControl({ book }: { book: BookView }) {
         </p>
       )}
     </div>
+  )
+}
+
+function MyCopy({ book, rawEdition }: { book: BookView; rawEdition: Edition }) {
+  const { library } = useServices()
+  return (
+    <OwnedControl
+      owned={book.entry.owned === true}
+      format={book.edition.format}
+      onOwned={(owned) => library.setOwned(book.entry.id, owned)}
+      // The format is the edition's, kept as an override so a refresh from Open Library doesn't undo it.
+      onFormat={(format) => library.editEdition(rawEdition.id, { format: format === undefined || format === rawEdition.format ? null : format })}
+    />
   )
 }
 

@@ -36,6 +36,7 @@ export function LibraryScreen() {
   const listId = params.get('list') ?? ''
   const categoryId = params.get('cat') ?? ''
   const seriesId = params.get('series') ?? ''
+  const owned = params.get('owned') === '1'
   const collections = useCollections()
   const seriesNames = useSeriesNames()
 
@@ -68,11 +69,12 @@ export function LibraryScreen() {
               categoryId: categoryId || undefined,
               listEntryIds,
               seriesId: seriesId || undefined,
+              owned,
             }),
             sort,
           )
         : [],
-    [books, status, text, language, categoryId, listEntryIds, seriesId, sort],
+    [books, status, text, language, categoryId, listEntryIds, seriesId, owned, sort],
   )
 
   return (
@@ -99,6 +101,11 @@ export function LibraryScreen() {
             {f.label}
           </Button>
         ))}
+        {/* Owned combines with any status: Owned + To read is the shelf of books I own but haven't read. */}
+        <span aria-hidden className="my-1 w-px shrink-0 bg-border" />
+        <Button size="sm" variant={owned ? 'default' : 'outline'} aria-pressed={owned} onClick={() => set('owned', owned ? '' : '1')} className="rounded-full">
+          {t.owned.filter}
+        </Button>
       </div>
       <Input
         type="search"

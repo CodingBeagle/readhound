@@ -23,6 +23,8 @@ interface SampleBook {
   plan: 'finish' | 'dnf' | 'reread' | 'to_read' | 'old'
   lists?: ListKey[]
   favourite?: boolean
+  /** Whether the reader owns a copy (default: three in four books). */
+  owned?: boolean
   /** Series and number in it. */
   series?: [SeriesKey, number]
 }
@@ -241,7 +243,7 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
   const listItems: ListItem[] = []
   const notes: Note[] = []
 
-  const books = BOOKS.map((book) => {
+  const books = BOOKS.map((book, index) => {
     let author = authors.get(book.author)
     if (!author) {
       author = { id: id('author'), name: book.author, country: AUTHOR_COUNTRIES[book.author], overrides: {} }
@@ -275,6 +277,8 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       statusChangedAt: now,
       categoryIds: [`demo-genre-${book.genre}`, ...(book.favourite ? [favourites.id] : [])],
       favourite: book.favourite ?? false,
+      // Most books are the reader's own; every fourth one was a library loan or borrowed.
+      owned: book.owned ?? index % 4 !== 3,
     }
     works.push(work)
     editions.push(edition)

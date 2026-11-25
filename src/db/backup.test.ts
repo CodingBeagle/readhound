@@ -31,7 +31,7 @@ async function seed(db: ReadhoundDB) {
   const genre = await collections.createCategory({ name: 'Krimi', kind: 'genre', isFiction: true })
   const { entryId } = await library.addManual(
     { title: 'Frøken Smillas fornemmelse for sne', authors: ['Peter Høeg'], pageCount: 435, isbn13: '9788702034516' },
-    { status: 'reading', listIds: [list], categoryIds: [genre] },
+    { status: 'reading', listIds: [list], categoryIds: [genre], owned: true },
   )
   await library.logPage(entryId, 120)
   time = new Date('2026-11-26T09:00:00Z')
@@ -57,6 +57,19 @@ describe('JSON backup', () => {
 
     const again = await createBackup(target, clock, '0.1.0')
     expect(again.data).toEqual(backup.data)
+    expect(again.data.entries[0]!.owned).toBe(true)
+  })
+
+  it('restores older backups, made before books could be owned, as not owned', async () => {
+    const source = await newDb()
+    await seed(source)
+    const backup = await createBackup(source, clock, '0.1.0')
+    for (const entry of backup.data.entries) delete entry.owned
+    const target = await newDb()
+    await restoreBackup(target, parseBackup(JSON.stringify(backup)))
+    const [book] = await loadLibrary(target)
+    expect(book!.entry.owned).toBeUndefined()
+    expect(libraryCsv([book!], [], [], []).split('\r\n')[1]).toContain(',reading,,')
   })
 
   it('leaves out the Open Library response cache', async () => {
@@ -113,7 +126,7 @@ describe('CSV export', () => {
     const lib = libraryCsv(books, await db.lists.toArray(), await db.listItems.toArray(), await db.categories.toArray())
     const [header, row] = lib.replace('﻿', '').trim().split('\r\n')
     expect(header).toContain('Title,Subtitle,Authors')
-    expect(row).toBe('Frøken Smillas fornemmelse for sne,,Peter Høeg,9788702034516,,,,435,,,reading,,2026-11-25,0,,Danske klassikere,Krimi,')
+    expect(row).toBe('Frøken Smillas fornemmelse for sne,,Peter Høeg,9788702034516,,,,435,,,reading,yes,,2026-11-25,0,,Danske klassikere,Krimi,')
 
     const reads = readsCsv(books, await db.sessions.toArray()).trim().split('\r\n')
     expect(reads[1]).toBe('Frøken Smillas fornemmelse for sne,Peter Høeg,9788702034516,2026-11-25,,in progress,,180,2,')

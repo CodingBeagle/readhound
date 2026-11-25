@@ -4,6 +4,7 @@ import { progress, type BookView } from '@/domain/bookView'
 import { t } from '@/i18n'
 
 import { BookCover } from './BookCover'
+import { OwnedBadge } from './OwnedControl'
 import { ProgressBar } from './ProgressBar'
 import { StatusBadge } from './StatusBadge'
 
@@ -24,6 +25,7 @@ export function BookListItem({ book }: { book: BookView }) {
         <span className="truncate text-sm text-muted-foreground">{authorLine(book)}</span>
         <div className="flex items-center gap-2">
           <StatusBadge status={book.entry.status} />
+          {book.entry.owned && <OwnedBadge />}
           {p !== undefined && (
             <div className="w-24">
               <ProgressBar value={p} label={t.common.pageOf(book.currentPage, book.edition.pageCount)} />
