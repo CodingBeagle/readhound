@@ -4,11 +4,14 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
+import pkg from './package.json' with { type: 'json' }
+
 // https://vite.dev/config/
 export default defineConfig({
   // The base path can be set at build time for hosts that serve from a sub-path,
   // e.g. GitHub Pages: `BASE_PATH=/readhound/ npm run build`.
   base: process.env.BASE_PATH ?? '/',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

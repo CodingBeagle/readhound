@@ -1,0 +1,41 @@
+{
+  "name": "Peter Høeg",
+  "remote_ids": {
+    "wikidata": "Q337384",
+    "viaf": "114758804",
+    "bookbrainz": "3cf44bdd-28fb-43c3-90d3-04418124cd76",
+    "musicbrainz": "57265696-77fe-461f-ad88-727d59362495",
+    "goodreads": "369288",
+    "isni": "0000000109378833",
+    "imdb": "nm0406032",
+    "lc_naf": "n93118292",
+    "librarything": "hoegpeter",
+    "opac_sbn": "MILV084216",
+    "gnd": "115364005"
+  },
+  "personal_name": "Peter Høeg",
+  "birth_date": "1957-05-17",
+  "key": "/authors/OL365301A",
+  "source_records": [
+    "promise:bwb_daily_pallets_2022-08-13",
+    "promise:bwb_daily_pallets_2022-04-20",
+    "promise:bwb_daily_pallets_2021-04-09",
+    "promise:bwb_daily_pallets_2021-02-11"
+  ],
+  "type": {
+    "key": "/type/author"
+  },
+  "photos": [
+    15228699
+  ],
+  "latest_revision": 14,
+  "revision": 14,
+  "created": {
+    "type": "/type/datetime",
+    "value": "2008-04-01T03:28:50.625462"
+  },
+  "last_modified": {
+    "type": "/type/datetime",
+    "value": "2026-06-09T16:06:35.341110"
+  }
+}

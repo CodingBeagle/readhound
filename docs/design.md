@@ -104,7 +104,7 @@ A `SourceRegistry` holds the adapters in priority order (version 1: `[OpenLibrar
 
 **Behaviour:**
 
-- Every request sends `User-Agent: <AppName>/<version> (<contact email>)`; app name and email are configuration values.
+- Every request sends `User-Agent: <AppName>/<version> (<contact email>)`; app name and email are configuration values. Exception: browsers can't send a custom User-Agent to Open Library (its CORS preflight rejects the header), so the web app sends none and throttles itself to the unidentified limit of 1 request per second; the header and 3 requests per second apply only outside the browser (tests, a future native Capacitor HTTP layer).
 - Client-side throttle: at most 3 requests per second; on HTTP 429 or a dropped connection, wait 1 second and retry once.
 - Search input is debounced by 400 ms, and an in-flight search is cancelled when the query changes.
 - Timeout 15 seconds per request; show a loading state after 300 ms.

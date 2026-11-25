@@ -1,0 +1,119 @@
+{
+  "first_publish_date": "August 31, 1996",
+  "key": "/works/OL258333W",
+  "title": "Frøken Smillas fornemmelse for sne",
+  "authors": [
+    {
+      "author": {
+        "key": "/authors/OL365301A"
+      },
+      "type": {
+        "key": "/type/author_role"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/author_role"
+      },
+      "author": {
+        "key": "/authors/OL3218495A"
+      }
+    }
+  ],
+  "type": {
+    "key": "/type/work"
+  },
+  "covers": [
+    1013877,
+    963749,
+    5535549,
+    13282000,
+    11322093,
+    9744026,
+    10207760,
+    13869973,
+    914731,
+    1007732,
+    3936112,
+    6821623,
+    6875507,
+    10043496,
+    8720257,
+    10096949,
+    10787554,
+    11485620,
+    14518703,
+    13539731,
+    13539732,
+    13551604,
+    13551605,
+    13652084
+  ],
+  "subjects": [
+    "Women detectives",
+    "Fiction",
+    "Danish Detective and mystery stories",
+    "French fiction",
+    "Translations from Danish",
+    "Danish fiction",
+    "Translations into French",
+    "Littérature danoise",
+    "Detective and mystery stories",
+    "Copenhagen (denmark), fiction",
+    "Fiction, mystery & detective, women sleuths",
+    "Denmark, fiction",
+    "Fiction, espionage",
+    "Fiction, thrillers, general",
+    "Fiction, thrillers, espionage",
+    "Dán irodalom",
+    "Regény",
+    "Műfordítás",
+    "Fiction, general",
+    "Aliens",
+    "Culture conflict",
+    "Kriminalfall",
+    "Eskimos",
+    "Eskimo women",
+    "Conspiracies",
+    "Large type books",
+    "Mystery & Detective",
+    "General",
+    "FICTION",
+    "Inuit",
+    "Fiction, mystery & detective, police procedural"
+  ],
+  "first_sentence": {
+    "type": "/type/text",
+    "value": "It's freezing-an extraordinary 0 Fahrenheit-and it's snowing, and in the language that is no longer mine, the snow is qanik-big, almost weightless crystals falling in clumps and covering the ground with a layer of pulverized white frost."
+  },
+  "excerpts": [
+    {
+      "excerpt": {
+        "type": "/type/text",
+        "value": "It's freezing-an extraordinary 0 Fahrenheit-and it's snowing, and in the language that is no longer mine, the snow is qanik-big, almost weightless crystals falling in clumps and covering the ground with a layer of pulverized white frost."
+      },
+      "page": "First sentence"
+    }
+  ],
+  "subject_places": [
+    "Denmark",
+    "Copenhagen",
+    "Copenhagen (Denmark)",
+    "Europe",
+    "Greenland"
+  ],
+  "description": {
+    "type": "/type/text",
+    "value": "Miss Smilla Jasperson isn't prepared to accept the Copenhagen police's verdict of accidental death when a neighbour's six-year-old boy falls from the roof of a block of flats. She's a Greenlander, and her feeling for snow tells her that the footprints in the snow are a clue to what happened."
+  },
+  "latest_revision": 9,
+  "revision": 9,
+  "created": {
+    "type": "/type/datetime",
+    "value": "2009-10-24T00:36:36.861649"
+  },
+  "last_modified": {
+    "type": "/type/datetime",
+    "value": "2026-06-09T16:05:13.199447"
+  }
+}
