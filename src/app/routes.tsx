@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 
 import { AppShell } from '@/ui/layout/AppShell'
@@ -10,8 +11,10 @@ import { ManualEntryScreen } from '@/ui/screens/ManualEntryScreen'
 import { NotFoundScreen } from '@/ui/screens/NotFoundScreen'
 import { ProfileScreen } from '@/ui/screens/ProfileScreen'
 import { SearchScreen } from '@/ui/screens/SearchScreen'
-import { StatsScreen } from '@/ui/screens/StatsScreen'
 import { WorkScreen } from '@/ui/screens/WorkScreen'
+
+// The stats screen carries the chart libraries, so it loads on first visit only.
+const StatsScreen = lazy(() => import('@/ui/screens/StatsScreen').then((m) => ({ default: m.StatsScreen })))
 
 export const routes: RouteObject[] = [
   {
@@ -24,7 +27,14 @@ export const routes: RouteObject[] = [
       { path: 'add/manual', element: <ManualEntryScreen /> },
       { path: 'book/:entryId', element: <BookScreen /> },
       { path: 'library', element: <LibraryScreen /> },
-      { path: 'stats', element: <StatsScreen /> },
+      {
+        path: 'stats',
+        element: (
+          <Suspense fallback={null}>
+            <StatsScreen />
+          </Suspense>
+        ),
+      },
       { path: 'profile', element: <ProfileScreen /> },
       { path: 'demo', element: <DemoScreen /> },
       { path: '*', element: <NotFoundScreen /> },

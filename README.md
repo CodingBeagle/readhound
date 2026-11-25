@@ -49,7 +49,7 @@ Demo mode (Profile → Demo mode, or `/demo`) switches the app to a separate `re
 
 ## Tech stack
 
-React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Still to come as features land: Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
+React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Recharts draws the stats charts, with d3-geo for the author map. Still to come as features land: Motion for animation, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
 
 ## Code layout
 
@@ -65,7 +65,7 @@ src/
   ui/         screens, layout, book components and hooks (shadcn/ui lives in ui/components/ui)
 ```
 
-Stat calculations will join `domain/` as pure functions.
+Stat calculations live in `domain/stats/` as pure functions over a joined model (`buildStatsModel`), tested against a hand-calculated data set and a 50,000-session timing check.
 
 Screen tests (`src/ui/screens/screens.test.tsx`) render the real routes against a throwaway IndexedDB (fake-indexeddb) and the recorded Open Library fixtures.
 

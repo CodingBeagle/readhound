@@ -15,6 +15,8 @@ interface SampleBook {
   year: number
   pages: number
   lang: 'dan' | 'eng'
+  /** Original language when the edition is a translation. */
+  orig?: string
   genre: GenreKey
   format?: EditionFormat
   /** What happens to the book in the sample timeline. */
@@ -90,7 +92,7 @@ const BOOKS: SampleBook[] = [
   { title: 'Barndom', author: 'Tove Ditlevsen', year: 1967, pages: 112, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics', 'club'] },
   { title: 'Ungdom', author: 'Tove Ditlevsen', year: 1967, pages: 128, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'] },
   { title: 'Gift', author: 'Tove Ditlevsen', year: 1971, pages: 184, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'] },
-  { title: 'Sapiens', author: 'Yuval Noah Harari', year: 2011, pages: 443, lang: 'eng', genre: 'science', plan: 'finish' },
+  { title: 'Sapiens', author: 'Yuval Noah Harari', year: 2011, pages: 443, lang: 'eng', orig: 'heb', genre: 'science', plan: 'finish' },
   { title: 'Kvinden i buret', author: 'Jussi Adler-Olsen', year: 2007, pages: 400, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'] },
   { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', year: 2011, pages: 499, lang: 'eng', genre: 'science', plan: 'dnf' },
   { title: 'Fasandræberne', author: 'Jussi Adler-Olsen', year: 2008, pages: 456, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'] },
@@ -106,9 +108,9 @@ const BOOKS: SampleBook[] = [
   { title: 'Station Eleven', author: 'Emily St. John Mandel', year: 2014, pages: 333, lang: 'eng', genre: 'scifi', plan: 'finish' },
   { title: 'The Silent Patient', author: 'Alex Michaelides', year: 2019, pages: 336, lang: 'eng', genre: 'crime', plan: 'finish', lists: ['summer'] },
   { title: 'Det', author: 'Inger Christensen', year: 1969, pages: 240, lang: 'dan', genre: 'poetry', plan: 'finish' },
-  { title: 'Klara and the Sun', author: 'Kazuo Ishiguro', year: 2021, pages: 303, lang: 'eng', genre: 'literary', plan: 'finish', lists: ['club'] },
-  { title: 'The Three-Body Problem', author: 'Cixin Liu', year: 2014, pages: 400, lang: 'eng', genre: 'scifi', plan: 'dnf' },
-  { title: 'The Road', author: 'Cormac McCarthy', year: 2006, pages: 287, lang: 'eng', genre: 'literary', plan: 'finish' },
+  { title: 'Klara og solen', author: 'Kazuo Ishiguro', year: 2021, pages: 320, lang: 'dan', orig: 'eng', genre: 'literary', plan: 'finish', lists: ['club'] },
+  { title: 'The Three-Body Problem', author: 'Cixin Liu', year: 2008, pages: 400, lang: 'eng', orig: 'chi', genre: 'scifi', plan: 'dnf' },
+  { title: 'Vejen', author: 'Cormac McCarthy', year: 2006, pages: 240, lang: 'dan', orig: 'eng', genre: 'literary', plan: 'finish' },
   { title: 'Hvis det er', author: 'Helle Helle', year: 2014, pages: 160, lang: 'dan', genre: 'literary', plan: 'finish' },
   { title: 'Circe', author: 'Madeline Miller', year: 2018, pages: 393, lang: 'eng', genre: 'fantasy', plan: 'finish', lists: ['summer'] },
   { title: 'Project Hail Mary', author: 'Andy Weir', year: 2021, pages: 476, lang: 'eng', genre: 'scifi', plan: 'finish', favourite: true },
@@ -121,7 +123,7 @@ const BOOKS: SampleBook[] = [
   { title: 'Gone Girl', author: 'Gillian Flynn', year: 2012, pages: 419, lang: 'eng', genre: 'crime', plan: 'finish' },
   { title: 'The Name of the Wind', author: 'Patrick Rothfuss', year: 2007, pages: 662, lang: 'eng', genre: 'fantasy', plan: 'finish' },
   { title: 'Barndommens gade', author: 'Tove Ditlevsen', year: 1943, pages: 224, lang: 'dan', genre: 'classic', plan: 'finish', lists: ['classics'] },
-  { title: 'The Girl with the Dragon Tattoo', author: 'Stieg Larsson', year: 2008, pages: 465, lang: 'eng', genre: 'crime', plan: 'to_read', lists: ['summer'] },
+  { title: 'The Girl with the Dragon Tattoo', author: 'Stieg Larsson', year: 2005, pages: 465, lang: 'eng', orig: 'swe', genre: 'crime', plan: 'to_read', lists: ['summer'] },
   { title: 'A Short History of Nearly Everything', author: 'Bill Bryson', year: 2003, pages: 544, lang: 'eng', genre: 'science', plan: 'to_read' },
   { title: 'Braiding Sweetgrass', author: 'Robin Wall Kimmerer', year: 2013, pages: 391, lang: 'eng', genre: 'science', plan: 'to_read', lists: ['club'] },
 ]
@@ -232,7 +234,7 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       title: book.title,
       authorIds: [author.id],
       firstPublishYear: book.year,
-      originalLanguage: book.lang,
+      originalLanguage: book.orig ?? book.lang,
       subjects: [],
       medianPageCount: book.pages,
     }
@@ -404,7 +406,7 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
     notes,
     goals: [
       { year: year - 1, targetBooks: 20, targetPages: 6000 },
-      { year, targetBooks: 24 },
+      { year, targetBooks: 18 },
     ],
     settings: [
       { key: 'preferredLanguages', value: ['dan', 'eng'] },
