@@ -43,18 +43,21 @@ Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>
 
 ## Tech stack
 
-React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Still to come as features land: Dexie for the local database, TanStack Query for Open Library calls, Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
+React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally. Still to come as features land: TanStack Query for Open Library calls, Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
 
 ## Code layout
 
 ```
 src/
   app/        router and app root
+  db/         Dexie (IndexedDB) schema and repositories: the only way screens touch stored data
+  domain/     record types and pure logic: status transitions, session rules, effective values
   i18n/       UI strings (English now, Danish later)
   lib/        small shared helpers
+  sources/    book source adapters and registry (Open Library)
   ui/         screens, layout and components (shadcn/ui lives in ui/components/ui)
 ```
 
-Following the design doc, later pull requests add `sources/` (book source adapters and registry), `db/` (Dexie schema and repositories) and `domain/` (status transitions, session logic and stat calculations as pure functions).
+Stat calculations will join `domain/` as pure functions.
 
 To add a shadcn/ui component: `npx shadcn@latest add <component>` (configured by `components.json`).
