@@ -12,6 +12,7 @@ const byPath: Record<string, string> = {
   '/works/OL21745884W.json': 'work-OL21745884W',
   '/works/OL258333W.json': 'work-OL258333W',
   '/works/OL258333W/editions.json': 'editions-OL258333W',
+  '/works/OL17091839W/editions.json': 'editions-OL17091839W',
   '/authors/OL7234434A.json': 'author-OL7234434A',
   '/authors/OL365301A.json': 'author-OL365301A',
   '/authors/OL3218495A.json': 'author-OL3218495A',
@@ -20,6 +21,13 @@ const byPath: Record<string, string> = {
 const searches: Record<string, string> = {
   'project hail mary': 'search-project-hail-mary',
   'froken smilla': 'search-froken-smilla',
+  'author:andy weir': 'search-author-andy-weir',
+  'subject_key:science_fiction': 'search-subject-science-fiction',
+}
+
+const searchKey = (url: URL) => {
+  const author = url.searchParams.get('author')
+  return (author ? `author:${author}` : (url.searchParams.get('q') ?? '')).toLowerCase()
 }
 
 /** A 1×1 grey PNG for every cover request. */
@@ -29,7 +37,7 @@ async function stubOpenLibrary(page: Page) {
   await page.route('https://openlibrary.org/**', async (route) => {
     const url = new URL(route.request().url())
     const name =
-      url.pathname === '/search.json' ? (searches[(url.searchParams.get('q') ?? '').toLowerCase()] ?? 'search-empty') : byPath[url.pathname]
+      url.pathname === '/search.json' ? (searches[searchKey(url)] ?? 'search-empty') : byPath[url.pathname]
     if (!name) return route.fulfill({ status: 404, body: 'Not found' })
     await route.fulfill({ status: 200, contentType: 'application/json', body: fixture(name) })
   })

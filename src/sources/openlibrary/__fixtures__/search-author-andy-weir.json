@@ -1,0 +1,354 @@
+{
+  "numFound": 16,
+  "start": 0,
+  "numFoundExact": true,
+  "num_found": 16,
+  "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+  "q": "",
+  "offset": null,
+  "docs": [
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 11200092,
+      "edition_count": 32,
+      "first_publish_year": 2021,
+      "key": "/works/OL21745884W",
+      "language": [
+        "fre",
+        "kor",
+        "por",
+        "ger",
+        "dut",
+        "spa",
+        "eng",
+        "fin",
+        "tur"
+      ],
+      "number_of_pages_median": 496,
+      "title": "Project Hail Mary",
+      "subject": [
+        "hard science-fiction",
+        "science-fiction",
+        "hard sci-fi",
+        "nyt:hardcover-fiction=2021-05-23",
+        "New York Times bestseller",
+        "New York Times reviewed",
+        "Fiction, science fiction, action & adventure",
+        "Fiction, science fiction, hard science fiction",
+        "End of the world",
+        "Fiction",
+        "Astronauts",
+        "Space flight",
+        "Memory disorders",
+        "Survival",
+        "Fin du monde",
+        "Romans, nouvelles",
+        "Astronautes",
+        "Vol spatial",
+        "Habilet\u00e9s de survie",
+        "FICTION / Science Fiction / Action & Adventure",
+        "FICTION / Science Fiction / Hard Science Fiction",
+        "FICTION / Thrillers / Suspense",
+        "Survival after airplane accidents, shipwrecks",
+        "nyt:trade-fiction-paperback=2022-11-13",
+        "Sci-Fi"
+      ]
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 11447888,
+      "edition_count": 74,
+      "first_publish_year": 2011,
+      "key": "/works/OL17091839W",
+      "language": [
+        "fre",
+        "ind",
+        "spa",
+        "rum",
+        "bel",
+        "dan",
+        "ita",
+        "pol",
+        "hun",
+        "por",
+        "ger",
+        "dut",
+        "eng",
+        "heb",
+        "ara",
+        "chi",
+        "kor"
+      ],
+      "number_of_pages_median": 407,
+      "title": "The Martian",
+      "subject": [
+        "Science-Fiction",
+        "Science Fiction & Fantasy",
+        "Suspense & Thriller",
+        "Science fiction",
+        "Amerikanisches Englisch",
+        "Astronauts",
+        "Survival",
+        "Fiction",
+        "Survival skills",
+        "Supervivencia",
+        "Novela",
+        "Astronautas",
+        "Reading Level-Grade 7",
+        "Reading Level-Grade 9",
+        "Reading Level-Grade 8",
+        "Reading Level-Grade 11",
+        "Reading Level-Grade 10",
+        "Reading Level-Grade 12",
+        "Fiction, science fiction, action & adventure",
+        "Fiction, science fiction, general",
+        "Large type books",
+        "Arabic language materials",
+        "Romans, nouvelles",
+        "nyt:hardcover-fiction=2014-03-02",
+        "New York Times bestseller",
+        "Chang pian xiao shuo",
+        "Children's fiction",
+        "Adventure and adventurers, fiction",
+        "Fantasy fiction"
+      ]
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 8235551,
+      "edition_count": 34,
+      "first_publish_year": 2017,
+      "key": "/works/OL17837968W",
+      "language": [
+        "spa",
+        "ita",
+        "ger",
+        "eng",
+        "por"
+      ],
+      "number_of_pages_median": 322,
+      "title": "Artemis",
+      "subject": [
+        "Fiction",
+        "Science fiction",
+        "Smuggling",
+        "Conspiracies",
+        "Fiction, science fiction, hard science fiction",
+        "Fiction, science fiction, action & adventure",
+        "Conspiraciones",
+        "Contrabando",
+        "Luna",
+        "Ficci\u00f3n",
+        "Spanish language materials",
+        "nyt:combined-print-and-e-book-fiction=2017-12-03",
+        "New York Times bestseller",
+        "Suspense fiction",
+        "Moon",
+        "Hard Science Fiction"
+      ]
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 8445948,
+      "edition_count": 1,
+      "first_publish_year": 2009,
+      "key": "/works/OL17365207W",
+      "language": [
+        "bul",
+        "dut",
+        "tur",
+        "por",
+        "gre",
+        "rus",
+        "pol",
+        "rum",
+        "spa",
+        "jpn",
+        "nob",
+        "ita",
+        "hrv",
+        "est",
+        "eng",
+        "chi",
+        "dan",
+        "mac",
+        "heb",
+        "hun",
+        "fin",
+        "lit",
+        "swe",
+        "ger",
+        "cze",
+        "fre",
+        "nor",
+        "kor",
+        "ara",
+        "vie",
+        "epo"
+      ],
+      "number_of_pages_median": 1,
+      "title": "The Egg",
+      "subject": [
+        "Science-Fiction",
+        "Fiction",
+        "Science Fiction"
+      ]
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 15260719,
+      "edition_count": 1,
+      "first_publish_year": 2019,
+      "key": "/works/OL33476532W",
+      "title": "Randomize"
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "edition_count": 1,
+      "first_publish_year": 2022,
+      "key": "/works/OL36735881W",
+      "language": [
+        "eng"
+      ],
+      "number_of_pages_median": 1344,
+      "title": "The Martian / Artemis / Project Hail Mary",
+      "subject": [
+        "Fiction, science fiction, general",
+        "Anthology"
+      ]
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 8446071,
+      "edition_count": 3,
+      "first_publish_year": 2019,
+      "key": "/works/OL17841386W",
+      "language": [
+        "eng",
+        "spa"
+      ],
+      "number_of_pages_median": 128,
+      "title": "Cheshire Crossing",
+      "subject": [
+        "Comic books, strips",
+        "Fiction",
+        "Teenage girls",
+        "Imaginary places",
+        "Oz (Imaginary place)",
+        "Boarding schools",
+        "Plurality of worlds",
+        "Women adventurers",
+        "Characters in literature",
+        "Fantasy",
+        "Graphic novels",
+        "Young Adult",
+        "Comics",
+        "Retellings",
+        "Middle Grade",
+        "Adventure",
+        "Graphic Novels Comics",
+        "Magic",
+        "Young adult fiction, action & adventure, general",
+        "Young adult fiction, comics & graphic novels, fantasy",
+        "Young adult fiction, comics & graphic novels, fairy tales, folklore, legends & mythology"
+      ]
+    },
+    {
+      "author_key": [
+        "OL368638A",
+        "OL242164A",
+        "OL2965123A",
+        "OL7234434A",
+        "OL40784A",
+        "OL28006A",
+        "OL2629960A",
+        "OL30024A"
+      ],
+      "author_name": [
+        "Andrzej Sapkowski",
+        "Terry Goodkind",
+        "Anthony Ryan",
+        "Andy Weir",
+        "Raymond E. Feist",
+        "Peter F. Hamilton",
+        "Trudi Canavan",
+        "James Lovegrove"
+      ],
+      "cover_i": 15169217,
+      "edition_count": 1,
+      "first_publish_year": 2020,
+      "key": "/works/OL24719426W",
+      "language": [
+        "fre"
+      ],
+      "number_of_pages_median": 426,
+      "title": "The Road with No Return / The Sky People / Sandrunners / Diary of an AssCan / The Messenger / Starlight Dreamer / Whispers of the Mist Children / Speedstream"
+    },
+    {
+      "author_key": [
+        "OL12970306A"
+      ],
+      "author_name": [
+        "Andy Weir bush"
+      ],
+      "edition_count": 1,
+      "first_publish_year": 2021,
+      "key": "/works/OL35924574W",
+      "language": [
+        "eng"
+      ],
+      "title": "Adventures of Brian May"
+    },
+    {
+      "author_key": [
+        "OL7234434A"
+      ],
+      "author_name": [
+        "Andy Weir"
+      ],
+      "cover_i": 8445997,
+      "edition_count": 0,
+      "key": "/works/OL17082024W",
+      "title": "Lacero",
+      "subject": [
+        "Science-Fiction",
+        "Fan-Fiction"
+      ]
+    }
+  ]
+}

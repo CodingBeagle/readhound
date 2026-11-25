@@ -43,12 +43,14 @@ export class OpenLibrarySource implements BookSource {
 
   async search(q: SearchQuery, signal?: AbortSignal): Promise<SearchResult[]> {
     const params = new URLSearchParams()
-    if (q.text?.trim()) params.set('q', q.text.trim())
+    const text = [q.text?.trim(), q.subject?.trim() && `subject_key:${subjectKey(q.subject)}`].filter(Boolean).join(' ')
+    if (text) params.set('q', text)
     if (q.title?.trim()) params.set('title', q.title.trim())
     if (q.author?.trim()) params.set('author', q.author.trim())
     if (q.isbn?.trim()) params.set('isbn', normalizeIsbn(q.isbn))
     if ([...params.keys()].length === 0) return []
-    params.set('fields', SEARCH_FIELDS)
+    params.set('fields', q.withSubjects ? `${SEARCH_FIELDS},subject` : SEARCH_FIELDS)
+    if (q.popular) params.set('sort', 'rating')
     params.set('limit', String(q.limit ?? 20))
 
     const response = await this.http.getJson<OlSearchResponse>(`${BASE}/search.json?${params}`, {
@@ -135,4 +137,13 @@ export class OpenLibrarySource implements BookSource {
     }
     return authors
   }
+}
+
+/** Open Library's subject key: lower case, words joined by underscores ("Science fiction" → "science_fiction"). */
+export function subjectKey(subject: string): string {
+  return subject
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '_')
+    .replace(/^_+|_+$/g, '')
 }
