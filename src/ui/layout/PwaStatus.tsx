@@ -1,16 +1,26 @@
+import { useEffect } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import { t } from '@/i18n'
 import { Button } from '@/ui/components/ui/button'
 
+const AUTO_HIDE_MS = 5000
+
 /**
  * Registers the service worker (auto-update) and tells the user once the app
- * shell is cached for offline use.
+ * shell is cached for offline use. The notice hides itself after a few
+ * seconds so it never sits on top of a form's main button.
  */
 export function PwaStatus() {
   const {
     offlineReady: [offlineReady, setOfflineReady],
   } = useRegisterSW()
+
+  useEffect(() => {
+    if (!offlineReady) return
+    const id = setTimeout(() => setOfflineReady(false), AUTO_HIDE_MS)
+    return () => clearTimeout(id)
+  }, [offlineReady, setOfflineReady])
 
   if (!offlineReady) return null
 

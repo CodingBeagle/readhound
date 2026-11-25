@@ -73,6 +73,8 @@ export interface Author {
 
 export type Status = 'to_read' | 'reading' | 'finished' | 'dnf'
 
+export const STATUSES: readonly Status[] = ['to_read', 'reading', 'finished', 'dnf']
+
 /** My copy of one edition; unique per editionId. */
 export interface LibraryEntry {
   id: string

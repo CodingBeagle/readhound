@@ -80,6 +80,8 @@
   }
   html {
     -webkit-tap-highlight-color: transparent;
+    /* Keep focused or scrolled-to fields clear of the fixed bottom tab bar on phones. */
+    @apply scroll-pb-24 md:scroll-pb-0;
   }
   body {
     @apply bg-background text-foreground antialiased;

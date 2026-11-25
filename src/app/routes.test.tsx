@@ -1,12 +1,22 @@
+import 'fake-indexeddb/auto'
+
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
+import { ReadhoundDB } from '@/db/schema'
+
 import { routes } from './routes'
+import { createServices, ServicesProvider } from './services'
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
-  render(<RouterProvider router={router} />)
+  const services = createServices(new ReadhoundDB(`shell-${crypto.randomUUID()}`))
+  render(
+    <ServicesProvider services={services}>
+      <RouterProvider router={router} />
+    </ServicesProvider>,
+  )
   return router
 }
 
