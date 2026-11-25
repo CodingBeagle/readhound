@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 
-import { act, render, screen, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
@@ -354,5 +354,80 @@ describe('series', () => {
     expect(await screen.findByRole('link', { name: 'Afdeling Q #1' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: t.series.suggestion })).not.toBeInTheDocument()
     expect(await services.db.seriesMembers.count()).toBe(3)
+  })
+})
+
+describe('series screens', () => {
+  async function seedSeries() {
+    const one = await addManual('Kvinden i buret', 'Jussi Adler-Olsen', 'finished')
+    const two = await addManual('Fasandræberne', 'Jussi Adler-Olsen', 'to_read')
+    const workOf = async (entryId: string) => (await services.db.editions.get((await services.db.entries.get(entryId))!.editionId))!.workId
+    const q = await services.series.createSeries({ name: 'Afdeling Q', totalBooks: 4 })
+    await services.series.setWorkSeries(await workOf(one), q, { position: 1 })
+    await services.series.setWorkSeries(await workOf(two), q, { position: 2 })
+    await services.series.addMissingMember(q, { title: 'Flaskepost fra P', position: 3, authorName: 'Jussi Adler-Olsen' })
+    return { q, one, two }
+  }
+
+  it('lists series with progress from the library, and opens one in order', async () => {
+    const user = userEvent.setup()
+    await seedSeries()
+    await addManual('Dune', 'Frank Herbert')
+    const router = renderAt('/library')
+    await user.click(await screen.findByRole('link', { name: t.series.libraryLink }))
+    const card = await screen.findByRole('link', { name: /Afdeling Q/ })
+    expect(within(card).getByText(t.series.progress(1, 4))).toBeInTheDocument()
+    expect(within(card).getByText(t.series.owned(2, 4))).toBeInTheDocument()
+    await user.click(card)
+    expect(router.state.location.pathname).toMatch(/^\/series\//)
+    await screen.findByRole('heading', { name: 'Afdeling Q' })
+    const titles = screen.getAllByText(/^(Kvinden i buret|Fasandræberne|Flaskepost fra P)$/).map((e) => e.textContent)
+    expect(titles).toEqual(['Kvinden i buret', 'Fasandræberne', 'Flaskepost fra P'])
+    const missing = screen.getByRole('link', { name: `${t.series.findMissing}: Flaskepost fra P` })
+    expect(missing).toHaveAttribute('href', '/search?q=Flaskepost%20fra%20P%20Jussi%20Adler-Olsen')
+  })
+
+  it('filters the library by series', async () => {
+    const user = userEvent.setup()
+    await seedSeries()
+    await addManual('Dune', 'Frank Herbert')
+    renderAt('/library')
+    await screen.findByText('Dune')
+    await user.selectOptions(await screen.findByLabelText(t.series.filter), 'Afdeling Q')
+    expect(await screen.findByText(t.screens.library.count(2))).toBeInTheDocument()
+    expect(screen.queryByText('Dune')).not.toBeInTheDocument()
+  })
+
+  it('shows the next book in the series on Home with one tap to start it', async () => {
+    const user = userEvent.setup()
+    const { two } = await seedSeries()
+    renderAt('/')
+    const start = await screen.findByRole('button', { name: `${t.series.startNext}: Fasandræberne` })
+    expect(screen.getByText(t.series.nextLine('Afdeling Q', '2'))).toBeInTheDocument()
+    await user.click(start)
+    await screen.findByRole('link', { name: /Fasandræberne/ })
+    expect((await services.db.entries.get(two))!.status).toBe('reading')
+  })
+
+  it('edits the series name and total, and deletes it without touching the books', async () => {
+    const user = userEvent.setup()
+    const { q } = await seedSeries()
+    const router = renderAt(`/series/${q}`)
+    await user.click(await screen.findByRole('button', { name: t.series.rename }))
+    const name = screen.getByLabelText(t.series.newName)
+    await user.clear(name)
+    await user.type(name, 'Department Q')
+    const total = screen.getByLabelText(t.series.totalBooks)
+    await user.clear(total)
+    await user.type(total, '10')
+    await user.click(screen.getByRole('button', { name: t.common.save }))
+    expect(await screen.findByRole('heading', { name: 'Department Q' })).toBeInTheDocument()
+    expect(screen.getByText(t.series.progress(1, 10))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: t.series.deleteSeries }))
+    await user.click(screen.getByRole('button', { name: t.common.delete }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/series'))
+    expect(await services.db.series.count()).toBe(0)
+    expect(await services.db.entries.count()).toBe(2)
   })
 })

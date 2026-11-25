@@ -494,6 +494,7 @@ export const en = {
     positionHint: 'Decimals are fine for novellas, like 3.5.',
     invalidPosition: 'Enter a number such as 3 or 3.5.',
     nameNeeded: 'Give the series a name.',
+    invalidTotal: 'Enter a whole number of 1 or more.',
     remove: 'Remove from series',
     edit: 'Edit',
     numbered: (name: string, position?: string) => (position ? `${name} #${position}` : name),

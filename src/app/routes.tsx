@@ -12,6 +12,8 @@ import { ManualEntryScreen } from '@/ui/screens/ManualEntryScreen'
 import { NotFoundScreen } from '@/ui/screens/NotFoundScreen'
 import { ProfileScreen } from '@/ui/screens/ProfileScreen'
 import { SearchScreen } from '@/ui/screens/SearchScreen'
+import { SeriesListScreen } from '@/ui/screens/SeriesListScreen'
+import { SeriesScreen } from '@/ui/screens/SeriesScreen'
 import { WorkScreen } from '@/ui/screens/WorkScreen'
 
 // The stats screen carries the chart libraries, so it loads on first visit only.
@@ -30,6 +32,8 @@ export const routes: RouteObject[] = [
       { path: 'add/manual', element: <ManualEntryScreen /> },
       { path: 'book/:entryId', element: <BookScreen /> },
       { path: 'library', element: <LibraryScreen /> },
+      { path: 'series', element: <SeriesListScreen /> },
+      { path: 'series/:seriesId', element: <SeriesScreen /> },
       {
         path: 'stats/year/:year',
         element: (
