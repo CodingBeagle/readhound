@@ -31,7 +31,7 @@ const STATE_STYLES: Record<MemberState, string> = {
 }
 
 export function MemberStateBadge({ state }: { state: MemberState }) {
-  return <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', STATE_STYLES[state])}>{s.states[state]}</span>
+  return <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap', STATE_STYLES[state])}>{s.states[state]}</span>
 }
 
 /** A cover in a series strip; books not in the library are shown faded with a dashed outline. */

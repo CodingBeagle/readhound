@@ -6,7 +6,7 @@
  */
 import { addDays, daysBetween, weekdayOf } from './stats/calendar'
 import type { StatRead, StatsModel } from './stats/model'
-import type { Goal } from './types'
+import type { Goal, Series, SeriesMember } from './types'
 
 export const TIERS = ['bronze', 'silver', 'gold', 'platinum'] as const
 export type Tier = (typeof TIERS)[number]
@@ -31,6 +31,7 @@ export const FAMILIES = [
   'superfan',
   'rereader',
   'collector',
+  'completionist',
 ] as const
 export type Family = (typeof FAMILIES)[number]
 
@@ -48,6 +49,8 @@ export const SPECIALS = [
   'everyMonth',
   'lifeIsShort',
   'critic',
+  'trilogy',
+  'backToBack',
 ] as const
 export type Special = (typeof SPECIALS)[number]
 
@@ -67,6 +70,7 @@ export const FAMILY_RULES: Record<Family, { group: AchievementGroup; thresholds:
   superfan: { group: 'collection', thresholds: [3, 5, 8, 12] },
   rereader: { group: 'collection', thresholds: [1, 3, 6, 10] },
   collector: { group: 'collection', thresholds: [25, 50, 100, 250] },
+  completionist: { group: 'collection', thresholds: [1, 3, 5, 10] },
 }
 
 /** A long book has at least this many pages (Marathoner); Doorstopper and Short and sweet use their own. */
@@ -78,6 +82,8 @@ export const BIG_DAY_PAGES = 100
 export const WEEKEND_PAGES = 250
 export const CLASSIC_BEFORE = 1900
 export const CRITIC_RATINGS = 10
+/** Trilogy: complete a series of at least this many books. */
+export const TRILOGY_BOOKS = 3
 
 export interface TierState {
   tier: Tier
@@ -124,6 +130,8 @@ export interface Unlock {
 export interface AchievementsInput {
   model: StatsModel
   goals: readonly Goal[]
+  /** Series and their members, for the series achievements. */
+  series?: { series: readonly Series[]; members: readonly SeriesMember[] }
 }
 
 export interface AchievementSummary {
@@ -204,7 +212,7 @@ function special(id: Special, unlockedOn: string | undefined, progress?: { value
   return { kind: 'special', id, group: 'special', unlocked, unlockedOn: unlocked ? unlockedOn : undefined, progress }
 }
 
-export function achievements({ model, goals }: AchievementsInput): AchievementSummary {
+export function achievements({ model, goals, series }: AchievementsInput): AchievementSummary {
   const finished = model.reads.filter((r): r is StatRead & { endedOn: string } => r.outcome === 'finished' && !!r.endedOn).sort((a, b) => byDate(a.endedOn, b.endedOn))
   const finishedDates = finished.map((r) => r.endedOn)
   const days = [...new Set(model.sessions.map((s) => s.date))].sort()
@@ -269,6 +277,8 @@ export function achievements({ model, goals }: AchievementsInput): AchievementSu
   families.push(family('rereader', rereadDates.length, rereadDates))
   const added = model.books.map((b) => b.entry.addedAt.slice(0, 10)).sort()
   families.push(family('collector', added.length, added))
+  const completed = completedSeries(finished, series)
+  families.push(family('completionist', completed.length, completed.map((c) => c.on)))
 
   // Specials
   const specials: SpecialAchievement[] = []
@@ -300,6 +310,8 @@ export function achievements({ model, goals }: AchievementsInput): AchievementSu
   )
   const rated = model.books.filter((b) => b.entry.rating !== undefined).length
   specials.push(special('critic', undefined, { value: Math.min(rated, CRITIC_RATINGS), target: CRITIC_RATINGS }))
+  specials.push(special('trilogy', completed.find((c) => c.books >= TRILOGY_BOOKS)?.on))
+  specials.push(special('backToBack', backToBack(finished, series?.members ?? [])))
 
   const unlocks: Unlock[] = [
     ...families.flatMap((f) =>
@@ -361,6 +373,42 @@ function everyMonth(days: readonly string[]): string | undefined {
     set.add(d.slice(5, 7))
     months.set(year, set)
     if (set.size === 12) return d
+  }
+  return undefined
+}
+
+/**
+ * Series finished, with the day each became complete (the day its last
+ * book was first finished), in order. A series needs at least two books,
+ * and every one of its known books (or its stated total) read.
+ */
+function completedSeries(
+  finished: readonly (StatRead & { endedOn: string })[],
+  input: AchievementsInput['series'],
+): { seriesId: string; books: number; on: string }[] {
+  if (!input) return []
+  const firstFinish = new Map<string, string>()
+  for (const r of finished) if (!firstFinish.has(r.book.workId)) firstFinish.set(r.book.workId, r.endedOn)
+  const out: { seriesId: string; books: number; on: string }[] = []
+  for (const s of input.series) {
+    const members = input.members.filter((m) => m.seriesId === s.id)
+    const total = Math.max(s.totalBooks ?? 0, members.length)
+    if (total < 2 || members.length < total) continue
+    const dates = members.map((m) => (m.workId ? firstFinish.get(m.workId) : undefined))
+    if (dates.some((d) => d === undefined)) continue
+    out.push({ seriesId: s.id, books: total, on: (dates as string[]).sort().at(-1)! })
+  }
+  return out.sort((a, b) => a.on.localeCompare(b.on))
+}
+
+/** The first time two books finished one after the other were consecutive books of one series. */
+function backToBack(finished: readonly (StatRead & { endedOn: string })[], members: readonly SeriesMember[]): string | undefined {
+  const byWork = new Map<string, SeriesMember[]>()
+  for (const m of members) if (m.workId && m.position !== undefined) byWork.set(m.workId, [...(byWork.get(m.workId) ?? []), m])
+  for (let i = 1; i < finished.length; i++) {
+    const before = byWork.get(finished[i - 1]!.book.workId) ?? []
+    const after = byWork.get(finished[i]!.book.workId) ?? []
+    if (before.some((b) => after.some((a) => a.seriesId === b.seriesId && a.position! > b.position!))) return finished[i]!.endedOn
   }
   return undefined
 }

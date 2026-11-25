@@ -119,8 +119,11 @@ export function mapSeriesResponse(response: SparqlResponse): WikidataSeries[] {
     series.memberById.set(memberId, member)
     series.members.push(member)
   }
-  return [...bySeries.values()].map(({ memberById: _, ...series }) => ({
-    ...series,
+  return [...bySeries.values()].map((series) => ({
+    wikidataId: series.wikidataId,
+    name: series.name,
+    position: series.position,
+    totalBooks: series.totalBooks,
     members: series.members.sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity) || a.title.localeCompare(b.title)),
   }))
 }

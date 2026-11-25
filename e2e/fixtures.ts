@@ -36,11 +36,21 @@ async function stubOpenLibrary(page: Page) {
   await page.route('https://covers.openlibrary.org/**', (route) => route.fulfill({ status: 200, contentType: 'image/png', body: COVER }))
 }
 
-/** Every test starts on an empty library with Open Library stubbed. */
+/** Wikidata's query service answers every series query with the Afdeling Q fixture. */
+const WIKIDATA = readFileSync(new URL('../src/sources/series/__fixtures__/sparql-afdeling-q.json', import.meta.url), 'utf8')
+
+async function stubWikidata(page: Page) {
+  await page.route('https://query.wikidata.org/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/sparql-results+json', headers: { 'Access-Control-Allow-Origin': '*' }, body: WIKIDATA }),
+  )
+}
+
+/** Every test starts on an empty library with Open Library and Wikidata stubbed. */
 export const test = base.extend<{ stubs: void }>({
   stubs: [
     async ({ page }, use) => {
       await stubOpenLibrary(page)
+      await stubWikidata(page)
       await use()
     },
     { auto: true },

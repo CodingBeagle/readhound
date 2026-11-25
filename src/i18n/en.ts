@@ -464,6 +464,7 @@ export const en = {
       superfan: { name: 'Superfan', goal: (n: string) => `Finish ${n} books by one author` },
       rereader: { name: 'Old friends', goal: (n: string) => `Reread ${n} ${n === '1' ? 'book' : 'books'}` },
       collector: { name: 'Collector', goal: (n: string) => `Have ${n} books in your library` },
+      completionist: { name: 'Completionist', goal: (n: string) => `Finish every book in ${n === '1' ? 'a series' : `${n} series`}` },
     },
     specials: {
       firstChapter: { name: 'First chapter', description: 'Finish your first book.' },
@@ -479,6 +480,8 @@ export const en = {
       everyMonth: { name: 'All year round', description: 'Read in all twelve months of one year.' },
       lifeIsShort: { name: 'Life is short', description: 'Put a book on the DNF pile.' },
       critic: { name: 'Critic', description: 'Rate 10 books.' },
+      trilogy: { name: 'Trilogy', description: 'Finish every book in a series of three or more.' },
+      backToBack: { name: 'Back to back', description: 'Finish the next book in a series right after the one before it.' },
     },
   },
   series: {

@@ -76,7 +76,7 @@ function MemberRow({ member, isNext }: { member: SeriesMemberView; isNext: boole
       <span className="w-9 shrink-0 text-right text-sm font-semibold text-muted-foreground tabular-nums">{label}</span>
       <MemberCover member={member} className="w-10" />
       <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate font-medium">{member.title}</span>
+        <span className="line-clamp-2 leading-snug font-medium">{member.title}</span>
         <span className="flex flex-wrap items-center gap-2">
           <MemberStateBadge state={member.state} />
           {isNext && <span className="text-xs font-medium text-primary">{s.nextTitle}</span>}
@@ -122,10 +122,9 @@ function MemberRow({ member, isNext }: { member: SeriesMemberView; isNext: boole
         <div className="flex min-h-11 min-w-0 flex-1 items-center gap-3 p-2">{body}</div>
       )}
       {!member.book && (
-        <Button asChild variant="ghost" size="sm">
-          <Link to={findLink(member)} aria-label={`${s.findMissing}: ${member.title}`}>
+        <Button asChild variant="ghost" size="icon">
+          <Link to={findLink(member)} aria-label={`${s.findMissing}: ${member.title}`} title={s.findMissing}>
             <Search />
-            {s.findMissing}
           </Link>
         </Button>
       )}

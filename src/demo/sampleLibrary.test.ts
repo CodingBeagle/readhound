@@ -4,6 +4,9 @@ import { parseBackup } from '@/db/backup'
 import type { Clock } from '@/db/clock'
 import { loadLibrary } from '@/db/queries'
 import { ReadhoundDB } from '@/db/schema'
+import { achievements } from '@/domain/achievements'
+import { buildSeriesViews } from '@/domain/series'
+import { buildStatsModel } from '@/domain/stats'
 import { validateSession } from '@/domain/sessions'
 
 import { buildSampleLibrary } from './sampleLibrary'
@@ -52,6 +55,24 @@ describe.each(['2026-11-25', '2026-12-24', '2027-01-01', '2027-08-15'])('sample 
       }
     }
   })
+})
+
+it('has series to try: a completed trilogy, gaps, a decimal number and a next book', async () => {
+  const clock: Clock = { now: () => new Date('2026-11-25T09:00:00Z'), timeZone: () => 'Europe/Copenhagen' }
+  const db = new ReadhoundDB(`test-${crypto.randomUUID()}`)
+  await seedDemo(db, clock)
+  const views = buildSeriesViews(await db.series.toArray(), await db.seriesMembers.toArray(), await loadLibrary(db))
+  await db.delete()
+  expect(views.length).toBeGreaterThanOrEqual(6)
+  expect(views.find((v) => v.series.name === 'Københavnertrilogien')).toMatchObject({ complete: true, finished: 3 })
+  expect(views.find((v) => v.series.name === 'Afdeling Q')).toMatchObject({ total: 10, owned: 2 })
+  expect(views.some((v) => v.members.some((m) => m.member.position === 2.5))).toBe(true)
+  expect(views.filter((v) => v.next).length).toBeGreaterThanOrEqual(3)
+
+  const data = buildSampleLibrary({ today: '2026-11-25' })
+  const model = buildStatsModel(data)
+  const summary = achievements({ model, goals: [], series: { series: data.series, members: data.seriesMembers } })
+  expect(summary.specials.find((x) => x.id === 'trilogy')!.unlocked).toBe(true)
 })
 
 it('passes the backup file checks', () => {
