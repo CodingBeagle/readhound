@@ -29,6 +29,11 @@ test('demo mode fills the stats and leaves my library alone', async ({ page }) =
   await page.getByText('Show as table').first().click()
   await expect(page.getByRole('table').first()).toBeVisible()
 
+  // The danger zone can't touch anything in demo mode.
+  await page.goto('/profile')
+  await expect(page.getByRole('region', { name: 'Danger zone' }).getByText('You are in demo mode.', { exact: false })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Delete all my data…' })).toHaveCount(0)
+
   // Leaving demo mode from the banner brings my own library back.
   await page.getByRole('status').filter({ hasText: 'Demo mode: sample data' }).getByRole('button', { name: 'Leave demo mode' }).click()
   await expect(page.getByText('Demo mode: sample data')).toHaveCount(0)

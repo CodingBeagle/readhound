@@ -14,12 +14,13 @@ import { Field, Input, Select } from '@/ui/components/ui/input'
 import { useBackup } from '@/ui/hooks/useBackup'
 import { useCollections } from '@/ui/hooks/useCollections'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
+import { DangerZone } from '@/ui/profile/DangerZone'
 import { Section } from '@/ui/layout/Section'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 
 const p = t.screens.profile
 
-/** Appearance, goals, lists, categories, preferred languages, and export/import (design doc, Screens). */
+/** Appearance, goals, lists, categories, preferred languages, export/import and the danger zone (design doc, Screens). */
 export function ProfileScreen() {
   return (
     <>
@@ -42,6 +43,7 @@ export function ProfileScreen() {
       <Section title={p.about.title}>
         <p className="text-sm text-muted-foreground">{p.about.version(__APP_VERSION__)}</p>
       </Section>
+      <DangerZone />
     </>
   )
 }

@@ -375,9 +375,22 @@ Mobile-first: a bottom tab bar with five tabs. On wide screens it becomes a side
 | Search | Search box (text or ISBN), results list, work detail with edition picker, "Add manually" at the bottom of results and on empty results |
 | Library | Filter by status (to read, reading, finished, DNF pile), list, category, language; sort by added, title, author, finished date, rating; grid or list view |
 | Stats | Period filter; sections matching the stat groups; year in review entry point |
-| Profile | Theme, goals, lists and categories management, preferred languages, export and import, settings |
+| Profile | Theme, goals, lists and categories management, preferred languages, export and import, settings, danger zone |
 
 **Book detail** (from anywhere): cover, effective metadata with an edit button, status control, reads history with sessions, notes and quotes, lists and categories, rating, link to Open Library.
+
+## Danger zone
+
+The last section of Profile deletes everything Readhound stores on this device. That covers every table in the personal database: books, editions and authors, reads, sessions, notes, lists, categories, goals, settings (including the last-backup time) and the Open Library cache.
+
+It is deliberately hard to trigger:
+1. Tap **Delete all my data…**.
+2. Optionally save a backup with **Export backup**, which is offered right there.
+3. Type `DELETE` (any case) to enable **Delete everything**.
+
+**What it leaves alone:**
+- **Theme:** a per-device preference kept outside the database.
+- **Demo database:** in demo mode the section only says to leave demo mode first, so the sample data can never be confused with the real library. **Reset sample data** on the demo page already covers the demo database.
 
 ## Themes and animation
 
@@ -505,3 +518,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Wait before starting counts first reads that began after the day the book was added; books added as reading or finished are left out |
 | 2026-11-25 | Year in review: a full-screen card sequence per year (from Stats, and on Home in December), saved as a 1080 × 1350 PNG drawn on a canvas, shared through the phone's share sheet where available |
 | 2026-11-25 | Four themes (Classic, Aurora, Bookshop, Midnight), chosen per device in Profile; motion across screens and charts, all honouring reduced motion |
+| 2026-11-25 | Danger zone at the bottom of Profile: deletes the whole personal database (settings and cache included) after an export offer and typing DELETE; keeps the theme; hidden in demo mode and never touches the demo database |

@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto'
 import { isBackupDue } from '@/domain/backup'
 import { toCsv } from '@/domain/csv'
 
-import { BackupError, backupCounts, createBackup, libraryCsv, markBackedUp, parseBackup, readsCsv, restoreBackup } from './backup'
+import { BackupError, backupCounts, clearEverything, createBackup, libraryCsv, markBackedUp, parseBackup, readsCsv, restoreBackup } from './backup'
 import type { Clock } from './clock'
 import { CollectionsRepository } from './collections'
 import { LibraryRepository } from './library'
@@ -84,6 +84,24 @@ describe('JSON backup', () => {
     await markBackedUp(db, clock)
     expect((await db.settings.get('lastBackupAt'))?.value).toBe('2026-11-25T09:00:00.000Z')
     expect((await db.settings.get('backupReminderSnoozedUntil'))?.value).toBeUndefined()
+  })
+})
+
+describe('danger zone', () => {
+  it('empties every table, settings and cache included', async () => {
+    const db = await newDb()
+    await seed(db)
+    await db.httpCache.put({ key: 'k', body: '{}', storedAt: 0 } as never)
+    await clearEverything(db)
+    for (const table of db.tables) expect(await table.count(), table.name).toBe(0)
+  })
+
+  it('leaves other databases alone', async () => {
+    const mine = await newDb()
+    const other = await newDb()
+    await seed(other)
+    await clearEverything(mine)
+    expect(await other.entries.count()).toBe(1)
   })
 })
 
