@@ -30,6 +30,7 @@ import {
   ratingsByGenre,
   ratingsVsLength,
   readingSpeedInPeriod,
+  reviewYears,
   rereads,
   stackHeight,
   startedVsFinished,
@@ -210,6 +211,15 @@ function Overview({ model, period, preset, today }: { model: StatsModel; period:
           </Link>
         </p>
       )}
+      <ChartCard title={s.yearInReview} summary={s.yearInReviewHint} className="md:col-span-2">
+        <div className="flex flex-wrap gap-2">
+          {reviewYears(model).map((y) => (
+            <Button key={y} asChild variant="outline" size="sm">
+              <Link to={`/stats/year/${y}`}>{t.review.title(y)}</Link>
+            </Button>
+          ))}
+        </div>
+      </ChartCard>
       <ChartCard
         title={s.booksPerMonth}
         table={{ headers: [s.month, s.books], rows: months.map((m) => [monthLabel(m.month, 'long'), m.books]) }}

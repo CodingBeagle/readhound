@@ -35,7 +35,9 @@ export function genresOverTime(model: StatsModel, period: Period, by: 'month' | 
 export function topAuthors(model: StatsModel, period: Period, includeDnf = false) {
   const reads = attributeReads(model, period, includeDnf)
   const names = new Map(reads.flatMap((r) => r.book.authors.map((a) => [a.id, a.name] as const)))
-  return countBy(reads, (r) => r.book.authors.map((a) => a.id)).map((c) => ({ authorId: c.key, name: names.get(c.key) ?? '', count: c.count }))
+  return countBy(reads, (r) => r.book.authors.map((a) => a.id))
+    .map((c) => ({ authorId: c.key, name: names.get(c.key) ?? '', count: c.count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'da'))
 }
 
 /** An author is new in the period if none of their works had a finished read before the period started. */
