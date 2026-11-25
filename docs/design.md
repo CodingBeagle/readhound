@@ -454,3 +454,7 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Statuses: to read, currently reading, finished, DNF (with its own DNF pile) |
 | 2026-11-25 | Data lives only on the device for now; no hosting or backend |
 | 2026-11-25 | Tech stack: React + TypeScript PWA, wrapped with Capacitor for mobile later |
+| 2026-11-25 | Notes are plain text (markdown allowed, shown as written); the rating scale is 0.5–5 in half steps |
+| 2026-11-25 | Backup reminder: counts from the last JSON export, or from the first book added before any export; "Later" hides it for 7 days |
+| 2026-11-25 | JSON import replaces everything on the device after a confirmation; CSV exports are for spreadsheets only |
+| 2026-11-25 | Demo mode: a separate `readhound-demo` database with about two years of generated sample reading; the real library is never touched |

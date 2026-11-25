@@ -7,6 +7,7 @@ import { LogPageForm } from '@/ui/books/LogPageForm'
 import { ProgressBar } from '@/ui/books/ProgressBar'
 import { Button } from '@/ui/components/ui/button'
 import { useLibrary } from '@/ui/hooks/useLibrary'
+import { BackupReminder } from '@/ui/layout/BackupReminder'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 
@@ -16,6 +17,7 @@ export function HomeScreen() {
 
   return (
     <>
+      <BackupReminder />
       <ScreenHeader title={t.screens.home.title} />
       {reading && reading.length === 0 && (
         <EmptyState>

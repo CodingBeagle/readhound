@@ -213,7 +213,8 @@ export class LibraryRepository {
       }
     }
 
-    for (const [position, listId] of (options.listIds ?? []).entries()) {
+    for (const listId of options.listIds ?? []) {
+      const position = await this.db.listItems.where('listId').equals(listId).count()
       await this.db.listItems.add({ listId, entryId: entry.id, position, addedAt: now })
     }
     return { entryId: entry.id, existing: false }

@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 
+import { DemoBanner } from './DemoBanner'
 import { tabs } from './tabs'
 
 /**
@@ -43,6 +44,7 @@ export function AppShell() {
         </ul>
       </nav>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-6 pb-24 md:px-8 md:pb-8">
+        <DemoBanner />
         <Outlet />
       </main>
     </div>
