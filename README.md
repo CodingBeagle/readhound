@@ -27,7 +27,13 @@ npm run dev        # dev server at http://localhost:5173
 | `npm test` | Run the unit tests once with Vitest |
 | `npm run generate-pwa-assets` | Regenerate the app icons in `public/` from `public/logo.svg` |
 
-To serve from a sub-path (for example GitHub Pages), build with `BASE_PATH=/readhound/ npm run build`.
+To serve from a sub-path, build with `BASE_PATH=/readhound/ npm run build`.
+
+## Deployment
+
+Every push to `main` builds the app and publishes it to GitHub Pages at https://codingbeagle.github.io/readhound/ (`.github/workflows/deploy.yml`). The workflow builds with the `/readhound/` base path, so the router, PWA manifest scope and service worker all live under that path, and it copies `index.html` to `404.html` so deep links such as `/readhound/stats` load the app. It can also be run by hand from the Actions tab.
+
+One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
 
 ## Tech stack
 
