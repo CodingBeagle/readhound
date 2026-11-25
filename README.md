@@ -25,6 +25,7 @@ npm run dev        # dev server at http://localhost:5173
 | `npm run typecheck` | Run TypeScript in build mode |
 | `npm run lint` | Lint with oxlint |
 | `npm test` | Run the unit tests once with Vitest |
+| `npm run e2e` | Run the end-to-end tests with Playwright against the production build (run `npm run build` first) |
 | `npm run generate-pwa-assets` | Regenerate the app icons in `public/` from `public/logo.svg` |
 
 To serve from a sub-path, build with `BASE_PATH=/readhound/ npm run build`.
@@ -49,7 +50,7 @@ Demo mode (Profile → Demo mode, or `/demo`) switches the app to a separate `re
 
 ## Tech stack
 
-React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Recharts draws the stats charts, with d3-geo for the author map. Still to come as features land: Motion for animation, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
+React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Recharts draws the stats charts, with d3-geo for the author map. Still to come as features land: Motion for animation and Capacitor for the iOS and Android apps.
 
 ## Code layout
 
@@ -68,5 +69,7 @@ src/
 Stat calculations live in `domain/stats/` as pure functions over a joined model (`buildStatsModel`), tested against a hand-calculated data set and a 50,000-session timing check.
 
 Screen tests (`src/ui/screens/screens.test.tsx`) render the real routes against a throwaway IndexedDB (fake-indexeddb) and the recorded Open Library fixtures.
+
+End-to-end tests (`e2e/`) drive the production build in a phone-sized Chromium (Pixel 7) with Playwright: finding and adding a book, logging reading, adding a book by hand and finishing it, exporting and restoring a backup, demo mode with the stats screen, and Year in review. Open Library is stubbed with the same recorded fixtures, and the service worker is blocked so every test starts fresh. CI runs them after the build.
 
 To add a shadcn/ui component: `npx shadcn@latest add <component>` (configured by `components.json`).
