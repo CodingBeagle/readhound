@@ -145,7 +145,7 @@ interface Edition {
   pageCount?: number;
   language?: string;                  // language of this edition
   format?: "hardcover" | "paperback" | "ebook" | "audiobook" | "other";
-  coverUrl?: string;                  // remote URL or local blob reference
+  coverUrl?: string;                  // remote URL; a cover photo is a "readhound-cover:<id>" override
   borrowed: { pageCount?: boolean; coverUrl?: boolean };  // value taken from work or another edition
   overrides: Partial<Record<EditableField, unknown>>;   // user edits, win over source values
   fetchedAt?: string;
@@ -230,6 +230,14 @@ interface SeriesMember {              // one book's place in a series; linked pe
   addedAt: string;
 }
 
+interface CoverPhoto {                // a photo the reader took or picked (see Cover photos)
+  id: string;
+  editionId: string;
+  dataUrl: string;                    // JPEG data URL, 2:3, at most 600 × 900
+  width: number; height: number;
+  createdAt: string;
+}
+
 type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | "publishYear"
   | "pageCount" | "language" | "format" | "coverUrl";
 ```
@@ -244,7 +252,7 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 
 **Gaps:** if an edition has no page count or cover, the app falls back to the work's typical page count or another edition's cover, and marks the value as borrowed so the user can correct it.
 
-**Manual entry:** creates the same records with source "manual". Title and author are required. ISBN, page count, language, publisher, year and a cover photo are optional.
+**Manual entry:** creates the same records with source "manual". Title and author are required. ISBN, page count, language, publisher, year and a cover (a URL or a photo, see Cover photos) are optional.
 
 **Categories:** the app keeps its own categories. Open Library subjects are only offered as suggestions, since they are noisy and often missing for Danish books.
 
@@ -283,6 +291,16 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 | finished or dnf | to\_read | allowed; no read changes |
 
 At most one open Read per entry. The **DNF pile** is the view of entries with `status = dnf`. All dates in these transitions can be edited afterwards.
+
+## Cover photos
+
+When a book has no cover in the catalog, or a bad one, the reader can take a photo of their copy or pick an image.
+
+- **Where:** the book page has "Add cover photo" (no cover) or "Change cover" under the title. It opens a panel with **Take photo** (`<input type="file" accept="image/*" capture="environment">`, the back camera on phones), **Choose image** (the same without `capture`) and, when a photo is set, **Remove photo**. Manual entry offers the same buttons next to the cover URL field, and the Add screen offers them when the found edition and its work have no cover.
+- **Crop step:** a dialog shows the photo behind a 2:3 frame. Drag (or the arrow keys) moves it, pinch, the slider or the mouse wheel zooms (1× to 4×), and Turn rotates by quarter turns. The crop always keeps the 2:3 shape and stays inside the photo. Crop maths are pure functions in `domain/covers.ts`; drawing is in `ui/covers/image.ts`.
+- **Output:** the crop is drawn to a canvas at most 600 × 900 (never scaled up) and saved as a JPEG data URL at quality 0.85, again at 0.7 if it is over about 300 KB. Browsers apply the photo's EXIF orientation when decoding.
+- **Storage:** photos live in their own `covers` table (Dexie version 3, indexed by `editionId`), one per edition, so library and stats queries don't load image data. The edition's `coverUrl` **override** is set to `readhound-cover:<coverId>`; `BookCover` resolves such references from the table with a live query, everywhere covers are shown. The source cover stays untouched, so a refresh from Open Library keeps the photo, and **Remove photo** deletes the row and the override, bringing the source cover (or the placeholder) back. Typing a cover URL in Edit details replaces the photo. Pruning orphaned editions deletes their photos.
+- **Backups:** the `covers` table is part of the JSON backup, which is now **format version 3**. Version 1 and 2 files still import, with no photos. Only image data URLs (`data:image/jpeg|png|webp;base64,`) are accepted.
 
 ## Series
 
@@ -711,3 +729,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Series detection also matches Wikidata by title and author, and falls back to the most common series label across a work's Open Library editions (found with Assassin's Apprentice: the added edition had no series label, and Wikidata may not carry the book's Open Library ID) |
 | 2026-11-25 | Genres are prefilled automatically from a fixed list of 31 genres. Evidence comes from the book's subjects, its other editions, Wikidata P136, series and author fallbacks, and learned corrections. Suggestions are chips to confirm when adding a book, and a backfill screen covers the existing library. Subject tags are left out for now |
 | 2026-11-25 | "Owned" is a flag on each book, not a fifth status, because owning is independent of reading (an owned book can be to read, reading, finished or DNF). Format is the edition's existing format. Library gets an Owned chip that combines with the status chips, and stats get an "Owned but not read" card. No backup format change: the field is optional and absent means not owned |
+| 2026-11-25 | Cover photos: when a book has no cover or a bad one, the reader takes a photo or picks an image, crops it to 2:3 and it is saved on the device as a JPEG (at most 600 × 900) in a separate `covers` table, shown through the `coverUrl` override so removing it brings the source cover back. Included in backups (format version 3; older backups still import) |

@@ -2,12 +2,14 @@ import { useId, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import { useServices } from '@/app/services'
+import type { CoverPhotoInput } from '@/db'
 import type { EditionFormat } from '@/domain/types'
 import { t } from '@/i18n'
 import { parseIsbn } from '@/sources/isbn'
 import { BackLink } from '@/ui/books/BackLink'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
+import { CoverPhotoPicker } from '@/ui/covers/CoverPhotoPicker'
 
 const FORMATS = Object.keys(t.formats) as EditionFormat[]
 const optionalNumber = (v: string) => (v.trim() ? Number(v) : undefined)
@@ -34,6 +36,7 @@ export function ManualEntryScreen() {
     coverUrl: '',
   })
   const [owned, setOwned] = useState(false)
+  const [coverPhoto, setCoverPhoto] = useState<CoverPhotoInput>()
   const hintId = useId()
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({})
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -63,6 +66,7 @@ export function ManualEntryScreen() {
         publishYear: optionalNumber(form.publishYear),
         format: (form.format || undefined) as EditionFormat | undefined,
         coverUrl: optionalText(form.coverUrl),
+        coverPhoto,
       },
       { owned },
     )
@@ -112,9 +116,18 @@ export function ManualEntryScreen() {
             </Select>
           </Field>
         </div>
-        <Field label={m.coverUrl}>
-          <Input type="url" value={form.coverUrl} onChange={set('coverUrl')} />
-        </Field>
+        <fieldset className="flex flex-col gap-2 text-sm">
+          <legend className="mb-1.5 font-medium">{t.covers.manualLabel}</legend>
+          <div className="flex items-start gap-3">
+            {coverPhoto && <img src={coverPhoto.dataUrl} alt={t.covers.manualPhoto} className="aspect-[2/3] w-16 rounded-md object-cover shadow" />}
+            <CoverPhotoPicker onPhoto={setCoverPhoto} onRemove={coverPhoto ? () => setCoverPhoto(undefined) : undefined} />
+          </div>
+          {!coverPhoto && (
+            <Field label={m.coverUrl}>
+              <Input type="url" value={form.coverUrl} onChange={set('coverUrl')} />
+            </Field>
+          )}
+        </fieldset>
         <label className="flex min-h-11 items-center gap-3 text-sm">
           <input type="checkbox" className="size-5 accent-[var(--chart-1)]" aria-label={t.owned.own} aria-describedby={hintId} checked={owned} onChange={(e) => setOwned(e.target.checked)} />
           <span>

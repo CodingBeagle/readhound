@@ -52,7 +52,7 @@ export interface Edition {
   /** Language of this edition. */
   language?: string
   format?: EditionFormat
-  /** Remote URL or local blob reference. */
+  /** Remote URL, or a `readhound-cover:<id>` reference to a stored cover photo (only ever as an override). */
   coverUrl?: string
   /** Values taken from the work or another edition, so the user can correct them. */
   borrowed: { pageCount?: boolean; coverUrl?: boolean }
@@ -162,6 +162,17 @@ export interface Goal {
   year: number
   targetBooks?: number
   targetPages?: number
+}
+
+/** A cover photo the reader took or picked for an edition (design doc, Cover photos). */
+export interface CoverPhoto {
+  id: string
+  editionId: string
+  /** JPEG data URL, 2:3, at most 600 × 900. */
+  dataUrl: string
+  width: number
+  height: number
+  createdAt: string
 }
 
 /** Key-value app settings, e.g. preferred languages and the last backup time. */

@@ -3,6 +3,7 @@
  * details, changing status and logging reading sessions. Every write that
  * touches several tables runs in one transaction.
  */
+import { isImageDataUrl, isLocalCoverRef, localCoverRef } from '@/domain/covers'
 import { effective } from '@/domain/effective'
 import { currentPage, lastSession, validateSession, type SessionError } from '@/domain/sessions'
 import { planTransition } from '@/domain/transitions'
@@ -64,6 +65,15 @@ export interface ManualBookInput {
   coverUrl?: string
   /** "Can't find my edition": create a manual edition under this existing work. */
   workId?: string
+  /** A cover photo taken while adding the book; it wins over `coverUrl`. */
+  coverPhoto?: CoverPhotoInput
+}
+
+/** A processed cover photo: a 2:3 JPEG data URL and its size. */
+export interface CoverPhotoInput {
+  dataUrl: string
+  width: number
+  height: number
 }
 
 export type ChangeStatusResult =
@@ -158,7 +168,9 @@ export class LibraryRepository {
     if (!title) throw new Error('A title is required.')
     if (names.length === 0 && !input.workId) throw new Error('At least one author is required.')
 
-    return this.db.transaction('rw', [this.db.works, this.db.authors, this.db.editions, this.db.entries, this.db.reads, this.db.listItems], async () => {
+    if (input.coverPhoto && !isImageDataUrl(input.coverPhoto.dataUrl)) throw new Error('A cover photo must be an image.')
+
+    return this.db.transaction('rw', [this.db.works, this.db.authors, this.db.editions, this.db.entries, this.db.reads, this.db.listItems, this.db.covers], async () => {
       let workId = input.workId
       if (!workId) {
         const authorIds: string[] = []
@@ -188,6 +200,7 @@ export class LibraryRepository {
         overrides: {},
       }
       await this.db.editions.add(edition)
+      if (input.coverPhoto) await this.storeCoverPhoto(edition, input.coverPhoto)
       return this.createEntry(edition.id, options)
     })
   }
@@ -272,9 +285,11 @@ export class LibraryRepository {
 
   /** Stores user edits as overrides. Pass `null` to clear an override and fall back to the source value. */
   async editEdition(editionId: string, changes: Partial<Record<EditableField, unknown>>): Promise<void> {
-    await this.db.transaction('rw', this.db.editions, async () => {
+    await this.db.transaction('rw', [this.db.editions, this.db.covers], async () => {
       const edition = await this.db.editions.get(editionId)
       if (!edition) throw new Error(`Edition ${editionId} not found`)
+      // A new cover address replaces the cover photo, which is then no longer needed.
+      if (changes.coverUrl !== undefined && changes.coverUrl !== edition.overrides.coverUrl) await this.db.covers.where('editionId').equals(editionId).delete()
       const overrides = { ...edition.overrides }
       for (const [field, value] of Object.entries(changes) as [EditableField, unknown][]) {
         if (value === null) delete overrides[field]
@@ -282,6 +297,48 @@ export class LibraryRepository {
       }
       await this.db.editions.update(editionId, { overrides })
     })
+  }
+
+  // ---------- Cover photos ----------
+
+  /**
+   * Sets a cover photo for the book (design doc, Cover photos). It is shown
+   * through the `coverUrl` override, so the source cover is kept and comes
+   * back when the photo is removed. A new photo replaces the old one.
+   */
+  async setCoverPhoto(entryId: string, photo: CoverPhotoInput): Promise<void> {
+    if (!isImageDataUrl(photo.dataUrl)) throw new Error('A cover photo must be an image.')
+    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.covers], async () => {
+      const edition = await this.entryEdition(entryId)
+      await this.db.covers.where('editionId').equals(edition.id).delete()
+      await this.storeCoverPhoto(edition, photo)
+    })
+  }
+
+  /** Removes the cover photo; the book shows its source cover again (or the placeholder). */
+  async removeCoverPhoto(entryId: string): Promise<void> {
+    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.covers], async () => {
+      const edition = await this.entryEdition(entryId)
+      await this.db.covers.where('editionId').equals(edition.id).delete()
+      if (isLocalCoverRef(edition.overrides.coverUrl as string | undefined)) {
+        const overrides = { ...edition.overrides }
+        delete overrides.coverUrl
+        await this.db.editions.update(edition.id, { overrides })
+      }
+    })
+  }
+
+  private async entryEdition(entryId: string): Promise<Edition> {
+    const entry = await this.db.entries.get(entryId)
+    const edition = entry && (await this.db.editions.get(entry.editionId))
+    if (!edition) throw new Error(`Entry ${entryId} not found`)
+    return edition
+  }
+
+  private async storeCoverPhoto(edition: Edition, photo: CoverPhotoInput): Promise<void> {
+    const id = newId()
+    await this.db.covers.add({ id, editionId: edition.id, dataUrl: photo.dataUrl, width: photo.width, height: photo.height, createdAt: this.nowIso() })
+    await this.db.editions.update(edition.id, { overrides: { ...edition.overrides, coverUrl: localCoverRef(id) } })
   }
 
   /** Applies fresh source data. Source values and `fetchedAt` change; overrides never do. */
@@ -468,10 +525,12 @@ export class LibraryRepository {
    * more. Series members of removed works stay as not-owned books.
    */
   async pruneOrphans(): Promise<void> {
-    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.works, this.db.authors, this.db.seriesMembers], async () => {
+    await this.db.transaction('rw', [this.db.entries, this.db.editions, this.db.works, this.db.authors, this.db.seriesMembers, this.db.covers], async () => {
       const usedEditions = new Set((await this.db.entries.toArray()).map((e) => e.editionId))
       const editions = await this.db.editions.toArray()
-      await this.db.editions.bulkDelete(editions.filter((e) => !usedEditions.has(e.id)).map((e) => e.id))
+      const removedEditions = editions.filter((e) => !usedEditions.has(e.id)).map((e) => e.id)
+      await this.db.editions.bulkDelete(removedEditions)
+      await this.db.covers.where('editionId').anyOf(removedEditions).delete()
       const usedWorks = new Set(editions.filter((e) => usedEditions.has(e.id)).map((e) => e.workId))
       const works = await this.db.works.toArray()
       const removedWorks = works.filter((w) => !usedWorks.has(w.id)).map((w) => w.id)

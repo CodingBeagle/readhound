@@ -141,7 +141,7 @@ describe('series in backups', () => {
     await series.setWorkSeries(workId, s, { position: 1 })
     await series.addMissingMember(s, { title: 'Fasandræberne', position: 2 })
     const backup = await createBackup(db, clock, '0.1.0')
-    expect(backup.version).toBe(2)
+    expect(backup.version).toBeGreaterThanOrEqual(2)
 
     const target = new ReadhoundDB(`test-${crypto.randomUUID()}`)
     await restoreBackup(target, parseBackup(JSON.stringify(backup)))

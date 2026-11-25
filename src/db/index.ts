@@ -1,7 +1,7 @@
 export { db, ReadhoundDB, requestPersistentStorage } from './schema'
 export { IndexedDbCache } from './httpCache'
 export { LibraryRepository, normalizeFormat } from './library'
-export type { AddFromSourceInput, AddOptions, AddResult, ChangeStatusResult, LogResult, ManualBookInput } from './library'
+export type { AddFromSourceInput, AddOptions, AddResult, ChangeStatusResult, CoverPhotoInput, LogResult, ManualBookInput } from './library'
 export { systemClock, type Clock } from './clock'
 export { CollectionsRepository, type NoteInput } from './collections'
 export { SeriesRepository, SETTING_SERIES_DISMISSED, linkWorkToMembers, type MemberInput } from './series'

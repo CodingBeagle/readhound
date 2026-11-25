@@ -3,6 +3,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import type {
   Author,
   Category,
+  CoverPhoto,
   Edition,
   Goal,
   LibraryEntry,
@@ -39,6 +40,7 @@ export class ReadhoundDB extends Dexie {
   httpCache!: EntityTable<HttpCacheRow, 'key'>
   series!: EntityTable<Series, 'id'>
   seriesMembers!: EntityTable<SeriesMember, 'id'>
+  covers!: EntityTable<CoverPhoto, 'id'>
 
   constructor(name = 'readhound') {
     super(name)
@@ -62,6 +64,10 @@ export class ReadhoundDB extends Dexie {
     this.version(2).stores({
       series: 'id, name, wikidataId',
       seriesMembers: 'id, seriesId, workId, olWorkId, wikidataId',
+    })
+    // Cover photos taken or picked by the reader (design doc, Cover photos).
+    this.version(3).stores({
+      covers: 'id, editionId',
     })
   }
 }

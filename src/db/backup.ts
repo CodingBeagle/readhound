@@ -8,6 +8,7 @@ import { toCsv } from '@/domain/csv'
 import type {
   Author,
   Category,
+  CoverPhoto,
   Edition,
   Goal,
   LibraryEntry,
@@ -26,8 +27,11 @@ import type { Clock } from './clock'
 import type { ReadhoundDB } from './schema'
 
 export const BACKUP_FORMAT = 'readhound-backup'
-/** Version 2 added series. Version 1 files still import (they simply have no series). */
-export const BACKUP_VERSION = 2
+/**
+ * Version 2 added series, version 3 cover photos. Older files still import
+ * (they simply have no series or cover photos).
+ */
+export const BACKUP_VERSION = 3
 
 export const SETTING_LAST_BACKUP = 'lastBackupAt'
 export const SETTING_BACKUP_SNOOZE = 'backupReminderSnoozedUntil'
@@ -48,6 +52,7 @@ export interface BackupData {
   settings: Setting[]
   series: Series[]
   seriesMembers: SeriesMember[]
+  covers: CoverPhoto[]
 }
 
 export interface Backup {
@@ -74,6 +79,7 @@ export const BACKUP_TABLES = [
   'settings',
   'series',
   'seriesMembers',
+  'covers',
 ] as const satisfies readonly (keyof BackupData)[]
 
 /** Primary key field per table, used to sanity-check rows on import. */
@@ -92,6 +98,7 @@ const KEY_FIELDS: Record<keyof BackupData, readonly string[]> = {
   settings: ['key'],
   series: ['id'],
   seriesMembers: ['id', 'seriesId'],
+  covers: ['id', 'editionId', 'dataUrl'],
 }
 
 export async function createBackup(db: ReadhoundDB, clock: Clock, appVersion: string): Promise<Backup> {
