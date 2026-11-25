@@ -20,6 +20,7 @@ import {
   longestStreak,
   newVsReturningAuthors,
   originalsVsTranslations,
+  ownedShelf,
   pagesByWeekdayAndHour,
   pagesPerDay,
   pagesRead,
@@ -276,6 +277,25 @@ describe('my library and extras', () => {
   it('describes the to-read pile', () => {
     const pile = toReadPile(model, TODAY)
     expect(pile).toMatchObject({ count: 1, averageWait: 365, longestWait: 365 })
+  })
+
+  it('counts owned books and the ones owned but not read yet', () => {
+    expect(ownedShelf(model, TODAY)).toMatchObject({ owned: 0, unread: 0, unreadShare: 0, byFormat: [] })
+    const owned = new Set(['n1', 'n2', 'n5'])
+    const mine = buildStatsModel({
+      entries: entries.map((e) => ({ ...e, owned: owned.has(e.id) })),
+      editions: editions.map((e) => (e.id === 'e5' ? { ...e, format: 'ebook' as const } : { ...e, format: 'paperback' as const })),
+      works,
+      authors,
+      reads,
+      sessions,
+      categories,
+    })
+    const shelf = ownedShelf(mine, TODAY)
+    // Finished books are read; only The Dispossessed (to read, 250 pages) waits on the shelf.
+    expect(shelf).toMatchObject({ owned: 3, unread: 1, unreadPages: 250, byFormat: [{ format: 'paperback', count: 2 }, { format: 'ebook', count: 1 }] })
+    expect(shelf.unreadShare).toBeCloseTo(1 / 3)
+    expect(shelf.oldestUnread[0]).toMatchObject({ book: { title: 'The Dispossessed' }, waitingDays: 365 })
   })
 
   it('measures the wait before starting', () => {

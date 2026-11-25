@@ -171,6 +171,7 @@ interface LibraryEntry {              // my copy of one edition; unique per edit
   rating?: number;                    // scale open; store as 0.5–5 in 0.5 steps unless decided otherwise
   categoryIds: string[];
   favourite: boolean;
+  owned?: boolean;                    // I own a copy; independent of status; absent (older records and backups) = not owned
 }
 
 interface Read {                      // one attempt at reading the book
@@ -253,6 +254,8 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 
 **Statuses:** every book in the library has one reading status: **to read**, **currently reading**, **finished** or **DNF** (did not finish). DNF books go into their own DNF pile, and the app remembers the page I stopped at.
 
+**Owned:** separate from the reading status, every book has an **owned** flag: "I own this book". It combines with any status, so a book can be owned and to read, reading, finished or DNF. The format of my copy is the edition's `format` (hardcover, paperback, e-book, audiobook, other), edited as an override so a refresh from Open Library keeps it. The flag is set when adding a book (Add and manual entry, default off) and on the book page under "My copy". Library has an **Owned** chip next to the status chips that combines with them: Owned + To read is the shelf of books I own but haven't read (`?owned=1&status=to_read`). Owned books show an "Owned" badge. Older backups without the field restore as not owned; the library CSV has an Owned column.
+
 **Series:** see [Series](#series). A book's series is set on the work, so every edition I own counts toward it.
 
 **Lists:** I can create my own named lists (for example "Summer 2027" or "Danish classics") and put books in them. A book can be in several lists. Lists are separate from status and from categories.
@@ -261,7 +264,7 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 
 1. User searches; results are works (cover, title, authors, first year, edition count).
 2. User picks a work, then picks their edition from the work's editions. Editions in the user's preferred languages (default `dan`, `eng`) are listed first, then by publish year descending. A "Can't find my edition" option creates a manual edition under that work.
-3. User chooses the initial status (default `to_read`) and optionally lists and categories.
+3. User chooses the initial status (default `to_read`), whether they own it (with the format of their copy, prefilled from the edition), and optionally lists and categories.
 4. App stores Work, Authors, Edition and LibraryEntry. If the edition lacks `pageCount`, copy the work's `medianPageCount` and set `borrowed.pageCount = true`; same for the cover, taking the first edition of the work with a cover.
 5. Adding an edition already in the library opens the existing entry instead.
 
@@ -401,6 +404,7 @@ These rules apply to every stat so the numbers agree with each other.
 | Length distribution | finished reads bucketed by page count: under 200, 200–349, 350–499, 500–749, 750+ | histogram |
 | Fiction vs. non-fiction | from the `isFiction` flag on genre categories; unknown if no flagged category | split bar |
 | To-read pile | count of `to_read` entries; average and longest wait = today − `addedAt` | numbers plus oldest five |
+| Owned but not read | owned entries with status `to_read` and no finished read; share of all owned books, their total pages, wait = today − `addedAt`, and owned books by edition format | split bar (read or started vs. not read yet), oldest five, link to the Library filter |
 | Wait before starting | for reads begun from to\_read: `startedOn − addedAt` | average and distribution |
 | Started vs. finished | reads started in period vs. reads finished in period vs. DNF | three numbers |
 | Where I stop | for DNF reads: `stoppedAtPage ÷ pageCount`, bucketed by 10% | histogram |
@@ -706,3 +710,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Recommendations from an on-device taste profile, built from ratings, favourites, finishes and DNFs. Open Library searches by the top authors and subjects, ranked by a weighted fit with a reason per pick; dismissals are stored in settings. Smarter in-browser similarity can come later as an extra ranking term |
 | 2026-11-25 | Series detection also matches Wikidata by title and author, and falls back to the most common series label across a work's Open Library editions (found with Assassin's Apprentice: the added edition had no series label, and Wikidata may not carry the book's Open Library ID) |
 | 2026-11-25 | Genres are prefilled automatically from a fixed list of 31 genres. Evidence comes from the book's subjects, its other editions, Wikidata P136, series and author fallbacks, and learned corrections. Suggestions are chips to confirm when adding a book, and a backfill screen covers the existing library. Subject tags are left out for now |
+| 2026-11-25 | "Owned" is a flag on each book, not a fifth status, because owning is independent of reading (an owned book can be to read, reading, finished or DNF). Format is the edition's existing format. Library gets an Owned chip that combines with the status chips, and stats get an "Owned but not read" card. No backup format change: the field is optional and absent means not owned |

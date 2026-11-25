@@ -86,6 +86,8 @@ export interface LibraryEntry {
   rating?: number
   categoryIds: string[]
   favourite: boolean
+  /** I own a copy (any format; the format is the edition's). Independent of the reading status. Absent in older records: not owned. */
+  owned?: boolean
 }
 
 /** One attempt at reading the book. */

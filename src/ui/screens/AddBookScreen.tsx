@@ -3,14 +3,16 @@ import { Navigate, useLocation, useNavigate } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { categoryForGenre, categoryGenres, recordGenreChoice, type GenreBook } from '@/db/genres'
+import { normalizeFormat } from '@/db/library'
 import { localDate } from '@/domain/dates'
 import type { GenreId } from '@/domain/genres'
-import type { Status } from '@/domain/types'
+import type { EditionFormat, Status } from '@/domain/types'
 import { t } from '@/i18n'
 import type { EditionDetails, SearchResult } from '@/sources/types'
 import { BackLink } from '@/ui/books/BackLink'
 import { BookCover } from '@/ui/books/BookCover'
 import { CollectionPicker } from '@/ui/books/Organise'
+import { OwnedControl } from '@/ui/books/OwnedControl'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { GenreSuggestionChips } from '@/ui/genres/GenreSuggestionChips'
@@ -36,6 +38,9 @@ export function AddBookScreen() {
   const [startedOn, setStartedOn] = useState(today)
   const [endedOn, setEndedOn] = useState(today)
   const [busy, setBusy] = useState(false)
+  const [owned, setOwned] = useState(false)
+  const sourceFormat = state?.edition ? normalizeFormat(state.edition.format) : undefined
+  const [format, setFormat] = useState<EditionFormat | undefined>(sourceFormat)
   const collections = useCollections()
   const [listIds, setListIds] = useState<ReadonlySet<string>>(new Set())
   const [categoryIds, setCategoryIds] = useState<ReadonlySet<string>>(new Set())
@@ -98,8 +103,14 @@ export function AddBookScreen() {
         ...(status === 'finished' && { startedOn, endedOn }),
         listIds: [...listIds],
         categoryIds: [...finalCategoryIds],
+        owned,
       },
     )
+    // My copy's format, when it differs from the catalog's, is kept as the reader's edit.
+    if (owned && format !== sourceFormat) {
+      const entry = await db.entries.get(entryId)
+      if (entry) await library.editEdition(entry.editionId, { format: format ?? null })
+    }
     navigate(`/book/${entryId}`, { replace: true })
   }
 
@@ -139,6 +150,7 @@ export function AddBookScreen() {
             </Field>
           </div>
         )}
+        <OwnedControl owned={owned} format={format} onOwned={setOwned} onFormat={setFormat} />
         <GenreSuggestionChips suggestions={suggestions} selected={selectedGenres} onToggle={setGenre} />
         {collections && (
           <CollectionPicker

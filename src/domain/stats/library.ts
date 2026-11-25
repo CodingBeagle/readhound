@@ -12,6 +12,31 @@ export function toReadPile(model: StatsModel, today: string) {
   return { count: pile.length, averageWait: pile.length ? total / pile.length : 0, longestWait: pile[0]?.waitingDays ?? 0, oldest: pile.slice(0, 5) }
 }
 
+/**
+ * My own books: how many, by format, and the shelf of ones I own but haven't
+ * read (on the to-read pile and never finished), with their pages and the
+ * longest-waiting five.
+ */
+export function ownedShelf(model: StatsModel, today: string) {
+  const finished = new Set(model.reads.filter((r) => r.outcome === 'finished').map((r) => r.entryId))
+  const owned = model.books.filter((b) => b.entry.owned)
+  const formats = new Map<string, number>()
+  for (const b of owned) formats.set(b.edition.format ?? 'unknown', (formats.get(b.edition.format ?? 'unknown') ?? 0) + 1)
+  const unread = owned
+    .filter((b) => b.entry.status === 'to_read' && !finished.has(b.entry.id))
+    .map((book) => ({ book, waitingDays: Math.max(0, daysBetween(book.entry.addedAt.slice(0, 10), today)) }))
+    .sort((a, b) => b.waitingDays - a.waitingDays)
+  return {
+    owned: owned.length,
+    unread: unread.length,
+    /** Share of owned books not read yet, 0–1. */
+    unreadShare: owned.length ? unread.length / owned.length : 0,
+    unreadPages: unread.reduce((sum, u) => sum + (u.book.pageCount ?? 0), 0),
+    byFormat: [...formats].map(([format, count]) => ({ format, count })).sort((a, b) => b.count - a.count),
+    oldestUnread: unread.slice(0, 5),
+  }
+}
+
 export const WAIT_BUCKETS = ['Under a week', '1–4 weeks', '1–6 months', '6–12 months', 'Over a year'] as const
 
 /**

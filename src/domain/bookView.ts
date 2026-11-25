@@ -78,6 +78,8 @@ export interface LibraryFilter {
   categoryId?: string
   listEntryIds?: ReadonlySet<string>
   seriesId?: string
+  /** Only books I own. */
+  owned?: boolean
 }
 
 export function filterBooks(books: readonly BookView[], filter: LibraryFilter): BookView[] {
@@ -85,6 +87,7 @@ export function filterBooks(books: readonly BookView[], filter: LibraryFilter): 
   return books.filter(
     (b) =>
       (!filter.status || b.entry.status === filter.status) &&
+      (!filter.owned || b.entry.owned === true) &&
       (!filter.language || b.edition.language === filter.language) &&
       (!filter.categoryId || b.entry.categoryIds.includes(filter.categoryId)) &&
       (!filter.listEntryIds || filter.listEntryIds.has(b.entry.id)) &&

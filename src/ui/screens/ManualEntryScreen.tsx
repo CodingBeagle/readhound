@@ -33,6 +33,7 @@ export function ManualEntryScreen() {
     format: '',
     coverUrl: '',
   })
+  const [owned, setOwned] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({})
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -48,19 +49,22 @@ export function ManualEntryScreen() {
     setErrors(next)
     if (Object.keys(next).length > 0) return
 
-    const { entryId } = await library.addManual({
-      title: form.title,
-      subtitle: optionalText(form.subtitle),
-      authors,
-      isbn13: isbn?.length === 13 ? isbn : undefined,
-      isbn10: isbn?.length === 10 ? isbn : undefined,
-      pageCount: optionalNumber(form.pageCount),
-      language: optionalText(form.language.toLowerCase()),
-      publisher: optionalText(form.publisher),
-      publishYear: optionalNumber(form.publishYear),
-      format: (form.format || undefined) as EditionFormat | undefined,
-      coverUrl: optionalText(form.coverUrl),
-    })
+    const { entryId } = await library.addManual(
+      {
+        title: form.title,
+        subtitle: optionalText(form.subtitle),
+        authors,
+        isbn13: isbn?.length === 13 ? isbn : undefined,
+        isbn10: isbn?.length === 10 ? isbn : undefined,
+        pageCount: optionalNumber(form.pageCount),
+        language: optionalText(form.language.toLowerCase()),
+        publisher: optionalText(form.publisher),
+        publishYear: optionalNumber(form.publishYear),
+        format: (form.format || undefined) as EditionFormat | undefined,
+        coverUrl: optionalText(form.coverUrl),
+      },
+      { owned },
+    )
     navigate(`/book/${entryId}`, { replace: true })
   }
 
@@ -110,6 +114,13 @@ export function ManualEntryScreen() {
         <Field label={m.coverUrl}>
           <Input type="url" value={form.coverUrl} onChange={set('coverUrl')} />
         </Field>
+        <label className="flex min-h-11 items-center gap-3 text-sm">
+          <input type="checkbox" className="size-5 accent-[var(--chart-1)]" checked={owned} onChange={(e) => setOwned(e.target.checked)} />
+          <span>
+            <span className="font-medium">{t.owned.own}</span>
+            <span className="block text-xs text-muted-foreground">{t.owned.ownHint}</span>
+          </span>
+        </label>
         <Button type="submit" size="lg">
           {t.screens.add.submit}
         </Button>

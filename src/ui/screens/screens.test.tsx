@@ -78,11 +78,18 @@ describe('search → edition → add', () => {
 
     await screen.findByRole('heading', { name: t.screens.add.title })
     await user.selectOptions(screen.getByLabelText(t.screens.add.status), 'reading')
+    // Owned with a format of my own copy, next to the reading status.
+    await user.click(screen.getByRole('checkbox', { name: new RegExp(t.owned.own) }))
+    await user.selectOptions(screen.getByLabelText(t.owned.format), 'audiobook')
     await user.click(screen.getByRole('button', { name: t.screens.add.submit }))
 
     await screen.findByRole('button', { name: t.statusLong.reading, pressed: true })
     expect(router.state.location.pathname).toMatch(/^\/book\//)
     expect(await services.db.entries.count()).toBe(1)
+    const [entry] = await services.db.entries.toArray()
+    expect(entry).toMatchObject({ status: 'reading', owned: true })
+    expect((await services.db.editions.get(entry!.editionId))!.overrides.format).toBe('audiobook')
+    expect(screen.getByText(t.owned.badge)).toBeInTheDocument()
   })
 
   it('offers manual entry when nothing is found', async () => {
@@ -129,6 +136,43 @@ describe('library', () => {
     await user.type(screen.getByLabelText(t.screens.library.filter), 'hoeg')
     expect(await screen.findByText(t.screens.library.count(1))).toBeInTheDocument()
     expect(screen.getByText('Frøken Smillas fornemmelse for sne')).toBeInTheDocument()
+  })
+})
+
+describe('owned books', () => {
+  it('marks a book as owned on its page, whatever its status, with the format of the copy', async () => {
+    const entryId = await addManual('Kongens fald', 'Johannes V. Jensen', 'finished')
+    const user = userEvent.setup()
+    renderAt(`/book/${entryId}`)
+    const own = await screen.findByRole('checkbox', { name: new RegExp(t.owned.own) })
+    expect(own).not.toBeChecked()
+    await user.click(own)
+    await waitFor(async () => expect((await services.db.entries.get(entryId))!.owned).toBe(true))
+    expect(await screen.findByText(t.owned.badge)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t.statusLong.finished, pressed: true })).toBeInTheDocument()
+    await user.selectOptions(screen.getByLabelText(t.owned.format), 'hardcover')
+    await waitFor(async () => {
+      const entry = await services.db.entries.get(entryId)
+      expect((await services.db.editions.get(entry!.editionId))!.overrides.format).toBe('hardcover')
+    })
+  })
+
+  it('filters the library to owned books, and with To read to the ones owned but not read', async () => {
+    const mine = await addManual('Project Hail Mary', 'Andy Weir', 'to_read')
+    const read = await addManual('The Martian', 'Andy Weir', 'finished')
+    await addManual('Artemis', 'Andy Weir', 'to_read') // borrowed
+    await services.library.setOwned(mine, true)
+    await services.library.setOwned(read, true)
+    const user = userEvent.setup()
+    const router = renderAt('/library')
+    expect(await screen.findByText(t.screens.library.count(3))).toBeInTheDocument()
+    const chips = screen.getByRole('group', { name: t.screens.book.statusLabel })
+    await user.click(within(chips).getByRole('button', { name: t.owned.filter }))
+    expect(await screen.findByText(t.screens.library.count(2))).toBeInTheDocument()
+    expect(router.state.location.search).toContain('owned=1')
+    await user.click(within(chips).getByRole('button', { name: new RegExp(t.status.to_read) }))
+    expect(await screen.findByText(t.screens.library.count(1))).toBeInTheDocument()
+    expect(screen.getByText('Project Hail Mary')).toBeInTheDocument()
   })
 })
 
@@ -287,7 +331,7 @@ describe('stats', () => {
     await act(() => router.navigate('/stats?period=all'))
     expect(await screen.findByText(t.screens.stats.booksPerMonth, {}, { timeout: 5000 })).toBeInTheDocument()
     for (const title of Object.values(t.screens.stats.sections)) expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
-    for (const title of [t.screens.stats.heatmap, t.screens.stats.genres, t.screens.stats.topAuthors, t.screens.stats.whereIStop])
+    for (const title of [t.screens.stats.heatmap, t.screens.stats.genres, t.screens.stats.topAuthors, t.screens.stats.whereIStop, t.screens.stats.ownedShelf])
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     expect(screen.getAllByText(t.screens.stats.showTable).length).toBeGreaterThan(10)
     expect((await screen.findAllByText(t.achievements.open)).length).toBeGreaterThan(0)
@@ -530,6 +574,6 @@ describe('genre suggestions', () => {
     await waitFor(async () => expect((await services.db.entries.get(b))!.categoryIds).toEqual([krimi]))
     expect((await services.db.entries.get(a))!.categoryIds).toEqual([krimi])
     expect((await services.db.entries.get(c))!.categoryIds).toEqual([])
-    expect(screen.getAllByText(new RegExp(t.genres.backfill.applied))).toHaveLength(2)
+    await waitFor(() => expect(screen.getAllByText(new RegExp(t.genres.backfill.applied))).toHaveLength(2))
   })
 })

@@ -124,6 +124,22 @@ describe('adding books', () => {
   })
 })
 
+describe('owning', () => {
+  it('marks a book as owned when adding it, with any status, and can change it later', async () => {
+    const { entryId } = await repo.addFromSource({ edition: await projectHailMary() }, { status: 'finished', owned: true })
+    expect(await db.entries.get(entryId)).toMatchObject({ status: 'finished', owned: true })
+    await repo.changeStatus(entryId, 'reading')
+    expect((await db.entries.get(entryId))!.owned).toBe(true) // a status change keeps it
+    await repo.setOwned(entryId, false)
+    expect((await db.entries.get(entryId))!.owned).toBe(false)
+  })
+
+  it('adds books as not owned by default', async () => {
+    const { entryId } = await repo.addManual({ title: 'Lånt fra biblioteket', authors: ['Nogen'] })
+    expect((await db.entries.get(entryId))!.owned).toBe(false)
+  })
+})
+
 describe('editing', () => {
   it('keeps a page count edit after a refresh from Open Library (acceptance 4)', async () => {
     const { entryId } = await repo.addFromSource({ edition: await projectHailMary() })
