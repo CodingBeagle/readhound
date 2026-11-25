@@ -1,3 +1,3 @@
 export function ScreenHeader({ title }: { title: string }) {
-  return <h1 className="mb-4 text-2xl font-semibold tracking-tight">{title}</h1>
+  return <h1 className="title mb-5 text-3xl">{title}</h1>
 }

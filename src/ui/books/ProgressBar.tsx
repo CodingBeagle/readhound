@@ -9,7 +9,7 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
       aria-valuenow={percent}
       className="h-2 w-full overflow-hidden rounded-full bg-muted"
     >
-      <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${percent}%` }} />
+      <div className="fill-bar animate-grow h-full rounded-full transition-[width] duration-500" style={{ width: `${percent}%` }} />
     </div>
   )
 }

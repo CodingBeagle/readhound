@@ -1,11 +1,42 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/space-grotesk';
 
 /*
  * Design tokens follow the shadcn/ui convention so generated components work unchanged.
  * Light and dark values switch with the system colour scheme.
  */
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
+  /* Theme treatments (design doc, Themes); Classic keeps the plain look. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font-sans);
+  --title-weight: 650;
+  --title-tracking: -0.025em;
+  --title-paint: none;
+  --title-ink: var(--foreground);
+  --number-paint: none;
+  --number-ink: var(--foreground);
+  --page-paint: none;
+  --surface-bg: var(--card);
+  --surface-border: 1px solid var(--border);
+  --surface-shadow: 0 1px 2px rgb(28 25 23 / 4%);
+  --surface-blur: none;
+  --primary-paint: none;
+  --primary-shadow: none;
+  --fill: var(--accent);
+  --fill-paint: none;
+  --goal-fill: var(--chart-1);
+  --indicator: var(--muted);
+  --indicator-ink: var(--foreground);
+  --banner-paint: none;
+  --tint-1: var(--card);
+  --tint-2: var(--card);
+  --tint-3: var(--card);
+  --tint-4: var(--card);
   --background: oklch(0.985 0.001 106.4);
   --foreground: oklch(0.216 0.006 56);
   --card: oklch(1 0 0);
@@ -46,6 +77,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
+    --surface-shadow: none;
     --background: oklch(0.147 0.004 49.3);
     --foreground: oklch(0.985 0.001 106.4);
     --card: oklch(0.216 0.006 56);
@@ -81,6 +114,300 @@
     --heat-3: #338ced;
     --heat-4: #84b9f3;
   }
+}
+
+
+/* ── Aurora: soft gradients, frosted glass, violet and pink ─────────────── */
+:root[data-theme='aurora'] {
+  --radius: 1.25rem;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --background: #f6f4ff;
+  --foreground: #1e1b3a;
+  --card: #ffffff;
+  --card-foreground: #1e1b3a;
+  --popover: #ffffff;
+  --popover-foreground: #1e1b3a;
+  --primary: #6d28d9;
+  --primary-foreground: #ffffff;
+  --secondary: #efeafd;
+  --secondary-foreground: #2e1065;
+  --muted: #efeafd;
+  --muted-foreground: #625d85;
+  --accent: #c026d3;
+  --accent-foreground: #ffffff;
+  --border: rgb(109 40 217 / 12%);
+  --input: rgb(109 40 217 / 18%);
+  --ring: #a78bfa;
+  --title-weight: 800;
+  --title-tracking: -0.035em;
+  --title-paint: linear-gradient(90deg, #6d28d9, #db2777);
+  --title-ink: transparent;
+  --number-paint: linear-gradient(90deg, #6d28d9, #db2777);
+  --number-ink: transparent;
+  --page-paint: radial-gradient(60% 40% at 0% 0%, #ddd6fe, transparent 70%), radial-gradient(50% 35% at 100% 8%, #fbcfe8, transparent 70%),
+    radial-gradient(60% 40% at 50% 100%, #bae6fd, transparent 70%);
+  --surface-bg: rgb(255 255 255 / 70%);
+  --surface-border: 1px solid rgb(255 255 255 / 90%);
+  --surface-shadow: 0 12px 32px -14px rgb(76 29 149 / 28%);
+  --surface-blur: blur(16px) saturate(1.4);
+  --primary-paint: linear-gradient(135deg, #7c3aed, #db2777);
+  --primary-shadow: 0 8px 20px -8px rgb(124 58 237 / 65%);
+  --fill: #a855f7;
+  --fill-paint: linear-gradient(90deg, #7c3aed, #ec4899);
+  --goal-fill: #7c3aed;
+  --indicator: linear-gradient(135deg, #8b5cf6, #ec4899);
+  --indicator-ink: #ffffff;
+  --banner-paint: linear-gradient(90deg, #8b5cf6, #ec4899);
+  /* Charts: the validated palette rotated to lead with the theme's hue (order kept, re-validated). */
+  --chart-1: #6a4ce2;
+  --chart-2: #ec4647;
+  --chart-3: #257de0;
+  --chart-4: #f47230;
+  --chart-5: #00b894;
+  --chart-6: #f2a600;
+  --chart-7: #ee7fac;
+  --chart-8: #008a17;
+  --heat-1: color-mix(in oklab, var(--chart-1) 30%, var(--heat-0));
+  --heat-2: color-mix(in oklab, var(--chart-1) 55%, var(--heat-0));
+  --heat-3: color-mix(in oklab, var(--chart-1) 80%, var(--heat-0));
+  --heat-4: color-mix(in oklab, var(--chart-1) 100%, var(--heat-0));
+  --heat-0: #ece8fb;
+}
+
+/* ── Bookshop: warm paper, serif titles, ink outlines, a colour per card ── */
+:root[data-theme='bookshop'] {
+  --radius: 1rem;
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --background: #f5efe3;
+  --foreground: #1f1a17;
+  --card: #fffaf0;
+  --card-foreground: #1f1a17;
+  --popover: #fffaf0;
+  --popover-foreground: #1f1a17;
+  --primary: #c2410c;
+  --primary-foreground: #ffffff;
+  --secondary: #ebe2d0;
+  --secondary-foreground: #1f1a17;
+  --muted: #ebe2d0;
+  --muted-foreground: #6b5d50;
+  --accent: #2f6b4f;
+  --accent-foreground: #ffffff;
+  --border: #1f1a17;
+  --input: #1f1a17;
+  --ring: #c2410c;
+  --ink: #1f1a17;
+  --title-weight: 800;
+  --title-tracking: -0.01em;
+  --surface-border: 1.5px solid var(--ink);
+  --surface-shadow: 4px 4px 0 var(--ink);
+  --primary-shadow: 3px 3px 0 var(--ink);
+  --fill: #2f6b4f;
+  --goal-fill: #c2410c;
+  --indicator: #f9d9c4;
+  --indicator-ink: #9a3412;
+  --tint-1: #f9d9c4;
+  --tint-2: #d4e6d4;
+  --tint-3: #f6e7a8;
+  --tint-4: #ddd5f3;
+  /* Charts: the validated palette rotated to lead with the theme's hue (order kept, re-validated). */
+  --chart-1: #f47230;
+  --chart-2: #00b894;
+  --chart-3: #f2a600;
+  --chart-4: #ee7fac;
+  --chart-5: #008a17;
+  --chart-6: #6a4ce2;
+  --chart-7: #ec4647;
+  --chart-8: #257de0;
+  --heat-1: color-mix(in oklab, var(--chart-1) 30%, var(--heat-0));
+  --heat-2: color-mix(in oklab, var(--chart-1) 55%, var(--heat-0));
+  --heat-3: color-mix(in oklab, var(--chart-1) 80%, var(--heat-0));
+  --heat-4: color-mix(in oklab, var(--chart-1) 100%, var(--heat-0));
+  --heat-0: #ebe2d0;
+}
+
+/* ── Midnight: deep navy, glowing lime and cyan (always dark) ───────────── */
+:root[data-theme='midnight'] {
+  color-scheme: dark;
+  --radius: 1rem;
+  --font-sans: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --background: #0a0d1c;
+  --foreground: #eef0ff;
+  --card: #131834;
+  --card-foreground: #eef0ff;
+  --popover: #1a2042;
+  --popover-foreground: #eef0ff;
+  --primary: #a3e635;
+  --primary-foreground: #0a0d1c;
+  --secondary: #1c2246;
+  --secondary-foreground: #eef0ff;
+  --muted: #1c2246;
+  --muted-foreground: #9aa0c7;
+  --accent: #fb7185;
+  --accent-foreground: #0a0d1c;
+  --destructive: #fb7185;
+  --border: rgb(255 255 255 / 9%);
+  --input: rgb(255 255 255 / 14%);
+  --ring: #a3e635;
+  --title-weight: 700;
+  --number-paint: linear-gradient(90deg, #a3e635, #22d3ee);
+  --number-ink: transparent;
+  --page-paint: radial-gradient(90% 45% at 50% -8%, rgb(67 56 202 / 55%), transparent 70%);
+  --surface-bg: linear-gradient(#131834, #131834) padding-box,
+    linear-gradient(135deg, rgb(163 230 53 / 45%), rgb(251 113 133 / 12%) 45%, rgb(99 102 241 / 45%)) border-box;
+  --surface-border: 1px solid transparent;
+  --surface-shadow: 0 16px 40px -24px rgb(0 0 0 / 80%);
+  --primary-shadow: 0 0 22px -4px rgb(163 230 53 / 70%);
+  --fill: #fb7185;
+  --fill-paint: linear-gradient(90deg, #fb7185, #f97316);
+  --goal-fill: #a3e635;
+  --indicator: rgb(163 230 53 / 14%);
+  --indicator-ink: #a3e635;
+  --banner-paint: linear-gradient(90deg, #fb7185, #f97316);
+                    --chart-other: #6b6b6b;
+    --chart-grid: #303030;
+    --chart-axis: #474747;
+    --heat-0: oklch(0.268 0.007 34.3);
+          /* Charts: the validated palette rotated to lead with the theme's hue (order kept, re-validated). */
+  --chart-1: #0aac23;
+  --chart-2: #9887ef;
+  --chart-3: #eb6263;
+  --chart-4: #338ced;
+  --chart-5: #e76624;
+  --chart-6: #00a888;
+  --chart-7: #d28e05;
+  --chart-8: #e24d8b;
+  --heat-1: color-mix(in oklab, var(--chart-1) 30%, var(--heat-0));
+  --heat-2: color-mix(in oklab, var(--chart-1) 55%, var(--heat-0));
+  --heat-3: color-mix(in oklab, var(--chart-1) 80%, var(--heat-0));
+  --heat-4: color-mix(in oklab, var(--chart-1) 100%, var(--heat-0));
+  --chart-grid: #252b52;
+  --chart-axis: #3a4170;
+  --heat-0: #1c2246;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='aurora'] {
+    --background: #0f0b20;
+    --foreground: #f1efff;
+    --card: #1b1636;
+    --card-foreground: #f1efff;
+    --popover: #221c42;
+    --popover-foreground: #f1efff;
+    --primary: #a78bfa;
+    --primary-foreground: #120c2b;
+    --secondary: #2a2350;
+    --secondary-foreground: #f1efff;
+    --muted: #2a2350;
+    --muted-foreground: #aaa3d6;
+    --accent: #f472b6;
+    --accent-foreground: #120c2b;
+    --border: rgb(255 255 255 / 10%);
+    --input: rgb(255 255 255 / 16%);
+    --title-paint: linear-gradient(90deg, #c4b5fd, #f9a8d4);
+    --number-paint: linear-gradient(90deg, #c4b5fd, #f9a8d4);
+    --page-paint: radial-gradient(60% 40% at 0% 0%, rgb(109 40 217 / 45%), transparent 70%),
+      radial-gradient(50% 35% at 100% 8%, rgb(219 39 119 / 30%), transparent 70%), radial-gradient(60% 40% at 50% 100%, rgb(14 116 144 / 35%), transparent 70%);
+    --surface-bg: rgb(30 24 60 / 62%);
+    --surface-border: 1px solid rgb(255 255 255 / 10%);
+    --surface-shadow: 0 16px 40px -20px rgb(0 0 0 / 70%);
+    --chart-1: #9887ef;
+    --chart-2: #eb6263;
+    --chart-3: #338ced;
+    --chart-4: #e76624;
+    --chart-5: #00a888;
+    --chart-6: #d28e05;
+    --chart-7: #e24d8b;
+    --chart-8: #0aac23;
+    --heat-0: #2a2350;
+  }
+  :root[data-theme='bookshop'] {
+    --background: #1b1612;
+    --foreground: #f5ead8;
+    --card: #28211b;
+    --card-foreground: #f5ead8;
+    --popover: #28211b;
+    --popover-foreground: #f5ead8;
+    --primary: #f08c5a;
+    --primary-foreground: #1b1612;
+    --secondary: #3a3027;
+    --secondary-foreground: #f5ead8;
+    --muted: #3a3027;
+    --muted-foreground: #bfae98;
+    --accent: #7fbf9a;
+    --accent-foreground: #1b1612;
+    --border: #e9dcc6;
+    --input: #e9dcc6;
+    --ink: #0b0907;
+    --surface-border: 1.5px solid #e9dcc6;
+    --fill: #7fbf9a;
+    --goal-fill: #f08c5a;
+    --indicator: #4a2c1c;
+    --indicator-ink: #f8b48f;
+    --tint-1: #4a2c1c;
+    --tint-2: #233a2c;
+    --tint-3: #45391a;
+    --tint-4: #2f2a48;
+    --chart-1: #e76624;
+    --chart-2: #00a888;
+    --chart-3: #d28e05;
+    --chart-4: #e24d8b;
+    --chart-5: #0aac23;
+    --chart-6: #9887ef;
+    --chart-7: #eb6263;
+    --chart-8: #338ced;
+    --heat-0: #3a3027;
+  }
+}
+
+/* Component treatments that tokens alone can't express. */
+:root[data-theme='aurora'] .tabbar {
+  @media (width < 48rem) {
+    inset-inline: 0.75rem;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    padding-bottom: 0;
+    border: 1px solid var(--surface-border-color, rgb(255 255 255 / 70%));
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    box-shadow: 0 14px 34px -12px rgb(76 29 149 / 40%);
+    backdrop-filter: blur(18px) saturate(1.4);
+  }
+}
+:root[data-theme='bookshop'] .tabbar {
+  border-top: 1.5px solid var(--border);
+  background: var(--card);
+}
+:root[data-theme='bookshop'] .tab-indicator {
+  border: 1.5px solid var(--border);
+}
+:root[data-theme='bookshop'] .title,
+:root[data-theme='bookshop'] .card-title {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 72;
+}
+:root[data-theme='bookshop'] .card-title {
+  font-weight: 700;
+}
+:root[data-theme='bookshop'] [data-slot='input'],
+:root[data-theme='bookshop'] [data-slot='select'] {
+  border-width: 1.5px;
+}
+:root[data-theme='bookshop'] .banner {
+  border: 1.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+:root[data-theme='bookshop'] .btn-primary {
+  border: 1.5px solid var(--ink);
+}
+:root[data-theme='bookshop'] .btn-primary:active {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--ink);
+}
+:root[data-theme='midnight'] .tab[aria-current='page'] {
+  text-shadow: 0 0 14px rgb(163 230 53 / 55%);
+}
+:root[data-theme='midnight'] .tab[aria-current='page'] svg {
+  filter: drop-shadow(0 0 6px rgb(163 230 53 / 70%));
 }
 
 @theme inline {
@@ -119,6 +446,116 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-sans);
+    background-image: var(--page-paint);
+    background-attachment: fixed;
+  }
+}
+
+/* Cards and panels: the theme decides fill, edge, shadow and glass. */
+@utility surface {
+  border-radius: var(--radius);
+  border: var(--surface-border);
+  background: var(--surface-bg);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: var(--surface-blur);
+}
+
+/* Screen titles and big numbers can carry a gradient. */
+@utility title {
+  font-family: var(--font-display);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-tracking);
+  background-image: var(--title-paint);
+  background-clip: text;
+  color: var(--title-ink);
+}
+@utility stat-value {
+  width: fit-content;
+  background-image: var(--number-paint);
+  background-clip: text;
+  color: var(--number-ink);
+}
+@utility fill-bar {
+  background-color: var(--fill);
+  background-image: var(--fill-paint);
+}
+@utility btn-primary {
+  background-image: var(--primary-paint);
+  box-shadow: var(--primary-shadow);
+}
+@utility banner {
+  background-image: var(--banner-paint);
+}
+
+/* Bookshop gives each card in a tinted group its own colour, in a fixed cycle. */
+:root[data-theme='bookshop'] .tint-cycle > .surface:nth-child(4n + 1) { background: var(--tint-1); }
+:root[data-theme='bookshop'] .tint-cycle > .surface:nth-child(4n + 2) { background: var(--tint-2); }
+:root[data-theme='bookshop'] .tint-cycle > .surface:nth-child(4n + 3) { background: var(--tint-3); }
+:root[data-theme='bookshop'] .tint-cycle > .surface:nth-child(4n + 4) { background: var(--tint-4); }
+
+/* ── Motion (design doc, Animation). All of it switches off for reduced motion. ── */
+@keyframes rise {
+  from { opacity: 0; translate: 0 10px; scale: 0.985; }
+}
+@keyframes grow {
+  from { scale: 0 1; }
+}
+@keyframes pop {
+  from { opacity: 0; scale: 0.4; }
+}
+@keyframes flicker {
+  0%, 100% { scale: 1; rotate: 0deg; }
+  30% { scale: 1.08 0.94; rotate: -4deg; }
+  60% { scale: 0.96 1.06; rotate: 3deg; }
+}
+@utility animate-flicker {
+  transform-origin: 50% 90%;
+  animation: flicker 1.6s ease-in-out infinite;
+}
+@utility animate-rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@utility animate-grow {
+  transform-origin: left center;
+  animation: grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+@utility animate-pop {
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+/* Children of a stagger group rise one after another. */
+.stagger > * { animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.stagger > :nth-child(2) { animation-delay: 50ms; }
+.stagger > :nth-child(3) { animation-delay: 100ms; }
+.stagger > :nth-child(4) { animation-delay: 150ms; }
+.stagger > :nth-child(5) { animation-delay: 200ms; }
+.stagger > :nth-child(6) { animation-delay: 250ms; }
+.stagger > :nth-child(n + 7) { animation-delay: 300ms; }
+
+/* Chart marks drawn by hand (heatmap, map) pop in where they stand. */
+.chart-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.chart-fade {
+  animation: fade 0.6s ease-out both;
+}
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
   }
 }

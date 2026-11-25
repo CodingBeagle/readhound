@@ -9,6 +9,13 @@
     <meta name="theme-color" content="#1c1917" />
     <meta name="description" content="Track what you read, organise your books and explore your reading stats." />
     <title>Readhound</title>
+    <script>
+      // Apply the saved theme before the first paint (see src/ui/theme/themes.ts).
+      try {
+        var theme = localStorage.getItem('readhound.theme')
+        if (theme) document.documentElement.dataset.theme = theme
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

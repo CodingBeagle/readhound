@@ -12,7 +12,10 @@ export function BookCover({ url, title, className }: { url?: string; title: stri
           src={url}
           alt=""
           loading="lazy"
-          className="size-full object-cover"
+          className="relative z-[1] size-full object-cover opacity-0 transition-opacity duration-500"
+          onLoad={(e) => {
+            e.currentTarget.style.opacity = '1'
+          }}
           onError={(e) => {
             e.currentTarget.style.display = 'none'
           }}

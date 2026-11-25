@@ -42,7 +42,15 @@ export function AuthorMap({ counts, label }: { counts: Map<string, number>; labe
       {countries.features.map((f, i) => {
         const n = f.id !== undefined ? byId.get(String(f.id)) : undefined
         return (
-          <path key={f.id ?? i} d={path(f) ?? undefined} fill={n ? `var(--heat-${level(n)})` : 'var(--heat-0)'} stroke="var(--card)" strokeWidth={0.5}>
+          <path
+            key={f.id ?? i}
+            d={path(f) ?? undefined}
+            fill={n ? `var(--heat-${level(n)})` : 'var(--heat-0)'}
+            stroke="var(--card)"
+            strokeWidth={0.5}
+            className={n ? 'chart-pop' : 'chart-fade'}
+            style={n ? { animationDelay: `${200 + level(n) * 120}ms` } : undefined}
+          >
             <title>{n ? `${f.properties.name}: ${n}` : f.properties.name}</title>
           </path>
         )

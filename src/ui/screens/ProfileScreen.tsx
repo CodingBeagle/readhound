@@ -15,14 +15,19 @@ import { useBackup } from '@/ui/hooks/useBackup'
 import { useCollections } from '@/ui/hooks/useCollections'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 import { Section } from '@/ui/layout/Section'
+import { ThemePicker } from '@/ui/theme/ThemePicker'
 
 const p = t.screens.profile
 
-/** Goals, lists, categories, preferred languages, and export/import (design doc, Screens). */
+/** Appearance, goals, lists, categories, preferred languages, and export/import (design doc, Screens). */
 export function ProfileScreen() {
   return (
     <>
       <ScreenHeader title={p.title} />
+      <Section title={p.appearance.title}>
+        <p className="mb-3 text-sm text-muted-foreground">{p.appearance.intro}</p>
+        <ThemePicker />
+      </Section>
       <BackupSection />
       <GoalSection />
       <ListsSection />
@@ -84,7 +89,7 @@ function BackupSection() {
 
   return (
     <Section title={p.backup.title}>
-      <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+      <div className="flex flex-col gap-4 surface p-4">
         <p className="text-sm">{p.backup.intro}</p>
         <p className={backup.due ? 'text-sm font-medium' : 'text-sm text-muted-foreground'}>{last ? p.backup.lastBackup(last) : p.backup.never}</p>
 
@@ -224,7 +229,7 @@ function ListsSection() {
     <Section title={p.lists.title}>
       <p className="mb-3 text-sm text-muted-foreground">{p.lists.intro}</p>
       {data.lists.length === 0 && <p className="mb-3 text-sm">{p.lists.empty}</p>}
-      <ul className="mb-3 flex flex-col divide-y rounded-xl border">
+      <ul className="mb-3 flex flex-col divide-y surface">
         {data.lists.map((list, i) => (
           <li key={list.id} className="flex flex-col gap-2 px-3 py-1">
             {editing === list.id ? (
@@ -348,7 +353,7 @@ function CategoriesSection() {
     <Section title={p.categories.title}>
       <p className="mb-3 text-sm text-muted-foreground">{p.categories.intro}</p>
       {data.categories.length === 0 && <p className="mb-3 text-sm">{p.categories.empty}</p>}
-      <ul className="mb-3 flex flex-col divide-y rounded-xl border">
+      <ul className="mb-3 flex flex-col divide-y surface">
         {data.categories.map((c) => (
           <li key={c.id} className="flex flex-col gap-2 px-3 py-1">
             {editing === c.id ? (

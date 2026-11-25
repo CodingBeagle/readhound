@@ -1,5 +1,10 @@
+import { motion } from 'motion/react'
+import { useRef } from 'react'
+
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { CountUp } from '@/ui/motion/CountUp'
+import { motionSkipped, useRevealed } from '@/ui/motion/useRevealed'
 
 export interface TableData {
   headers: string[]
@@ -20,13 +25,24 @@ export function ChartCard({
   children?: React.ReactNode
   className?: string
 }) {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useRevealed(ref)
   return (
-    <section className={cn('flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4', className)}>
+    <motion.section
+      ref={ref}
+      className={cn('flex min-w-0 flex-col gap-3 surface p-4', className)}
+      initial={motionSkipped ? false : { opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div>
-        <h3 className="text-sm font-semibold">{title}</h3>
+        <h3 className="card-title text-sm font-semibold">{title}</h3>
         {summary && <div className="mt-0.5 text-sm text-muted-foreground">{summary}</div>}
       </div>
-      {children}
+      {/* Charts draw themselves the moment the card scrolls into view, not off screen. */}
+      <div key={inView ? 'shown' : 'waiting'} className="contents">
+        {children}
+      </div>
       {table && table.rows.length > 0 && (
         <details className="text-sm">
           <summary className="cursor-pointer py-1 text-xs text-muted-foreground">{t.screens.stats.showTable}</summary>
@@ -54,16 +70,16 @@ export function ChartCard({
           </table>
         </details>
       )}
-    </section>
+    </motion.section>
   )
 }
 
 /** A headline number with a label and an optional detail line. */
 export function StatTile({ label, value, detail }: { label: string; value: React.ReactNode; detail?: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-col rounded-xl border bg-card p-4">
+    <div className="flex min-w-0 flex-col surface p-4">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="text-2xl font-semibold tracking-tight">{value}</span>
+      <span className="stat-value text-2xl font-bold tracking-tight">{typeof value === 'string' ? <CountUp value={value} /> : value}</span>
       {detail && <span className="text-xs text-muted-foreground">{detail}</span>}
     </div>
   )

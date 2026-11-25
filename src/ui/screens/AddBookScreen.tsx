@@ -56,7 +56,7 @@ export function AddBookScreen() {
   return (
     <>
       <BackLink />
-      <h1 className="mb-4 text-2xl font-semibold tracking-tight">{t.screens.add.title}</h1>
+      <h1 className="title mb-5 text-3xl">{t.screens.add.title}</h1>
       <div className="mb-5 flex gap-4">
         <BookCover url={edition.coverUrl ?? fallbackCoverUrl} title={edition.title} className="w-20" />
         <div className="flex flex-col gap-1">

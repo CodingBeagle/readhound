@@ -20,6 +20,7 @@ import { StatusBadge } from '@/ui/books/StatusBadge'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { EmptyState } from '@/ui/layout/EmptyState'
+import { FinishCelebration } from '@/ui/motion/Celebration'
 import { Section } from '@/ui/layout/Section'
 
 const b = t.screens.book
@@ -42,10 +43,11 @@ export function BookScreen() {
   return (
     <>
       <BackLink />
+      <FinishCelebration status={book.entry.status} />
       <header className="mb-5 flex gap-4">
-        <BookCover url={book.edition.coverUrl} title={book.edition.title} className="w-24" />
+        <BookCover url={book.edition.coverUrl} title={book.edition.title} className="animate-rise w-24 shadow-lg" />
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="text-xl leading-tight font-semibold tracking-tight">{book.edition.title}</h1>
+          <h1 className="text-xl leading-tight title">{book.edition.title}</h1>
           {book.edition.subtitle && <p className="text-sm">{book.edition.subtitle}</p>}
           <p className="text-muted-foreground">{book.authorNames.join(', ') || t.common.unknownAuthor}</p>
           <div>
@@ -313,7 +315,7 @@ function ReadHistory({ book, sessions }: { book: BookView; sessions: ReadingSess
               ? b.readDnf(read.startedOn, read.endedOn ?? '', read.stoppedAtPage)
               : b.readInProgress(read.startedOn)
         return (
-          <li key={read.id} className="rounded-lg border p-3">
+          <li key={read.id} className="surface p-3">
             <p className="mb-2 text-sm font-medium">{label}</p>
             {readSessions.length > SESSIONS_SHOWN ? (
               <details>

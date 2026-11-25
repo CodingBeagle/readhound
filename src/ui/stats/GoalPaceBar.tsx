@@ -27,8 +27,8 @@ export function GoalPaceBar({ pace, unit }: { pace: GoalPace; unit: 'books' | 'p
         aria-valuenow={pace.actual}
         aria-valuetext={status}
       >
-        <div className="h-full rounded-full bg-[var(--chart-1)]" style={{ width: `${share * 100}%` }} />
-        <div title={s.paceMarker} className="absolute -top-1 h-[18px] w-0.5 rounded bg-foreground" style={{ left: `calc(${marker * 100}% - 1px)` }} />
+        <div className="animate-grow h-full rounded-full bg-[var(--goal-fill)] bg-[image:var(--fill-paint)]" style={{ width: `${share * 100}%` }} />
+        <div title={s.paceMarker} className="animate-pop absolute -top-1 h-[18px] w-0.5 rounded bg-foreground" style={{ left: `calc(${marker * 100}% - 1px)` }} />
       </div>
     </div>
   )
