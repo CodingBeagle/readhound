@@ -497,6 +497,70 @@ No author gets more than two picks (series picks aside), and there are up to 12 
 
 **Other states.** Offline, error and "rate a few books first" states are covered. Demo mode works from the sample library's ratings and genres.
 
+## Genres
+
+Readhound fills in genres automatically (`src/domain/genres.ts` for the scoring, `src/db/genres.ts` for gathering and applying). Subject tags as a feature of their own are out of scope for now.
+
+**A fixed list of 31 genres.**
+
+- Fiction: Fantasy, Science fiction, Horror, Crime & mystery, Thriller, Romance, Historical fiction, Literary fiction, Classics, Young adult, Children's, Graphic novels & comics, Humour, Short stories, Poetry, Drama & plays.
+- Non-fiction: Biography & memoir, History, Popular science, Philosophy, Psychology, Self-help, Business & economics, Politics & society, True crime, Travel, Nature & environment, Religion & spirituality, Art & design, Food & cooking, Health & fitness.
+
+Each genre has the phrases that point to it in catalog subjects, aliases for the reader's own category names (Danish included, such as Krimi, Klassiker, Digte and Erindringer), and an Open Library subject key.
+
+**Mapping subjects.**
+
+- A subject maps to a genre when one of the genre's phrases appears in it as whole words. "Fiction, fantasy, epic" maps to Fantasy, and "FICTION / Thrillers / Suspense" maps to Thriller.
+- Non-fiction genres never come from a subject about fiction, so "Science fiction" is not Popular science and "Denmark -- History -- Fiction" is not History.
+- "History and criticism"-style subjects are ignored.
+- When a list of subjects says the book is fiction, stray non-fiction matches count only 0.4.
+
+**Evidence and weights.** Each genre is counted once per subject list. Repeats add a quarter each, up to double.
+
+| Source | Weight |
+| --- | --- |
+| Subjects of the work, or of the edition being added | 1.5 |
+| Subjects of the work's other editions (Open Library, up to 50 editions) | 0.5 per edition that agrees, up to 3 |
+| Wikidata genre (P136) of the work, found by Open Library id or by title and author | 2 |
+| Genres of other books in the same series in the library | 2 |
+| Genres of the author's other books in the library | 0.75 × 2 × the share of those books with the genre |
+| Learned corrections (below) | ±1 per net vote, capped at ±3 per term |
+| Fiction first published before 1920 | Classics +1.5 |
+
+**Choosing suggestions.** A genre is suggested when its score is at least 1.5 and at least 55% of the best genre's score. At most 3 are suggested. Each suggestion lists its sources, and the UI shows them, for example "Based on Wikidata and other editions."
+
+**Mapping to categories.** A suggestion maps to the reader's own genre category whose name matches the genre's name or an alias. If there is no match, accepting it creates a genre category with the genre's name and its fiction flag.
+
+**Learning.** A correction is remembered against the book's learning terms:
+
+- its useful subjects (`s:<subject>`)
+- its authors (`a:<author>`)
+
+The rules for a vote:
+
+- A genre the reader picks that wasn't suggested gets +1 on each term.
+- A suggested genre the reader removes gets −1.
+- Switching a genre category on or off on a book counts as a correction too.
+
+The votes are stored in the setting `genreLearning`, which keeps up to 3,000 terms (oldest dropped first) and is part of the backup.
+
+**Where it shows:**
+
+- **Adding a book:** "Suggested genres" chips appear above the list and category chips and are switched on by default. The reader can switch any off. On save, chosen genres without a category get one created, and the difference between what was suggested and what was chosen is learned.
+- **Book screen:** a book with no genre shows the suggestions to tap.
+- **Profile → Categories → Suggest genres for my library** (`/genres/suggest`): checks every book without a genre, one at a time, with progress. The reader can keep or drop each chip, then Apply or Skip per book, or Apply to all.
+
+**Network.**
+
+- Open Library editions use the existing client: 1 request a second in the browser, cached for 30 days.
+- Wikidata uses its own client: 2 requests a second, cached for 30 days.
+- Offline, suggestions use only what is on the device: stored subjects, series, author and learning.
+
+**Feeds.**
+
+- Accepted genres are ordinary genre categories, so all genre stats include them.
+- Recommendations map genre categories to the fixed list. A genre category searches Open Library's subject for that genre ("Krimi" searches `mystery_and_detective_stories`), and it matches candidates by genre as well as by subject text.
+
 ## Danger zone
 
 The last section of Profile deletes everything Readhound stores on this device. That covers every table in the personal database: books, editions and authors, reads, sessions, notes, lists, categories, goals, settings (including the last-backup time) and the Open Library cache.
@@ -641,3 +705,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Series tracking: series linked per work with decimal positions and not-owned gaps; detection from Wikidata (P179/P1545 by Open Library ID) with Open Library's series label as fallback, offered as one-tap suggestions plus a library scan; Library > Series, a series filter, Next in series on Home; Completionist, Trilogy and Back to back achievements; backup format version 2 |
 | 2026-11-25 | Recommendations from an on-device taste profile, built from ratings, favourites, finishes and DNFs. Open Library searches by the top authors and subjects, ranked by a weighted fit with a reason per pick; dismissals are stored in settings. Smarter in-browser similarity can come later as an extra ranking term |
 | 2026-11-25 | Series detection also matches Wikidata by title and author, and falls back to the most common series label across a work's Open Library editions (found with Assassin's Apprentice: the added edition had no series label, and Wikidata may not carry the book's Open Library ID) |
+| 2026-11-25 | Genres are prefilled automatically from a fixed list of 31 genres. Evidence comes from the book's subjects, its other editions, Wikidata P136, series and author fallbacks, and learned corrections. Suggestions are chips to confirm when adding a book, and a backfill screen covers the existing library. Subject tags are left out for now |

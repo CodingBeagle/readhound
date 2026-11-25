@@ -13,6 +13,8 @@ import { HttpClient } from '@/sources/http'
 import { fixtureFetch } from '@/sources/openlibrary/fixtureFetch'
 import { OpenLibrarySource } from '@/sources/openlibrary/OpenLibrarySource'
 import { SourceRegistry } from '@/sources/registry'
+import { WikidataGenreLookup } from '@/sources/genres/wikidataGenres'
+import sampleGenres from '@/sources/genres/__fixtures__/sparql-genres-sample.json'
 import { SeriesDetector, WikidataSeriesLookup } from '@/sources/series'
 import wikidataAfdelingQ from '@/sources/series/__fixtures__/sparql-afdeling-q.json'
 
@@ -38,7 +40,8 @@ beforeEach(async () => {
     wikidata: new WikidataSeriesLookup(new HttpClient({ fetch: wikidataFetch, sleep: async () => {} })),
     getEdition: async (ref) => (await sources.get(ref.source)?.getEdition(ref)) ?? null,
   })
-  services = { ...createServices(db), sources, seriesDetector }
+  const genreLookup = new WikidataGenreLookup(new HttpClient({ fetch: wikidataFetch, sleep: async () => {} }))
+  services = { ...createServices(db), sources, seriesDetector, genreLookup }
 })
 afterEach(async () => {
   await services.db.delete()
@@ -217,8 +220,10 @@ describe('profile: lists, categories and notes', () => {
     await user.type(await screen.findByLabelText(t.screens.profile.goal.books), '24')
     await user.click(within(screen.getByRole('heading', { name: t.screens.profile.goal.title(year) }).closest('section')!).getByRole('button', { name: t.common.save }))
     // Saving a goal re-runs the goal pace and achievements over the whole library, so allow more than the
-    // default second for the write and the confirmation on a busy test runner.
-    expect(await screen.findByText(t.screens.profile.goal.saved, {}, { timeout: 4000 })).toBeInTheDocument()
+    // default second for the write and the confirmation on a busy test runner. The form re-mounts once the
+    // saved goal reads back, which can swap the status line for a new one between finding it and checking
+    // it, so query afresh inside waitFor rather than holding on to the first element found.
+    await waitFor(() => expect(screen.getByText(t.screens.profile.goal.saved)).toBeInTheDocument(), { timeout: 4000 })
     expect(await services.db.goals.get(year)).toEqual({ year, targetBooks: 24 })
   })
 })
@@ -463,5 +468,68 @@ describe('recommendations', () => {
     await addManual('Unread', 'Someone')
     renderAt('/for-you')
     expect(await screen.findByText(t.recommendations.needRatings)).toBeInTheDocument()
+  })
+})
+
+describe('genre suggestions', () => {
+  it('prefills suggested genres when adding a book and learns from what was switched off', async () => {
+    wikidataAnswer = sampleGenres
+    const user = userEvent.setup()
+    renderAt('/search')
+    await user.type(screen.getByLabelText(t.screens.search.label), 'froken smilla')
+    await user.click((await screen.findAllByText('Frøken Smillas fornemmelse for sne', {}, { timeout: 3000 }))[0]!)
+    await user.click((await screen.findAllByRole('link', { name: /Smilla/ }))[0]!)
+
+    const group = await screen.findByRole('group', { name: t.genres.suggested }, { timeout: 3000 })
+    const crime = within(group).getByRole('button', { name: /Crime & mystery/ })
+    const thriller = within(group).getByRole('button', { name: /Thriller/ })
+    expect(crime).toHaveAttribute('aria-pressed', 'true')
+    expect(thriller).toHaveAttribute('aria-pressed', 'true')
+    expect(within(group).getByText(t.genres.from(['Wikidata']))).toBeInTheDocument()
+    await user.click(thriller)
+    expect(thriller).toHaveAttribute('aria-pressed', 'false')
+    await user.click(screen.getByRole('button', { name: t.screens.add.submit }))
+
+    await screen.findByRole('button', { name: t.statusLong.to_read, pressed: true })
+    const categories = await services.db.categories.toArray()
+    expect(categories.map((c) => c.name)).toEqual(['Crime & mystery'])
+    const [entry] = await services.db.entries.toArray()
+    expect(entry!.categoryIds).toEqual([categories[0]!.id])
+    expect((await services.db.settings.get('genreLearning'))?.value).toMatchObject({ 'a:peter høeg': { thriller: -1 } })
+  })
+
+  it('suggests a genre on a book without one, from the author\'s other books', async () => {
+    const user = userEvent.setup()
+    const krimi = await services.collections.createCategory({ name: 'Krimi', kind: 'genre', isFiction: true })
+    await services.library.addManual({ title: 'Kvinden i buret', authors: ['Jussi Adler-Olsen'] }, { categoryIds: [krimi] })
+    await services.library.addManual({ title: 'Fasandræberne', authors: ['Jussi Adler-Olsen'] }, { categoryIds: [krimi] })
+    const id = await addManual('Journal 64', 'Jussi Adler-Olsen')
+    renderAt(`/book/${id}`)
+
+    const group = await screen.findByRole('group', { name: t.genres.bookHint }, { timeout: 3000 })
+    await user.click(within(group).getByRole('button', { name: /Krimi/ }))
+    await waitFor(async () => expect((await services.db.entries.get(id))!.categoryIds).toEqual([krimi]))
+    await waitFor(() => expect(screen.queryByRole('group', { name: t.genres.bookHint })).not.toBeInTheDocument())
+  })
+
+  it('suggests genres for the whole library and applies them', async () => {
+    const user = userEvent.setup()
+    const krimi = await services.collections.createCategory({ name: 'Krimi', kind: 'genre', isFiction: true })
+    await services.library.addManual({ title: 'Kvinden i buret', authors: ['Jussi Adler-Olsen'] }, { categoryIds: [krimi] })
+    await services.library.addManual({ title: 'Fasandræberne', authors: ['Jussi Adler-Olsen'] }, { categoryIds: [krimi] })
+    const a = await addManual('Journal 64', 'Jussi Adler-Olsen')
+    const b = await addManual('Marco effekten', 'Jussi Adler-Olsen')
+    const c = await addManual('Something else', 'Nobody Known')
+    renderAt('/profile')
+    expect(await screen.findByText(t.genres.backfill.openHint(3))).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: t.genres.backfill.open }))
+
+    expect(await screen.findByText(t.genres.backfill.done(3), {}, { timeout: 3000 })).toBeInTheDocument()
+    expect(screen.getByText(t.genres.backfill.noSuggestion)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: t.genres.backfill.applyAll(2) }))
+    await waitFor(async () => expect((await services.db.entries.get(b))!.categoryIds).toEqual([krimi]))
+    expect((await services.db.entries.get(a))!.categoryIds).toEqual([krimi])
+    expect((await services.db.entries.get(c))!.categoryIds).toEqual([])
+    expect(screen.getAllByText(new RegExp(t.genres.backfill.applied))).toHaveLength(2)
   })
 })

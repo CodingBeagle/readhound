@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 
 import { useServices } from '@/app/services'
+import { categoryForGenre, categoryGenres, recordGenreChoice, type GenreBook } from '@/db/genres'
 import { localDate } from '@/domain/dates'
+import type { GenreId } from '@/domain/genres'
 import type { Status } from '@/domain/types'
 import { t } from '@/i18n'
 import type { EditionDetails, SearchResult } from '@/sources/types'
@@ -11,6 +13,8 @@ import { BookCover } from '@/ui/books/BookCover'
 import { CollectionPicker } from '@/ui/books/Organise'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
+import { GenreSuggestionChips } from '@/ui/genres/GenreSuggestionChips'
+import { useGenreSuggestions } from '@/ui/genres/useGenreSuggestions'
 import { useCollections } from '@/ui/hooks/useCollections'
 
 interface AddState {
@@ -25,7 +29,7 @@ const INITIAL_STATUSES: Status[] = ['to_read', 'reading', 'finished']
 /** Step 3 of adding a book: choose the initial status (default To read). */
 export function AddBookScreen() {
   const state = useLocation().state as AddState | null
-  const { library } = useServices()
+  const { library, db, collections: collectionsRepo } = useServices()
   const navigate = useNavigate()
   const [today] = useState(() => localDate(new Date()))
   const [status, setStatus] = useState<Status>('to_read')
@@ -35,20 +39,66 @@ export function AddBookScreen() {
   const collections = useCollections()
   const [listIds, setListIds] = useState<ReadonlySet<string>>(new Set())
   const [categoryIds, setCategoryIds] = useState<ReadonlySet<string>>(new Set())
+  /** Suggested genres the reader switched off (false) or back on (true); untouched suggestions are on. */
+  const [overrides, setOverrides] = useState<ReadonlyMap<GenreId, boolean>>(new Map())
 
-  if (!state?.edition) return <Navigate to="/search" replace />
+  const genreBook = useMemo((): GenreBook | undefined => {
+    if (!state?.edition) return undefined
+    const { edition, work } = state
+    return {
+      olWorkId: edition.work.source === 'openlibrary' ? edition.work.id : undefined,
+      olEditionId: edition.edition.source === 'openlibrary' ? edition.edition.id : undefined,
+      titles: [...new Set([work?.title, edition.title].filter((x): x is string => !!x))],
+      authors: edition.authors.map((a) => a.name),
+      subjects: [...new Set([...edition.subjects, ...(work?.subjects ?? [])])],
+      firstPublishYear: work?.firstPublishYear ?? edition.publishYear,
+    }
+  }, [state])
+  const suggestions = useGenreSuggestions(genreBook)
+
+  if (!state?.edition || !genreBook) return <Navigate to="/search" replace />
   const { edition, work, fallbackCoverUrl } = state
+
+  // Suggested genres are on unless switched off; those the reader already has a category for show as that category below too.
+  const isOn = (genre: GenreId) => overrides.get(genre) ?? true
+  const suggestedByCategory = new Map((suggestions ?? []).flatMap((s) => (s.categoryId ? [[s.categoryId, s.genre] as const] : [])))
+  const chosenCategoryIds = new Set([...categoryIds].filter((id) => !suggestedByCategory.has(id)))
+  for (const [id, genre] of suggestedByCategory) if (isOn(genre)) chosenCategoryIds.add(id)
+  const selectedGenres = new Set((suggestions ?? []).filter((s) => isOn(s.genre)).map((s) => s.genre))
+  const setGenre = (genre: GenreId, on: boolean) => setOverrides(new Map(overrides).set(genre, on))
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setBusy(true)
+    // New genre categories for chosen suggestions the reader has no category for yet.
+    const finalCategoryIds = new Set(chosenCategoryIds)
+    for (const s of suggestions ?? []) if (!s.categoryId && isOn(s.genre)) finalCategoryIds.add(await categoryForGenre(db, collectionsRepo, s.genre))
+    if (suggestions) {
+      const byCategory = categoryGenres(await db.categories.toArray())
+      const chosen = [...finalCategoryIds].flatMap((id) => byCategory.get(id) ?? [])
+      await recordGenreChoice(
+        db,
+        genreBook!,
+        suggestions.map((s) => s.genre),
+        chosen,
+      )
+    }
     const { entryId } = await library.addFromSource(
       {
         edition,
-        work: work && { firstPublishYear: work.firstPublishYear, medianPageCount: work.medianPageCount },
+        work: work && {
+          firstPublishYear: work.firstPublishYear,
+          medianPageCount: work.medianPageCount,
+          ...(work.subjects?.length && { subjects: work.subjects }),
+        },
         fallbackCoverUrl,
       },
-      { status, ...(status === 'finished' && { startedOn, endedOn }), listIds: [...listIds], categoryIds: [...categoryIds] },
+      {
+        status,
+        ...(status === 'finished' && { startedOn, endedOn }),
+        listIds: [...listIds],
+        categoryIds: [...finalCategoryIds],
+      },
     )
     navigate(`/book/${entryId}`, { replace: true })
   }
@@ -89,15 +139,20 @@ export function AddBookScreen() {
             </Field>
           </div>
         )}
+        <GenreSuggestionChips suggestions={suggestions} selected={selectedGenres} onToggle={setGenre} />
         {collections && (
           <CollectionPicker
             quiet
             lists={collections.lists}
             categories={collections.categories}
             listIds={listIds}
-            categoryIds={categoryIds}
+            categoryIds={chosenCategoryIds}
             onList={(id, on) => setListIds(toggle(listIds, id, on))}
-            onCategory={(id, on) => setCategoryIds(toggle(categoryIds, id, on))}
+            onCategory={(id, on) => {
+              const genre = suggestedByCategory.get(id)
+              if (genre) setGenre(genre, on)
+              else setCategoryIds(toggle(categoryIds, id, on))
+            }}
           />
         )}
         <Button type="submit" size="lg" disabled={busy}>

@@ -77,7 +77,7 @@ export function BookScreen() {
       </Section>
 
       <Section title={b.organise}>
-        <Organise entryId={book.entry.id} categoryIds={book.entry.categoryIds} />
+        <Organise book={book} />
       </Section>
 
       <Section title={t.series.section}>

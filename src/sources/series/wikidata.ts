@@ -43,7 +43,7 @@ export interface SparqlResponse {
   results: { bindings: Record<string, Binding | undefined>[] }
 }
 
-const OLID = /^OL\d+[WM]$/
+export const OLID = /^OL\d+[WM]$/
 
 /** What we know about the book: its Open Library IDs, and its titles and authors for when Wikidata lacks the IDs. */
 export interface BookLookup {
@@ -67,12 +67,12 @@ const literals = (texts: readonly string[]) =>
   [...new Set(texts.flatMap((t) => apostropheVariants(t.trim())).filter(Boolean))].flatMap((t) => MATCH_LANGUAGES.map((lang) => `${sparqlString(t)}@${lang}`)).join(' ')
 
 /**
- * The SPARQL query for the series of one book. The book is found by its
- * Open Library work or edition ID (P648, editions via P629), or, since many
- * Wikidata books have no Open Library ID, by an exact title label together
- * with an author (P50) whose name matches.
+ * The SPARQL pattern that binds `?work` to the book: by its Open Library
+ * work or edition ID (P648, editions via P629), or, since many Wikidata books
+ * have no Open Library ID, by an exact title label together with an author
+ * (P50) whose name matches. Shared by the series and genre lookups.
  */
-export function seriesQuery(book: BookLookup | readonly string[]): string {
+export function bookPattern(book: BookLookup | readonly string[]): string {
   const { olids = [], titles = [], authors = [] } = Array.isArray(book) ? { olids: book as readonly string[] } : (book as BookLookup)
   const ids = olids
     .filter((id) => OLID.test(id))
@@ -83,7 +83,12 @@ export function seriesQuery(book: BookLookup | readonly string[]): string {
     titles.length && authors.length
       ? `{ VALUES ?title { ${literals(titles)} } VALUES ?authorName { ${literals(authors)} } ?work rdfs:label ?title ; wdt:P50 ?writer . ?writer rdfs:label ?authorName . }`
       : ''
-  const find = [byId, byTitle].filter(Boolean).join('\n  UNION\n  ')
+  return [byId, byTitle].filter(Boolean).join('\n  UNION\n  ')
+}
+
+/** The SPARQL query for the series of one book (found by `bookPattern`). */
+export function seriesQuery(book: BookLookup | readonly string[]): string {
+  const find = bookPattern(book)
   return `SELECT ?series ?seriesLabel ?ordinal ?parts ?member ?memberLabel ?memberOrdinal ?memberOl ?authorLabel WHERE {
   ${find}
   ?work p:P179 ?statement . ?statement ps:P179 ?series .

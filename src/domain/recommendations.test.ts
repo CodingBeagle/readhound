@@ -106,7 +106,9 @@ describe('taste profile', () => {
       'subject:Detective and mystery stories', // 1.5 / 2
     ])
     expect(seeds[0]!.query).toMatchObject({ author: 'Andy Weir', popular: true, withSubjects: true })
-    expect(seeds[2]!.query).toMatchObject({ subject: 'Science fiction' })
+    // A genre category searches Open Library's subject for that genre.
+    expect(seeds[2]!.query).toMatchObject({ subject: 'science_fiction' })
+    expect(tasteProfile(model).subjects.get('krimi')!.genre).toBe('crime')
   })
 
   it('keeps tags and filler out of the subjects', () => {
