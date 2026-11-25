@@ -280,3 +280,29 @@ describe('stats', () => {
     expect(screen.getByLabelText(t.screens.stats.from)).toBeInTheDocument()
   })
 })
+
+describe('year in review', () => {
+  it('steps through the cards for a demo year with buttons and arrow keys', async () => {
+    const user = userEvent.setup()
+    const router = renderAt('/demo')
+    await user.click(await screen.findByRole('button', { name: t.demo.enter }))
+    await screen.findByText(t.demo.banner, {}, { timeout: 5000 })
+    const year = new Date().getFullYear() - 1
+    await act(() => router.navigate(`/stats/year/${year}`))
+    const dialog = await screen.findByRole('dialog', { name: t.review.title(year) }, { timeout: 5000 })
+    expect(within(dialog).getByRole('heading', { name: t.review.intro(year) })).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('button', { name: t.review.next }))
+    expect(within(dialog).getByText(t.review.totals)).toBeInTheDocument()
+    await user.keyboard('{ArrowRight}')
+    expect(within(dialog).getByText(t.review.topAuthors)).toBeInTheDocument()
+    await user.keyboard('{ArrowLeft}')
+    expect(within(dialog).getByText(t.review.totals)).toBeInTheDocument()
+
+    for (let i = 0; i < 12 && within(dialog).queryByRole('button', { name: t.review.next }); i++) await user.click(within(dialog).getByRole('button', { name: t.review.next }))
+    expect(within(dialog).getByRole('button', { name: t.review.save })).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+    expect(router.state.location.pathname).toBe('/stats')
+  })
+})

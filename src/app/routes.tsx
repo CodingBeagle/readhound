@@ -16,6 +16,8 @@ import { WorkScreen } from '@/ui/screens/WorkScreen'
 // The stats screen carries the chart libraries, so it loads on first visit only.
 const StatsScreen = lazy(() => import('@/ui/screens/StatsScreen').then((m) => ({ default: m.StatsScreen })))
 
+const YearInReviewScreen = lazy(() => import('@/ui/screens/YearInReviewScreen').then((m) => ({ default: m.YearInReviewScreen })))
+
 export const routes: RouteObject[] = [
   {
     element: <AppShell />,
@@ -27,6 +29,14 @@ export const routes: RouteObject[] = [
       { path: 'add/manual', element: <ManualEntryScreen /> },
       { path: 'book/:entryId', element: <BookScreen /> },
       { path: 'library', element: <LibraryScreen /> },
+      {
+        path: 'stats/year/:year',
+        element: (
+          <Suspense fallback={null}>
+            <YearInReviewScreen />
+          </Suspense>
+        ),
+      },
       {
         path: 'stats',
         element: (

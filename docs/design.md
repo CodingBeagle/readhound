@@ -462,3 +462,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Heatmap intensity: steps 1–4 are quarters of the biggest reading day in the last 12 months |
 | 2026-11-25 | Milestone unlock dates are worked out from the data instead of stored, so imports and edits keep them right |
 | 2026-11-25 | Wait before starting counts first reads that began after the day the book was added; books added as reading or finished are left out |
+| 2026-11-25 | Year in review: a full-screen card sequence per year (from Stats, and on Home in December), saved as a 1080 × 1350 PNG drawn on a canvas, shared through the phone's share sheet where available |

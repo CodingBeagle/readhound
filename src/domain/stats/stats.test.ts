@@ -37,6 +37,8 @@ import {
   topAuthors,
   waitBeforeStarting,
   whereIStop,
+  yearInReview,
+  reviewYears,
 } from './index'
 
 const TODAY = '2026-06-15'
@@ -300,5 +302,32 @@ describe('my library and extras', () => {
     expect(list.find((m) => m.id === 'books-1')?.unlockedOn).toBe('2025-03-10')
     expect(list.find((m) => m.id === 'streak-7')).toMatchObject({ unlockedOn: undefined, progress: 3 / 7 })
     expect(list.find((m) => m.id === 'category-scifi')?.progress).toBeCloseTo(2 / 5)
+  })
+})
+
+describe('year in review', () => {
+  it('summarises a year', () => {
+    const review = yearInReview(model, 2026)
+    expect(review).toMatchObject({ year: 2026, books: 2, uniqueBooks: 2, pages: 895, readingDays: 9 })
+    expect(review.topAuthors).toEqual([
+      { name: 'Andy Weir', count: 1 },
+      { name: 'Peter Høeg', count: 1 },
+    ])
+    expect(review.topGenres).toEqual([
+      { name: 'Krimi', count: 1 },
+      { name: 'Science fiction', count: 1 },
+    ])
+    expect(review.longest?.title).toBe('Frøken Smillas fornemmelse for sne') // 400 pages
+    expect(review.shortest?.title).toBe('The Martian') // 300 pages
+    expect(review.fastest).toMatchObject({ title: 'Frøken Smillas fornemmelse for sne', days: 3 }) // tie with The Martian, finished first
+    expect(review.highestRated).toMatchObject({ title: 'The Martian', rating: 5 })
+    expect(review.streak).toEqual({ length: 3, from: '2026-01-05', to: '2026-01-07' })
+    expect(review.first?.endedOn).toBe('2026-01-07')
+    expect(review.last?.endedOn).toBe('2026-02-03')
+  })
+
+  it('lists the years that have finished books', () => {
+    expect(reviewYears(model)).toEqual([2026, 2025])
+    expect(yearInReview(model, 2024)).toMatchObject({ books: 0, pages: 0, longest: undefined, streak: { length: 0 } })
   })
 })

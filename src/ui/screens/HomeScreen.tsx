@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 import { useServices } from '@/app/services'
 import { today as todayOf } from '@/db/clock'
 import { progress } from '@/domain/bookView'
-import { booksRead, currentStreak, finishForecast, goalPace, pagesRead, periodFor } from '@/domain/stats'
+import { booksRead, currentStreak, finishForecast, goalPace, pagesRead, periodFor, reviewYears } from '@/domain/stats'
 import { t } from '@/i18n'
 import { BookCover } from '@/ui/books/BookCover'
 import { LogPageForm } from '@/ui/books/LogPageForm'
@@ -47,6 +47,15 @@ export function HomeScreen() {
           {goal?.targetPages !== undefined && <GoalPaceBar pace={goalPace(goal.targetPages, pagesRead(model, periodFor('this_year', today)), year, today)} unit="pages" />}
         </div>
       ) : null}
+      {model && today.slice(5, 7) === '12' && reviewYears(model).includes(year) && (
+        <Link
+          to={`/stats/year/${year}`}
+          className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-[#1c1917] p-4 text-sm font-medium text-[#fafaf9]"
+        >
+          <span>{t.review.homeBanner(year)}</span>
+          <span className="text-[#f59e0b]">{t.review.homeBannerAction} →</span>
+        </Link>
+      )}
       <ScreenHeader title={t.screens.home.title} />
       {reading && reading.length === 0 && (
         <EmptyState>
