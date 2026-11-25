@@ -17,6 +17,8 @@ import { BackupReminder } from '@/ui/layout/BackupReminder'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 import { GoalPaceBar } from '@/ui/stats/GoalPaceBar'
+import { LevelCard } from '@/ui/achievements/LevelCard'
+import { useAchievements } from '@/ui/achievements/useAchievements'
 
 export function HomeScreen() {
   const books = useLibrary()
@@ -26,6 +28,7 @@ export function HomeScreen() {
   const today = todayOf(clock)
   const year = Number(today.slice(0, 4))
   const goal = useLiveQuery(() => db.goals.get(year), [db, year])
+  const achievements = useAchievements()
   const streak = model ? currentStreak(model, today) : undefined
   const forecastFor = (entryId: string) => {
     const read = model?.reads.find((r) => r.entryId === entryId && r.outcome === undefined)
@@ -89,6 +92,7 @@ export function HomeScreen() {
           )
         })}
       </ul>
+      {achievements && <LevelCard summary={achievements} className="animate-rise mt-6" />}
     </>
   )
 }

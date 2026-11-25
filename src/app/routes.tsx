@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 
 import { AppShell } from '@/ui/layout/AppShell'
+import { AchievementsScreen } from '@/ui/screens/AchievementsScreen'
 import { AddBookScreen } from '@/ui/screens/AddBookScreen'
 import { BookScreen } from '@/ui/screens/BookScreen'
 import { DemoScreen } from '@/ui/screens/DemoScreen'
@@ -46,6 +47,7 @@ export const routes: RouteObject[] = [
         ),
       },
       { path: 'profile', element: <ProfileScreen /> },
+      { path: 'achievements', element: <AchievementsScreen /> },
       { path: 'demo', element: <DemoScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],

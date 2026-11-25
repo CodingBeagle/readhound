@@ -18,7 +18,6 @@ import {
   languages,
   lengthDistribution,
   longestStreak,
-  milestones,
   newVsReturningAuthors,
   originalsVsTranslations,
   pagesByWeekdayAndHour,
@@ -51,6 +50,8 @@ import { useStatsModel } from '@/ui/hooks/useStats'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 import { AuthorMap } from '@/ui/stats/AuthorMap'
+import { LevelCard } from '@/ui/achievements/LevelCard'
+import { useAchievements } from '@/ui/achievements/useAchievements'
 import { ChartCard, StatTile } from '@/ui/stats/ChartCard'
 import { DonutChart, formatNumber, OTHER, RatingScatter, SERIES, SimpleBarChart, SplitBar, StackedBarChart } from '@/ui/stats/charts'
 import { GoalPaceBar } from '@/ui/stats/GoalPaceBar'
@@ -521,7 +522,7 @@ function FunExtras({ model, period, includeDnf }: { model: StatsModel; period: P
   const scatter = ratingsVsLength(model, period, includeDnf)
   const genreName = new Map(model.categories.map((c) => [c.id, c.name]))
   const byGenre = ratingsByGenre(model, period, includeDnf).map((g) => ({ genre: genreName.get(g.genreId) ?? '', average: Math.round(g.average * 10) / 10 }))
-  const badges = milestones(model)
+  const achievements = useAchievements()
 
   return (
     <Group title={s.sections.fun}>
@@ -555,16 +556,7 @@ function FunExtras({ model, period, includeDnf }: { model: StatsModel; period: P
           <SimpleBarChart data={byGenre} x="genre" y="average" name={s.averageRating} yDomain={[0, 5]} />
         </ChartCard>
       )}
-      <ChartCard title={s.milestones} className="md:col-span-2">
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {badges.map((m) => (
-            <li key={m.id} className={m.unlockedOn ? 'rounded-lg border border-[var(--chart-1)] p-2' : 'rounded-lg border border-dashed p-2 opacity-70'}>
-              <p className="text-sm font-medium">{m.label}</p>
-              <p className="text-xs text-muted-foreground">{m.unlockedOn ? s.unlocked(dateLabel(m.unlockedOn)) : s.locked(Math.floor(m.progress * 100))}</p>
-            </li>
-          ))}
-        </ul>
-      </ChartCard>
+      {achievements && <LevelCard summary={achievements} className="md:col-span-2" />}
     </Group>
   )
 }

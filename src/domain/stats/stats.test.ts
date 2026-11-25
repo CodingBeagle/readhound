@@ -2,6 +2,7 @@
  * Every stat against a small data set whose answers were worked out by hand
  * (design doc, acceptance criterion 7). The arithmetic is in the comments.
  */
+import { achievements, levelFor } from '../achievements'
 import type { Author, Category, Edition, LibraryEntry, Read, ReadingSession, Work } from '../types'
 import {
   attributeReads,
@@ -17,7 +18,6 @@ import {
   languages,
   lengthDistribution,
   longestStreak,
-  milestones,
   newVsReturningAuthors,
   originalsVsTranslations,
   pagesByWeekdayAndHour,
@@ -294,14 +294,56 @@ describe('my library and extras', () => {
     expect(stackHeight(400_000).landmark.name).toBe('Round Tower') // 40 m
     expect(stackHeight(1195).metres).toBeCloseTo(0.1195)
   })
+})
 
-  it('unlocks milestones on the day the threshold was crossed', () => {
-    const list = milestones(model)
+describe('achievements', () => {
+  const summary = achievements({ model, goals: [] })
+  const fam = (id: string) => summary.families.find((f) => f.id === id)!
+  const sp = (id: string) => summary.specials.find((x) => x.id === id)!
+
+  it('measures tiered families and dates each tier by when it was reached', () => {
+    expect(fam('bookworm')).toMatchObject({ value: 3, tier: undefined, next: { tier: 'bronze', threshold: 5 } }) // r2, r1, r3
     // 300 + 100 + 150 + 150 + 150 + 150 = 1,000 on 3 February
-    expect(list.find((m) => m.id === 'pages-1000')?.unlockedOn).toBe('2026-02-03')
-    expect(list.find((m) => m.id === 'books-1')?.unlockedOn).toBe('2025-03-10')
-    expect(list.find((m) => m.id === 'streak-7')).toMatchObject({ unlockedOn: undefined, progress: 3 / 7 })
-    expect(list.find((m) => m.id === 'category-scifi')?.progress).toBeCloseTo(2 / 5)
+    expect(fam('pageTurner').tiers[0]).toMatchObject({ unlocked: true, unlockedOn: '2026-02-03' })
+    expect(fam('pageTurner').value).toBe(1195)
+    // r1 and r3 took two days each; r2 took nine
+    expect(fam('speedReader')).toMatchObject({ value: 2, tier: 'bronze' })
+    expect(fam('speedReader').tiers[0]!.unlockedOn).toBe('2026-01-07')
+    expect(fam('onARoll').value).toBe(3) // 5–7 January
+    expect(fam('devoted').value).toBe(9)
+    expect(fam('polyglot')).toMatchObject({ value: 2, tier: 'bronze' }) // eng (r2), then dan (r1)
+    expect(fam('polyglot').tiers[0]!.unlockedOn).toBe('2026-01-07')
+    expect(fam('globetrotter').value).toBe(2) // US, DK
+    expect(fam('timeTraveller').value).toBe(2) // 2010s, 1990s
+    expect(fam('superfan').value).toBe(2) // Andy Weir twice
+    expect(fam('rereader').tiers[0]!.unlockedOn).toBe('2026-02-03')
+    expect(fam('collector').value).toBe(5)
+    expect(fam('marathoner').value).toBe(0) // the 500-page book is still being read
+  })
+
+  it('unlocks one-off specials on the first day they came true', () => {
+    expect(sp('firstChapter').unlockedOn).toBe('2025-03-10')
+    expect(sp('bigDay').unlockedOn).toBe('2025-03-10') // 300 pages on the end date of a read without sessions
+    expect(sp('lifeIsShort').unlockedOn).toBe('2026-03-02')
+    expect(sp('weekendBinge').unlocked).toBe(false) // best weekend is 150 pages
+    expect(sp('nightOwl').unlocked).toBe(false) // every session starts at 19:00 or 20:00
+    expect(sp('critic')).toMatchObject({ unlocked: false, progress: { value: 3, target: 10 } })
+  })
+
+  it('counts yearly goals reached', () => {
+    const withGoal = achievements({ model, goals: [{ year: 2026, targetBooks: 2 }, { year: 2025, targetBooks: 5 }] })
+    const goal = withGoal.families.find((f) => f.id === 'goalGetter')!
+    expect(goal).toMatchObject({ value: 1, tier: 'bronze' })
+    expect(goal.tiers[0]!.unlockedOn).toBe('2026-02-03') // the second book of 2026
+  })
+
+  it('adds up points into a reader level', () => {
+    // 4 bronze tiers × 10 + 3 specials × 25
+    expect(summary.points).toBe(115)
+    expect(summary.level).toMatchObject({ name: 'fetcher', index: 1, from: 100, to: 300 })
+    expect(summary.unlocks.map((u) => u.id)).toContain('pageTurner:bronze')
+    expect(levelFor(0).name).toBe('puppy')
+    expect(levelFor(5000)).toMatchObject({ name: 'readhound', to: undefined })
   })
 })
 

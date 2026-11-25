@@ -1,5 +1,4 @@
 import { daysBetween } from './calendar'
-import { longestStreak } from './habits'
 import type { StatsModel } from './model'
 import { inPeriod, type Period } from './period'
 
@@ -77,77 +76,4 @@ export function stackHeight(pages: number, mmPerPage = 0.1) {
   const metres = (pages * mmPerPage) / 1000
   const landmark = [...LANDMARKS].reverse().find((l) => metres >= l.metres) ?? LANDMARKS[0]!
   return { metres, landmark, times: metres / landmark.metres }
-}
-
-export interface Milestone {
-  id: string
-  kind: 'pages' | 'books' | 'streak' | 'category'
-  threshold: number
-  label: string
-  /** Date it was reached; undefined while still locked. */
-  unlockedOn?: string
-  /** Progress towards it, 0–1. */
-  progress: number
-}
-
-const PAGE_MILESTONES = [1000, 5000, 10000, 25000, 50000]
-const BOOK_MILESTONES = [1, 10, 25, 50, 100]
-const STREAK_MILESTONES = [7, 30, 100]
-const CATEGORY_MILESTONE = 5
-
-/**
- * Rule-based badges. The unlock date is worked out from the data (the day the
- * running total crossed the threshold), so nothing needs storing and an
- * import or a deleted session keeps them correct.
- */
-export function milestones(model: StatsModel): Milestone[] {
-  const result: Milestone[] = []
-
-  let pages = 0
-  const pageDates = [...model.pagesByDate].sort(([a], [b]) => a.localeCompare(b))
-  const pageUnlocks = new Map<number, string>()
-  for (const [date, p] of pageDates) {
-    pages += p
-    for (const t of PAGE_MILESTONES) if (pages >= t && !pageUnlocks.has(t)) pageUnlocks.set(t, date)
-  }
-  for (const t of PAGE_MILESTONES)
-    result.push({ id: `pages-${t}`, kind: 'pages', threshold: t, label: `${t.toLocaleString('en')} pages`, unlockedOn: pageUnlocks.get(t), progress: Math.min(1, pages / t) })
-
-  const finished = model.reads.filter((r) => r.outcome === 'finished' && r.endedOn).sort((a, b) => a.endedOn!.localeCompare(b.endedOn!))
-  for (const t of BOOK_MILESTONES)
-    result.push({
-      id: `books-${t}`,
-      kind: 'books',
-      threshold: t,
-      label: t === 1 ? 'First book' : `${t} books`,
-      unlockedOn: finished[t - 1]?.endedOn,
-      progress: Math.min(1, finished.length / t),
-    })
-
-  // A streak milestone unlocks on the day the first long-enough run reached it.
-  const days = [...new Set(model.sessions.map((s) => s.date))].sort()
-  const best = longestStreak(model).length
-  for (const t of STREAK_MILESTONES) {
-    let unlockedOn: string | undefined
-    let run = 0
-    for (let i = 0; i < days.length && !unlockedOn; i++) {
-      run = i > 0 && daysBetween(days[i - 1]!, days[i]!) === 1 ? run + 1 : 1
-      if (run >= t) unlockedOn = days[i]
-    }
-    result.push({ id: `streak-${t}`, kind: 'streak', threshold: t, label: `${t}-day streak`, unlockedOn, progress: Math.min(1, best / t) })
-  }
-
-  for (const category of model.categories) {
-    const reads = finished.filter((r) => r.book.entry.categoryIds.includes(category.id))
-    if (reads.length === 0) continue
-    result.push({
-      id: `category-${category.id}`,
-      kind: 'category',
-      threshold: CATEGORY_MILESTONE,
-      label: `${CATEGORY_MILESTONE} × ${category.name}`,
-      unlockedOn: reads[CATEGORY_MILESTONE - 1]?.endedOn,
-      progress: Math.min(1, reads.length / CATEGORY_MILESTONE),
-    })
-  }
-  return result
 }

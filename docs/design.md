@@ -313,7 +313,7 @@ Statistics are the heart of the app. All of the following are in scope.
 - Total pages as a stack height compared with landmarks
 - A map of where my authors come from
 - Ratings vs. book length, and ratings by genre
-- Milestones and badges, such as 10,000 pages or 5 Danish classics
+- Achievements: tiered medals, one-off specials and reader levels (see Achievements)
 
 **Data each stat needs:** most come from catalog data (pages, authors, subjects, year, language) plus my statuses, reads and sessions. Fiction vs. non-fiction and genres rely on my own categories, with Open Library subjects as suggestions. Author country is not in Open Library and needs another source (see open questions).
 
@@ -361,7 +361,7 @@ These rules apply to every stat so the numbers agree with each other.
 | Author map | finished reads grouped by author `country` | world map; authors without country listed as unknown |
 | Ratings vs. length | rating against page count per finished read | scatter plot |
 | Ratings by genre | average rating per genre category | bar chart |
-| Milestones | rule-based badges, e.g. pages thresholds (1k, 5k, 10k, 25k, 50k), books thresholds, streak thresholds, N books in a category | badge grid; unlocked date stored |
+| Achievements | tiered families and specials, see Achievements | level card, Achievements screen; unlock dates worked out from the data |
 
 Stats are computed on demand from the stored records. If that gets slow, cache per-day aggregates (pages, minutes, sessions per date).
 
@@ -378,6 +378,20 @@ Mobile-first: a bottom tab bar with five tabs. On wide screens it becomes a side
 | Profile | Theme, goals, lists and categories management, preferred languages, export and import, settings, danger zone |
 
 **Book detail** (from anywhere): cover, effective metadata with an edit button, status control, reads history with sessions, notes and quotes, lists and categories, rating, link to Open Library.
+
+## Achievements
+
+Achievements gamify reading. They are worked out purely from the stats model and the yearly goals (`src/domain/achievements.ts`), so imports, edits and deletes keep them right. Unlock dates are derived from the data: the date of the session, finish or rating that crossed the threshold.
+
+- **Families**: 14 tiered achievements with bronze, silver, gold and platinum thresholds, in four groups.
+  - Reading: Bookworm (books finished 5/15/30/60), Page turner (pages 1k/5k/15k/40k), Marathoner (finished books of 500+ pages 1/3/6/12), Speed reader (books finished within 7 days of starting 1/3/8/20).
+  - Habits: On a roll (longest streak 7/30/60/100 days), Devoted (reading days 30/100/250/500), Goal getter (yearly goals met 1/2/3/5).
+  - Variety: Explorer (genres of finished books 3/5/8/12), Globetrotter (author countries 3/6/10/20), Polyglot (languages 2/3/4/5), Time traveller (publication decades 3/5/8/10), Superfan (most books by one author 3/5/8/12).
+  - Collection: Old friends (rereads 1/3/6/10), Collector (books in the library 25/50/100/250).
+- **Specials**: 13 one-off achievements: First chapter, Big day (100 pages in a day), Weekend binge (250 pages over a Saturday and Sunday), Night owl (a session starting 23:00 to 04:00), Early bird (a session starting 05:00 to 07:00), Doorstopper (800+ pages finished), Short and sweet (under 150 pages), Classic (published before 1900), Hot off the press (finished in its publication year), Lost in translation (a finished book read in translation), All year round (reading in all 12 months of one year), Life is short (first DNF), Critic (10 ratings).
+- **Points and levels**: bronze 10, silver 25, gold 50, platinum 100, special 25. Levels: Puppy 0, Fetcher 100, Sniffer 300, Tracker 700, Bloodhound 1,300, Readhound 2,100.
+- **Where it shows**: a level card on Home, Stats and Profile links to the Achievements screen (`/achievements`), which lists families by group with tier pips, next goal and progress, then the specials grid. Filters: All, Unlocked, Still to earn.
+- **Unlock moments**: the only stored state is the setting `achievementsSeen` ({ ids, level }). A newly earned achievement or level shows a toast with a confetti burst, once. The first run on a database (and in demo mode) is silent apart from a single welcome toast summarising what is already earned. Toasts honour reduced motion.
 
 ## Danger zone
 
@@ -514,8 +528,9 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Demo mode: a separate `readhound-demo` database with about two years of generated sample reading; the real library is never touched |
 | 2026-11-25 | Charts: Recharts for standard charts; the heatmap and author map are plain SVG with d3-geo, so Visx isn't needed. Chart colours use the validated reference categorical palette, with every chart also readable as a table |
 | 2026-11-25 | Heatmap intensity: steps 1–4 are quarters of the biggest reading day in the last 12 months |
-| 2026-11-25 | Milestone unlock dates are worked out from the data instead of stored, so imports and edits keep them right |
+| 2026-11-25 | Achievement (formerly milestone) unlock dates are worked out from the data instead of stored, so imports and edits keep them right |
 | 2026-11-25 | Wait before starting counts first reads that began after the day the book was added; books added as reading or finished are left out |
 | 2026-11-25 | Year in review: a full-screen card sequence per year (from Stats, and on Home in December), saved as a 1080 × 1350 PNG drawn on a canvas, shared through the phone's share sheet where available |
 | 2026-11-25 | Four themes (Classic, Aurora, Bookshop, Midnight), chosen per device in Profile; motion across screens and charts, all honouring reduced motion |
 | 2026-11-25 | Danger zone at the bottom of Profile: deletes the whole personal database (settings and cache included) after an export offer and typing DELETE; keeps the theme; hidden in demo mode and never touches the demo database |
+| 2026-11-25 | Achievement system replaces milestones: 14 tiered families (bronze to platinum), 13 specials, points and six dog-themed reader levels; derived from the data, only the seen state is stored so each unlock toasts once |

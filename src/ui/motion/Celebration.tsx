@@ -28,16 +28,25 @@ export function FinishCelebration({ status }: { status: Status }) {
     previous.current = status
   }, [status, reduce])
 
+  return <ConfettiBurst burst={burst} />
+}
+
+/** Confetti flying out from the middle of the screen each time `burst` goes up; 0 shows nothing. */
+export function ConfettiBurst({ burst }: { burst: number }) {
+  const [shown, setShown] = useState(0)
+  const reduce = useReducedMotion()
+
   useEffect(() => {
-    if (!burst) return
-    const timer = setTimeout(() => setBurst(0), 1600)
+    if (!burst || reduce) return
+    setShown(burst)
+    const timer = setTimeout(() => setShown(0), 1600)
     return () => clearTimeout(timer)
-  }, [burst])
+  }, [burst, reduce])
 
   return (
     <AnimatePresence>
-      {burst > 0 && (
-        <motion.div key={burst} aria-hidden className="pointer-events-none fixed inset-0 z-40 grid place-items-center" exit={{ opacity: 0 }}>
+      {shown > 0 && (
+        <motion.div key={shown} aria-hidden className="pointer-events-none fixed inset-0 z-40 grid place-items-center" exit={{ opacity: 0 }}>
           {PIECES.map((p, i) => (
             <motion.span
               key={i}
