@@ -39,3 +39,27 @@ test('export a backup and restore it into an empty library', async ({ page }, te
   await page.goto('/library')
   await expect(page.getByText('Kongens Fald')).toBeVisible()
 })
+
+test('the danger zone deletes everything, but only after typing DELETE', async ({ page }) => {
+  await page.goto('/add/manual')
+  await page.getByLabel('Title', { exact: true }).fill('Kongens Fald')
+  await page.getByLabel('Author').fill('Johannes V. Jensen')
+  await page.getByRole('button', { name: /Save|Add/ }).last().click()
+  await expect(page.getByRole('heading', { name: 'Kongens Fald' })).toBeVisible()
+
+  await page.goto('/profile')
+  const zone = page.getByRole('region', { name: 'Danger zone' })
+  await zone.getByRole('button', { name: 'Delete all my data…' }).click()
+  await expect(zone.getByRole('button', { name: 'Export backup' })).toBeVisible()
+
+  const confirm = zone.getByRole('button', { name: 'Delete everything' })
+  await expect(confirm).toBeDisabled()
+  await zone.getByLabel('Type DELETE to confirm').fill('delet')
+  await expect(confirm).toBeDisabled()
+  await zone.getByLabel('Type DELETE to confirm').fill('delete')
+  await confirm.click()
+  await expect(zone.getByText('Everything was deleted. Your library is now empty.')).toBeVisible()
+
+  await page.goto('/library')
+  await expect(page.getByText('Your library is empty.')).toBeVisible()
+})

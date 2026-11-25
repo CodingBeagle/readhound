@@ -363,6 +363,18 @@ export const en = {
         hint: 'Language codes, most preferred first, like dan, eng. Editions in these languages are listed first when you add a book.',
         saved: 'Languages saved.',
       },
+      danger: {
+        title: 'Danger zone',
+        intro: 'Delete everything Readhound stores on this device: all books, reading history and sessions, notes, lists, categories, goals and settings.',
+        keeps: 'This cannot be undone. Your theme and the demo mode sample data are not affected.',
+        start: 'Delete all my data…',
+        exportFirst: 'Save a backup first, so you can import it again if you change your mind.',
+        word: 'DELETE',
+        typeToConfirm: (word: string) => `Type ${word} to confirm`,
+        confirm: 'Delete everything',
+        done: 'Everything was deleted. Your library is now empty.',
+        demo: 'You are in demo mode. Leave demo mode to delete your own data.',
+      },
       demo: {
         title: 'Demo mode',
         intro: 'Try the app with two years of sample reading.',

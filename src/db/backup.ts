@@ -146,6 +146,17 @@ export async function restoreBackup(db: ReadhoundDB, backup: Backup): Promise<vo
   })
 }
 
+/**
+ * Danger zone: empties every table of this database (books, reads, sessions,
+ * notes, lists, categories, goals, settings and the Open Library cache).
+ * Only the database passed in is touched, so the demo database is left alone.
+ */
+export async function clearEverything(db: ReadhoundDB): Promise<void> {
+  await db.transaction('rw', db.tables, async () => {
+    await Promise.all(db.tables.map((table) => table.clear()))
+  })
+}
+
 // ---------- CSV ----------
 
 const joinNames = (names: readonly string[]) => names.join('; ')
