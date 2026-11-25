@@ -1,0 +1,401 @@
+{
+  "links": {
+    "self": "/works/OL258333W/editions.json?limit=50&offset=0",
+    "work": "/works/OL258333W",
+    "next": "/works/OL258333W/editions.json?limit=50&offset=50"
+  },
+  "size": 58,
+  "entries": [
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Smilla's gevoel voor sneeuw",
+      "source_records": [
+        "amazon:9029087943"
+      ],
+      "publishers": [
+        "Samenw. uitgeverijen Meulenhoff Boekerij"
+      ],
+      "isbn_10": [
+        "9029087943"
+      ],
+      "isbn_13": [
+        "9789029087940"
+      ],
+      "physical_format": "hardcover",
+      "full_title": "Smilla's gevoel voor sneeuw",
+      "covers": [
+        13652084
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "key": "/books/OL47217261M",
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-19T08:11:39.919896"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Smilla's gevoel voor sneeuw",
+      "source_records": [
+        "amazon:9029071532"
+      ],
+      "isbn_10": [
+        "9029071532"
+      ],
+      "isbn_13": [
+        "9789029071536"
+      ],
+      "physical_format": "paperback",
+      "full_title": "Smilla's gevoel voor sneeuw",
+      "covers": [
+        13551605
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "key": "/books/OL47148974M",
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-17T08:14:58.590642"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Smilla's gevoel voor sneeuw",
+      "source_records": [
+        "amazon:9029071532"
+      ],
+      "isbn_10": [
+        "9029071532"
+      ],
+      "isbn_13": [
+        "9789029071536"
+      ],
+      "physical_format": "paperback",
+      "full_title": "Smilla's gevoel voor sneeuw",
+      "covers": [
+        13551604
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "key": "/books/OL47148973M",
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-17T08:14:58.155043"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Smilla's gevoel voor sneeuw",
+      "source_records": [
+        "amazon:9029078499",
+        "promise:bwb_daily_pallets_2023-05-24:KL-477-420"
+      ],
+      "publishers": [
+        "Samenw. uitgeverijen Meulenhoff Boekerij"
+      ],
+      "isbn_10": [
+        "9029078499"
+      ],
+      "isbn_13": [
+        "9789029078498"
+      ],
+      "physical_format": "paperback",
+      "full_title": "Smilla's gevoel voor sneeuw roman",
+      "subtitle": "roman",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: Smilla's gevoel voor sneeuw: roman"
+      },
+      "covers": [
+        13539732
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "key": "/books/OL47141544M",
+      "local_id": [
+        "urn:bwbsku:KL-477-420"
+      ],
+      "publish_date": "2006-11-22",
+      "latest_revision": 3,
+      "revision": 3,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-17T02:05:54.021279"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "type": {
+        "key": "/type/edition"
+      },
+      "title": "Smilla's gevoel voor sneeuw",
+      "source_records": [
+        "amazon:9029078499"
+      ],
+      "publishers": [
+        "Samenw. uitgeverijen Meulenhoff Boekerij"
+      ],
+      "isbn_10": [
+        "9029078499"
+      ],
+      "isbn_13": [
+        "9789029078498"
+      ],
+      "physical_format": "paperback",
+      "full_title": "Smilla's gevoel voor sneeuw roman",
+      "subtitle": "roman",
+      "notes": {
+        "type": "/type/text",
+        "value": "Source title: Smilla's gevoel voor sneeuw: roman"
+      },
+      "covers": [
+        13539731
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "key": "/books/OL47141545M",
+      "latest_revision": 2,
+      "revision": 2,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-03-17T02:05:54.018542"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "identifiers": {
+        "amazon": [
+          "B003MTBIQ6"
+        ]
+      },
+      "title": "Smilla\\'s gevoel voor de sneeuw",
+      "authors": [
+        {
+          "key": "/authors/OL365301A"
+        }
+      ],
+      "publish_date": "1997-01-01",
+      "type": {
+        "key": "/type/edition"
+      },
+      "isbn_13": [
+        "9789041710413"
+      ],
+      "local_id": [
+        "urn:bwbsku:KH-304-232"
+      ],
+      "publishers": [
+        "Rainbow"
+      ],
+      "source_records": [
+        "promise:bwb_daily_pallets_2021-04-09",
+        "ia:smillasgevoelvoo0000hoeg"
+      ],
+      "ocaid": "smillasgevoelvoo0000hoeg",
+      "key": "/books/OL45827464M",
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "covers": [
+        14518703
+      ],
+      "number_of_pages": 594,
+      "latest_revision": 5,
+      "revision": 5,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2023-01-14T22:28:22.801658"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:05:13.199447"
+      }
+    },
+    {
+      "publishers": [
+        "Rosinante"
+      ],
+      "identifiers": {
+        "goodreads": [
+          "1729718"
+        ],
+        "librarything": [
+          "2856"
+        ]
+      },
+      "subtitle": "roman",
+      "isbn_10": [
+        "8716149629"
+      ],
+      "lc_classifications": [
+        "MLCM 92/06838 (P)"
+      ],
+      "key": "/books/OL1331775M",
+      "authors": [
+        {
+          "key": "/authors/OL365301A"
+        }
+      ],
+      "publish_places": [
+        "København"
+      ],
+      "pagination": "435 p. ;",
+      "source_records": [
+        "marc:marc_openlibraries_sanfranciscopubliclibrary/sfpl_chq_2018_12_24_run02.mrc:119932911:1232",
+        "marc:marc_loc_2016/BooksAll.2016.part22.utf8:81998581:460",
+        "marc:harvard_bibliographic_metadata/ab.bib.02.20150123.full.mrc:510241991:657",
+        "marc:harvard_bibliographic_metadata/20220215_026.bib.mrc:29975279:1031"
+      ],
+      "title": "Frøken Smillas fornemmelse for sne",
+      "lccn": [
+        "92213183"
+      ],
+      "number_of_pages": 435,
+      "languages": [
+        {
+          "key": "/languages/dan"
+        }
+      ],
+      "local_id": [
+        "urn:sfpl:31223036948652"
+      ],
+      "publish_date": "1992",
+      "publish_country": "dk ",
+      "by_statement": "Peter Høeg.",
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "oclc_numbers": [
+        "26764540"
+      ],
+      "latest_revision": 10,
+      "revision": 10,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-04-01T03:28:50.625462"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    },
+    {
+      "publishers": [
+        "Rosinante"
+      ],
+      "title": "Frøken Smillas fornemmelse for sne.",
+      "identifiers": {
+        "librarything": [
+          "2856"
+        ],
+        "goodreads": [
+          "124511"
+        ]
+      },
+      "languages": [
+        {
+          "key": "/languages/dan"
+        }
+      ],
+      "isbn_10": [
+        "8716142721"
+      ],
+      "publish_date": "1992",
+      "publish_country": "dk ",
+      "key": "/books/OL22301237M",
+      "authors": [
+        {
+          "key": "/authors/OL365301A"
+        }
+      ],
+      "publish_places": [
+        "København"
+      ],
+      "works": [
+        {
+          "key": "/works/OL258333W"
+        }
+      ],
+      "type": {
+        "key": "/type/edition"
+      },
+      "covers": [
+        14965500
+      ],
+      "ocaid": "frkensmillasforn0000pete",
+      "source_records": [
+        "ia:frkensmillasforn0000pete",
+        "promise:bwb_daily_pallets_2024-10-24:W9-CUU-560"
+      ],
+      "number_of_pages": 438,
+      "local_id": [
+        "urn:bwbsku:W9-CUU-560"
+      ],
+      "latest_revision": 8,
+      "revision": 8,
+      "created": {
+        "type": "/type/datetime",
+        "value": "2008-11-09T23:36:40.961519"
+      },
+      "last_modified": {
+        "type": "/type/datetime",
+        "value": "2026-06-09T16:04:42.672010"
+      }
+    }
+  ]
+}

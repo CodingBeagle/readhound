@@ -35,6 +35,12 @@ Every push to `main` builds the app and publishes it to GitHub Pages at https://
 
 One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
 
+## Book sources
+
+`src/sources/` holds the pluggable book-source layer from the design doc: the `BookSource` interface, a `SourceRegistry` that asks sources in priority order (the UI only talks to the registry), ISBN helpers, a throttled and cached HTTP client, and the Open Library adapter. Its tests run against recorded Open Library responses in `src/sources/openlibrary/__fixtures__`, never the live API.
+
+Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>)`. Browsers can't send that header to Open Library (its CORS rules reject it), so the web app doesn't; it is sent outside the browser, and the contact email comes from `VITE_OPENLIBRARY_CONTACT_EMAIL` if set.
+
 ## Tech stack
 
 React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Still to come as features land: Dexie for the local database, TanStack Query for Open Library calls, Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
