@@ -40,7 +40,8 @@ export default defineConfig({
       },
       workbox: {
         // App shell is precached so the library, logging and stats work offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
+        // Theme fonts: only the Latin subsets (English and Danish) are precached; others load on demand.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}', '**/*-latin-wght-normal-*.woff2', '**/*-latin-ext-wght-normal-*.woff2'],
         navigateFallback: 'index.html',
       },
     }),

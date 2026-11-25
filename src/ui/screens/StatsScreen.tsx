@@ -192,7 +192,7 @@ function Overview({ model, period, preset, today }: { model: StatsModel; period:
 
   return (
     <Group title={t.screens.stats.sections.overview}>
-      <div className="grid grid-cols-2 gap-3 md:col-span-2">
+      <div className="stagger tint-cycle grid grid-cols-2 gap-3 md:col-span-2">
         <StatTile label={s.booksRead} value={formatNumber(books.total)} detail={books.unique !== books.total ? s.uniqueBooks(books.unique) : undefined} />
         <StatTile label={s.pagesRead} value={formatNumber(pages)} />
         <StatTile label={s.perDay} value={formatNumber(perDay.perDay, 1)} detail={s.perReadingDay(formatNumber(perDay.perReadingDay, 0))} />
@@ -244,7 +244,7 @@ function StreakTile({ model, today }: { model: StatsModel; today: string }) {
       label={s.currentStreak}
       value={
         <span className="flex items-center gap-1">
-          <Flame aria-hidden className="size-5 text-[var(--chart-2)]" />
+          <Flame aria-hidden className="animate-flicker size-5 text-orange-500" />
           {s.days(current.length)}
         </span>
       }

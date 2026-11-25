@@ -23,10 +23,14 @@ const tooltip = {
     fontSize: 12,
   },
   itemStyle: { color: 'var(--popover-foreground)' },
-  cursor: { fill: 'var(--muted)' },
+  cursor: { fill: 'var(--muted)', fillOpacity: 0.6 },
+  animationDuration: 250,
 } as const
 
 /** Legend labels use the text colour; the swatch beside them carries the series colour. */
+/** Bars grow from the baseline, donuts sweep from the top, tooltips glide (design doc, Animation). */
+const grow = { animationDuration: 900, animationEasing: 'ease-out' } as const
+
 const legendText = (value: string) => <span style={{ color: 'var(--foreground)' }}>{value}</span>
 
 
@@ -58,7 +62,7 @@ export function SimpleBarChart({
           <XAxis dataKey={x} {...axis} tickFormatter={tickFormatter} interval="preserveStartEnd" minTickGap={8} />
           <YAxis {...axis} width={40} allowDecimals={false} axisLine={false} domain={yDomain} />
           <Tooltip {...tooltip} labelFormatter={(v) => (labelFormatter ? labelFormatter(String(v)) : String(v))} formatter={(v) => [formatNumber(Number(v), 1), name]} />
-          <Bar dataKey={y} name={name} fill={SERIES[0]} radius={[4, 4, 0, 0]} maxBarSize={28} />
+          <Bar dataKey={y} name={name} fill={SERIES[0]} radius={[4, 4, 0, 0]} maxBarSize={28} {...grow} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -105,6 +109,8 @@ export function StackedBarChart({
               strokeWidth={1}
               radius={i === series.length - 1 ? [4, 4, 0, 0] : 0}
               maxBarSize={28}
+              {...grow}
+              animationBegin={i * 90}
             />
           ))}
         </BarChart>
@@ -119,7 +125,20 @@ export function DonutChart({ data, height = 200 }: { data: { name: string; value
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={data} dataKey="value" nameKey="name" innerRadius="55%" outerRadius="85%" paddingAngle={1} stroke="var(--card)" strokeWidth={2}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="55%"
+            outerRadius="85%"
+            paddingAngle={1}
+            stroke="var(--card)"
+            strokeWidth={2}
+            startAngle={90}
+            endAngle={-270}
+            animationDuration={1100}
+            animationEasing="ease-out"
+          >
             {data.map((d) => (
               <Cell key={d.name} fill={d.color} />
             ))}
@@ -143,7 +162,7 @@ export function RatingScatter({ data, xName, yName }: { data: { title: string; p
           <YAxis type="number" dataKey="rating" name={yName} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} {...axis} width={32} axisLine={false} />
           <ZAxis dataKey="title" name="Book" range={[64, 64]} />
           <Tooltip {...tooltip} cursor={{ stroke: 'var(--chart-axis)' }} />
-          <Scatter data={data} fill={SERIES[0]} stroke="var(--card)" strokeWidth={2} />
+          <Scatter data={data} fill={SERIES[0]} stroke="var(--card)" strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
         </ScatterChart>
       </ResponsiveContainer>
     </div>
@@ -156,7 +175,7 @@ export function SplitBar({ parts }: { parts: { name: string; value: number; colo
   if (!total) return null
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex h-3 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={parts.map((p) => `${p.name} ${p.value}`).join(', ')}>
+      <div className="animate-grow flex h-3 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={parts.map((p) => `${p.name} ${p.value}`).join(', ')}>
         {parts
           .filter((p) => p.value > 0)
           .map((p) => (

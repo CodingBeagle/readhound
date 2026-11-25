@@ -30,7 +30,7 @@ export function DemoScreen() {
       <ScreenHeader title={t.demo.title} />
       <div className="flex flex-col gap-4">
         <p>{t.demo.intro}</p>
-        <p className="flex gap-2 rounded-xl border bg-card p-4 text-sm">
+        <p className="flex gap-2 surface p-4 text-sm">
           <ShieldCheck aria-hidden className="size-5 shrink-0" />
           {t.demo.safe}
         </p>

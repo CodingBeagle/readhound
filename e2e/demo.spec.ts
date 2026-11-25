@@ -20,6 +20,8 @@ test('demo mode fills the stats and leaves my library alone', async ({ page }) =
   await page.getByLabel('Period').selectOption('all')
   for (const section of ['Overview', 'Reading habits', 'What I read', 'My library', 'Fun extras'])
     await expect(page.getByRole('heading', { name: section })).toBeVisible()
+  // Charts draw themselves once they scroll into view.
+  await page.getByRole('heading', { name: 'Books per month' }).scrollIntoViewIfNeeded()
   await expect(page.getByRole('heading', { name: 'Books per month' })).toBeVisible()
   await expect(page.locator('.recharts-surface').first()).toBeVisible()
 

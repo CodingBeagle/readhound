@@ -375,9 +375,50 @@ Mobile-first: a bottom tab bar with five tabs. On wide screens it becomes a side
 | Search | Search box (text or ISBN), results list, work detail with edition picker, "Add manually" at the bottom of results and on empty results |
 | Library | Filter by status (to read, reading, finished, DNF pile), list, category, language; sort by added, title, author, finished date, rating; grid or list view |
 | Stats | Period filter; sections matching the stat groups; year in review entry point |
-| Profile | Goals, lists and categories management, preferred languages, export and import, settings |
+| Profile | Theme, goals, lists and categories management, preferred languages, export and import, settings |
 
 **Book detail** (from anywhere): cover, effective metadata with an edit button, status control, reads history with sessions, notes and quotes, lists and categories, rating, link to Open Library.
+
+## Themes and animation
+
+The user picks one of four themes in **Profile → Theme**. The choice is a per-device preference stored in `localStorage` (`readhound.theme`). An inline script in `index.html` applies it before the first paint, so there is no flash. It is not part of the backup.
+
+| Theme | Look | Light and dark |
+| --- | --- | --- |
+| Classic (default) | Calm stone and amber, the original look | Follows the system |
+| Aurora | Violet, pink and sky-blue gradient background; frosted-glass cards; gradient titles and numbers; a floating pill tab bar on phones; Plus Jakarta Sans | Follows the system |
+| Bookshop | Warm paper; Fraunces serif titles with DM Sans text; ink outlines with an offset shadow; stat tiles and Home cards cycle through peach, sage, butter and lavender | Follows the system |
+| Midnight | Deep navy with an indigo glow; gradient-edged cards; glowing lime active tab; lime-to-cyan numbers; Space Grotesk | Always dark |
+
+**How themes work:**
+- A theme is a `data-theme` attribute on `<html>` that overrides the shadcn tokens, plus extra tokens: `--font-sans`, `--font-display`, `--page-paint`, `--surface-*`, `--title-paint`, `--number-paint`, `--primary-paint`, `--fill`, `--indicator` and `--tint-1..4`.
+- Components use a few semantic utilities: `surface`, `title`, `stat-value`, `fill-bar`, `btn-primary`, `banner` and `tint-cycle`. A new screen gets every theme for free by using them.
+- Fonts are self-hosted with Fontsource. Only the Latin and Latin Extended subsets are precached for offline use.
+- **Charts:** every theme uses the validated categorical palette in its fixed order, rotated so that slot 1 is the theme's hue:
+  - Classic: blue
+  - Aurora: violet
+  - Bookshop: orange
+  - Midnight: green, using the dark steps
+- Each rotation was re-run through the palette validator for its light and dark surfaces and passes. The contrast warnings for the light steps are the same as for the reference order and are covered by the table views.
+- The heatmap and author map ramp is one hue: slot 1 mixed into the empty-cell colour at 30, 55, 80 and 100 %.
+
+**Animation** (Motion and CSS keyframes; everything respects `prefers-reduced-motion`):
+- Screens ease in when you change screen.
+- Cards rise in a short stagger.
+- The active tab highlight slides between tabs with a spring.
+- Buttons press in. Bookshop buttons move into their shadow.
+- Progress and goal bars grow from zero. The goal pace marker pops in.
+- Stat numbers count up, and glide to new values when the data changes.
+- The streak flame flickers.
+- Covers fade in once loaded.
+- Changing theme cross-fades with the View Transitions API where it is supported.
+- Finishing a book bursts confetti.
+- Charts animate when their card scrolls into view rather than off screen:
+  - bars grow from the baseline, and stacked series follow one after another
+  - donuts sweep clockwise from the top
+  - heatmap cells pop in week by week
+  - author countries pop in by intensity
+  - tooltips glide
 
 ## Tech stack
 
@@ -463,3 +504,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Milestone unlock dates are worked out from the data instead of stored, so imports and edits keep them right |
 | 2026-11-25 | Wait before starting counts first reads that began after the day the book was added; books added as reading or finished are left out |
 | 2026-11-25 | Year in review: a full-screen card sequence per year (from Stats, and on Home in December), saved as a 1080 × 1350 PNG drawn on a canvas, shared through the phone's share sheet where available |
+| 2026-11-25 | Four themes (Classic, Aurora, Bookshop, Midnight), chosen per device in Profile; motion across screens and charts, all honouring reduced motion |

@@ -11,7 +11,7 @@ export function BackupReminder() {
   const backup = useBackup()
   if (!backup.due) return null
   return (
-    <aside aria-label={r.title} className="mb-5 flex flex-col gap-3 rounded-xl border bg-card p-4 text-sm">
+    <aside aria-label={r.title} className="mb-5 flex flex-col gap-3 surface p-4 text-sm">
       <div className="flex gap-3">
         <HardDriveDownload aria-hidden className="mt-0.5 size-5 shrink-0" />
         <div>

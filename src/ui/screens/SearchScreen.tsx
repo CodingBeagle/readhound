@@ -123,7 +123,7 @@ function IsbnResult({ edition }: { edition: EditionDetails }) {
     <Link
       to="/add"
       state={{ edition }}
-      className="flex min-h-11 gap-3 rounded-lg border p-2 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="flex min-h-11 gap-3 surface p-2 transition-transform active:scale-[0.99] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <BookCover url={edition.coverUrl} title={edition.title} className="w-14" />
       <div className="flex min-w-0 flex-col justify-center gap-0.5">

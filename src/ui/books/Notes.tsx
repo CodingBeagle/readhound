@@ -30,7 +30,7 @@ export function Notes({ entryId, pageCount }: { entryId: string; pageCount?: num
         <ul className="flex flex-col gap-2">
           {notes.map((note) =>
             editing === note.id ? (
-              <li key={note.id} className="rounded-xl border p-3">
+              <li key={note.id} className="surface p-3">
                 <NoteForm
                   initial={note}
                   pageCount={pageCount}
@@ -43,7 +43,7 @@ export function Notes({ entryId, pageCount }: { entryId: string; pageCount?: num
                 />
               </li>
             ) : (
-              <li key={note.id} className="flex gap-2 rounded-xl border p-3">
+              <li key={note.id} className="flex gap-2 surface p-3">
                 {note.kind === 'quote' && <Quote aria-hidden className="mt-1 size-4 shrink-0 text-muted-foreground" />}
                 <div className="min-w-0 flex-1">
                   <p className={note.kind === 'quote' ? 'text-sm whitespace-pre-wrap italic' : 'text-sm whitespace-pre-wrap'}>{note.text}</p>

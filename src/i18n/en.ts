@@ -289,6 +289,16 @@ export const en = {
     },
     profile: {
       title: 'Profile',
+      appearance: {
+        title: 'Theme',
+        intro: 'Pick a look. It follows your phone’s light or dark mode, except Midnight, which is always dark.',
+        themes: {
+          classic: { name: 'Classic', description: 'Calm stone and amber.' },
+          aurora: { name: 'Aurora', description: 'Soft gradients and frosted glass.' },
+          bookshop: { name: 'Bookshop', description: 'Warm paper, serif titles and a colour for every card.' },
+          midnight: { name: 'Midnight', description: 'Deep navy with glowing lime and cyan.' },
+        },
+      },
       backup: {
         title: 'Backup',
         intro: 'Your books live only on this device. Export a backup now and then, so you can restore it if browser data is lost or you switch phones.',

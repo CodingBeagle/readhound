@@ -68,7 +68,7 @@ export function ManualEntryScreen() {
   return (
     <>
       <BackLink />
-      <h1 className="text-2xl font-semibold tracking-tight">{m.title}</h1>
+      <h1 className="text-2xl title">{m.title}</h1>
       <p className="mb-4 text-sm text-muted-foreground">{m.intro}</p>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field label={m.bookTitle} error={errors.title}>

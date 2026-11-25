@@ -36,10 +36,10 @@ export function HomeScreen() {
     <>
       <BackupReminder />
       {model && (streak?.length || goal) ? (
-        <div className="mb-5 flex flex-col gap-3 rounded-xl border bg-card p-4">
+        <div className="animate-rise mb-5 flex flex-col gap-3 surface p-4">
           {streak !== undefined && streak.length > 0 && (
             <p className="flex items-center gap-2 text-sm font-medium">
-              <Flame aria-hidden className="size-5 text-[var(--chart-2)]" />
+              <Flame aria-hidden className="animate-flicker size-5 text-orange-500" />
               {t.screens.home.streak(streak.length)}
             </p>
           )}
@@ -50,7 +50,7 @@ export function HomeScreen() {
       {model && today.slice(5, 7) === '12' && reviewYears(model).includes(year) && (
         <Link
           to={`/stats/year/${year}`}
-          className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-[#1c1917] p-4 text-sm font-medium text-[#fafaf9]"
+          className="animate-rise mb-5 flex items-center justify-between gap-3 rounded-[var(--radius)] bg-[#1c1917] p-4 text-sm font-medium text-[#fafaf9]"
         >
           <span>{t.review.homeBanner(year)}</span>
           <span className="text-[#f59e0b]">{t.review.homeBannerAction} →</span>
@@ -65,11 +65,11 @@ export function HomeScreen() {
           </Button>
         </EmptyState>
       )}
-      <ul className="flex flex-col gap-4">
+      <ul className="stagger tint-cycle flex flex-col gap-4">
         {reading?.map((book) => {
           const p = progress(book)
           return (
-            <li key={book.entry.id} className="rounded-lg border bg-card p-4">
+            <li key={book.entry.id} className="surface p-4">
               <Link to={`/book/${book.entry.id}`} className="mb-3 flex gap-3">
                 <BookCover url={book.edition.coverUrl} title={book.edition.title} className="w-16" />
                 <div className="flex min-w-0 flex-col gap-1">

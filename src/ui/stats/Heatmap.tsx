@@ -33,6 +33,8 @@ export function Heatmap({ days }: { days: HeatDay[] }) {
                 height={CELL}
                 rx={2}
                 fill={`var(--heat-${d.level})`}
+                className="chart-pop"
+                style={{ animationDelay: `${Math.floor(index / 7) * 12}ms` }}
               >
                 <title>{`${d.date}: ${d.pages} ${s.pages.toLowerCase()}`}</title>
               </rect>

@@ -47,7 +47,7 @@ export function WorkScreen() {
       <div className="mb-5 flex gap-4">
         <BookCover url={result?.coverUrl} title={title} className="w-20" />
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="text-xl title">{title}</h1>
           <p className="text-muted-foreground">{authors.join(', ')}</p>
           {result?.firstPublishYear && <p className="text-sm">{t.screens.search.firstPublished(result.firstPublishYear)}</p>}
         </div>

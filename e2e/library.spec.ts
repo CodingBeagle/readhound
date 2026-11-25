@@ -65,3 +65,19 @@ test('add a book by hand and finish it', async ({ page }) => {
   await page.getByLabel('Period').selectOption('all')
   await expect(page.getByText('Books read').first()).toBeVisible()
 })
+
+test('pick a theme in Profile and keep it after a reload', async ({ page }) => {
+  await page.goto('/profile')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'classic')
+  await expect(page.getByRole('radio', { name: /Classic/ })).toBeChecked()
+
+  await page.getByText('Bookshop', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: /Bookshop/ })).toBeChecked()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'bookshop')
+
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'bookshop')
+  await page.getByText('Midnight', { exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'midnight')
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0a0d1c')
+})
