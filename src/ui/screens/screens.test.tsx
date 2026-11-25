@@ -253,3 +253,30 @@ describe('demo mode', () => {
     expect(await screen.findByText('My real book')).toBeInTheDocument()
   })
 })
+
+describe('stats', () => {
+  it('suggests demo mode when there is nothing to show', async () => {
+    renderAt('/stats')
+    expect(await screen.findByText(t.screens.stats.empty, {}, { timeout: 5000 })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: t.demo.title })).toHaveAttribute('href', '/demo')
+  })
+
+  it('shows every stat section for the demo library, with tables behind the charts', async () => {
+    const user = userEvent.setup()
+    const router = renderAt('/demo')
+    await user.click(await screen.findByRole('button', { name: t.demo.enter }))
+    await screen.findByText(t.demo.banner, {}, { timeout: 5000 })
+    await act(() => router.navigate('/stats?period=all'))
+    expect(await screen.findByText(t.screens.stats.booksPerMonth, {}, { timeout: 5000 })).toBeInTheDocument()
+    for (const title of Object.values(t.screens.stats.sections)) expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
+    for (const title of [t.screens.stats.heatmap, t.screens.stats.genres, t.screens.stats.topAuthors, t.screens.stats.whereIStop, t.screens.stats.milestones])
+      expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
+    expect(screen.getAllByText(t.screens.stats.showTable).length).toBeGreaterThan(10)
+    const rereadCard = screen.getByRole('heading', { name: t.screens.stats.rereads }).closest('section')!
+    expect(within(rereadCard).getByText('The Hobbit')).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText(t.screens.stats.period), 'custom')
+    expect(router.state.location.search).toContain('period=custom')
+    expect(screen.getByLabelText(t.screens.stats.from)).toBeInTheDocument()
+  })
+})

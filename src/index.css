@@ -24,6 +24,24 @@
   --border: oklch(0.923 0.003 48.7);
   --input: oklch(0.923 0.003 48.7);
   --ring: oklch(0.709 0.01 56.3);
+  /* Charts: the validated reference categorical palette, in fixed order. */
+  --chart-1: #257de0;
+  --chart-2: #f47230;
+  --chart-3: #00b894;
+  --chart-4: #f2a600;
+  --chart-5: #ee7fac;
+  --chart-6: #008a17;
+  --chart-7: #6a4ce2;
+  --chart-8: #ec4647;
+  --chart-other: #a3a3a3;
+  --chart-grid: #e7e7e7;
+  --chart-axis: #c2c2c2;
+  /* Heatmap: one blue ramp, light to dark. */
+  --heat-0: oklch(0.94 0.003 48.7);
+  --heat-1: #b6d5f8;
+  --heat-2: #6aabf1;
+  --heat-3: #257de0;
+  --heat-4: #1757ac;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +64,22 @@
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 16%);
     --ring: oklch(0.553 0.013 58);
+    --chart-1: #338ced;
+    --chart-2: #e76624;
+    --chart-3: #00a888;
+    --chart-4: #d28e05;
+    --chart-5: #e24d8b;
+    --chart-6: #0aac23;
+    --chart-7: #9887ef;
+    --chart-8: #eb6263;
+    --chart-other: #6b6b6b;
+    --chart-grid: #303030;
+    --chart-axis: #474747;
+    --heat-0: oklch(0.268 0.007 34.3);
+    --heat-1: #0f4a96;
+    --heat-2: #1b64be;
+    --heat-3: #338ced;
+    --heat-4: #84b9f3;
   }
 }
 

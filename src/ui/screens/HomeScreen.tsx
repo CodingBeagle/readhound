@@ -1,23 +1,52 @@
+import { useLiveQuery } from 'dexie-react-hooks'
+import { Flame } from 'lucide-react'
 import { Link } from 'react-router'
 
+import { useServices } from '@/app/services'
+import { today as todayOf } from '@/db/clock'
 import { progress } from '@/domain/bookView'
+import { booksRead, currentStreak, finishForecast, goalPace, pagesRead, periodFor } from '@/domain/stats'
 import { t } from '@/i18n'
 import { BookCover } from '@/ui/books/BookCover'
 import { LogPageForm } from '@/ui/books/LogPageForm'
 import { ProgressBar } from '@/ui/books/ProgressBar'
 import { Button } from '@/ui/components/ui/button'
 import { useLibrary } from '@/ui/hooks/useLibrary'
+import { useStatsModel } from '@/ui/hooks/useStats'
 import { BackupReminder } from '@/ui/layout/BackupReminder'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
+import { GoalPaceBar } from '@/ui/stats/GoalPaceBar'
 
 export function HomeScreen() {
   const books = useLibrary()
   const reading = books?.filter((b) => b.entry.status === 'reading')
+  const model = useStatsModel()
+  const { db, clock } = useServices()
+  const today = todayOf(clock)
+  const year = Number(today.slice(0, 4))
+  const goal = useLiveQuery(() => db.goals.get(year), [db, year])
+  const streak = model ? currentStreak(model, today) : undefined
+  const forecastFor = (entryId: string) => {
+    const read = model?.reads.find((r) => r.entryId === entryId && r.outcome === undefined)
+    return read && finishForecast(read, today)
+  }
 
   return (
     <>
       <BackupReminder />
+      {model && (streak?.length || goal) ? (
+        <div className="mb-5 flex flex-col gap-3 rounded-xl border bg-card p-4">
+          {streak !== undefined && streak.length > 0 && (
+            <p className="flex items-center gap-2 text-sm font-medium">
+              <Flame aria-hidden className="size-5 text-[var(--chart-2)]" />
+              {t.screens.home.streak(streak.length)}
+            </p>
+          )}
+          {goal?.targetBooks !== undefined && <GoalPaceBar pace={goalPace(goal.targetBooks, booksRead(model, periodFor('this_year', today)).total, year, today)} unit="books" />}
+          {goal?.targetPages !== undefined && <GoalPaceBar pace={goalPace(goal.targetPages, pagesRead(model, periodFor('this_year', today)), year, today)} unit="pages" />}
+        </div>
+      ) : null}
       <ScreenHeader title={t.screens.home.title} />
       {reading && reading.length === 0 && (
         <EmptyState>
@@ -41,8 +70,9 @@ export function HomeScreen() {
                 </div>
               </Link>
               {p !== undefined && (
-                <div className="mb-3">
+                <div className="mb-3 flex flex-col gap-1">
                   <ProgressBar value={p} label={t.common.pageOf(book.currentPage, book.edition.pageCount)} />
+                  <ForecastLine forecast={forecastFor(book.entry.id)} />
                 </div>
               )}
               <LogPageForm book={book} />
@@ -52,4 +82,10 @@ export function HomeScreen() {
       </ul>
     </>
   )
+}
+
+function ForecastLine({ forecast }: { forecast?: { date: string } }) {
+  if (!forecast) return null
+  const label = new Date(`${forecast.date}T12:00:00Z`).toLocaleDateString('en', { day: 'numeric', month: 'short' })
+  return <span className="text-xs text-muted-foreground">{t.screens.stats.finishAround(label)}</span>
 }

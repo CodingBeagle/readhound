@@ -458,3 +458,7 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Backup reminder: counts from the last JSON export, or from the first book added before any export; "Later" hides it for 7 days |
 | 2026-11-25 | JSON import replaces everything on the device after a confirmation; CSV exports are for spreadsheets only |
 | 2026-11-25 | Demo mode: a separate `readhound-demo` database with about two years of generated sample reading; the real library is never touched |
+| 2026-11-25 | Charts: Recharts for standard charts; the heatmap and author map are plain SVG with d3-geo, so Visx isn't needed. Chart colours use the validated reference categorical palette, with every chart also readable as a table |
+| 2026-11-25 | Heatmap intensity: steps 1–4 are quarters of the biggest reading day in the last 12 months |
+| 2026-11-25 | Milestone unlock dates are worked out from the data instead of stored, so imports and edits keep them right |
+| 2026-11-25 | Wait before starting counts first reads that began after the day the book was added; books added as reading or finished are left out |
