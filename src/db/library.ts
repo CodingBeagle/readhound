@@ -339,6 +339,19 @@ export class LibraryRepository {
     })
   }
 
+  /** Edits a read's dates or stop page afterwards ("All dates can be edited afterwards"). */
+  async updateRead(readId: string, patch: Partial<Pick<Read, 'startedOn' | 'endedOn' | 'stoppedAtPage'>>): Promise<void> {
+    if (patch.startedOn && patch.endedOn && patch.endedOn < patch.startedOn) throw new Error('A read cannot end before it starts.')
+    await this.db.reads.update(readId, patch)
+  }
+
+  /** Rating 0.5–5 in 0.5 steps, or undefined to clear it. */
+  async setRating(entryId: string, rating: number | undefined): Promise<void> {
+    if (rating !== undefined && (rating < 0.5 || rating > 5 || rating * 2 !== Math.round(rating * 2)))
+      throw new Error('Ratings go from 0.5 to 5 in steps of 0.5.')
+    await this.db.entries.update(entryId, { rating })
+  }
+
   /** The entry's read in progress, if any. */
   async openRead(entryId: string): Promise<Read | undefined> {
     const reads = await this.db.reads.where('entryId').equals(entryId).toArray()

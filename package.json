@@ -17,9 +17,11 @@
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.108.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dexie": "^4.4.7",
+    "dexie-react-hooks": "^4.4.0",
     "lucide-react": "^1.80.0",
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",

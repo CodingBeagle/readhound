@@ -43,21 +43,23 @@ Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>
 
 ## Tech stack
 
-React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally. Still to come as features land: TanStack Query for Open Library calls, Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
+React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Still to come as features land: Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
 
 ## Code layout
 
 ```
 src/
-  app/        router and app root
+  app/        router, app root and the services provider (database, repositories, book sources)
   db/         Dexie (IndexedDB) schema and repositories: the only way screens touch stored data
   domain/     record types and pure logic: status transitions, session rules, effective values
   i18n/       UI strings (English now, Danish later)
   lib/        small shared helpers
   sources/    book source adapters and registry (Open Library)
-  ui/         screens, layout and components (shadcn/ui lives in ui/components/ui)
+  ui/         screens, layout, book components and hooks (shadcn/ui lives in ui/components/ui)
 ```
 
 Stat calculations will join `domain/` as pure functions.
+
+Screen tests (`src/ui/screens/screens.test.tsx`) render the real routes against a throwaway IndexedDB (fake-indexeddb) and the recorded Open Library fixtures.
 
 To add a shadcn/ui component: `npx shadcn@latest add <component>` (configured by `components.json`).
