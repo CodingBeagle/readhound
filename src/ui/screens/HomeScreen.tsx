@@ -19,6 +19,7 @@ import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 import { GoalPaceBar } from '@/ui/stats/GoalPaceBar'
 import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
+import { NextInSeries } from '@/ui/series/NextInSeries'
 import { HomePicks } from '@/ui/recommendations/HomePicks'
 
 export function HomeScreen() {
@@ -93,6 +94,7 @@ export function HomeScreen() {
           )
         })}
       </ul>
+      <NextInSeries className="mt-6" />
       <HomePicks className="mt-6" />
       {achievements && <LevelCard summary={achievements} className="animate-rise mt-6" />}
     </>

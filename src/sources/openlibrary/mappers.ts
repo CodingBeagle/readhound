@@ -2,7 +2,9 @@
  * Pure mapping from Open Library JSON to the app's source types.
  * Field notes come from the design doc ("Open Library adapter").
  */
-import type { AuthorRef, EditionDetails, SearchResult, SourceRef } from '../types'
+import { parseSeriesLabel } from '@/domain/series'
+
+import type { AuthorRef, EditionDetails, SearchResult, SeriesHint, SourceRef } from '../types'
 
 // --- Raw Open Library shapes (only the fields we read) ---
 
@@ -49,6 +51,8 @@ export interface OlEdition {
   covers?: number[]
   subjects?: string[]
   description?: string | OlText
+  /** Free text such as "Harry Potter, #1" or "Discworld -- 3". */
+  series?: string[]
 }
 
 export interface OlWork {
@@ -175,5 +179,16 @@ export function mapEdition(edition: OlEdition, authors: AuthorRef[]): EditionDet
     coverUrl: cover ? coverUrl(cover) : undefined,
     subjects: edition.subjects ?? [],
     description: normalizeText(edition.description),
+    series: editionSeries(edition.series),
   }
+}
+
+/** Parses Open Library's series labels, dropping duplicates. Undefined when there are none. */
+export function editionSeries(labels: string[] | undefined): SeriesHint[] | undefined {
+  const hints: SeriesHint[] = []
+  for (const label of labels ?? []) {
+    const hint = parseSeriesLabel(label)
+    if (hint && !hints.some((h) => h.name.toLowerCase() === hint.name.toLowerCase())) hints.push(hint)
+  }
+  return hints.length ? hints : undefined
 }

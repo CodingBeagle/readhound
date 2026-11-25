@@ -5,9 +5,11 @@ import { useMemo } from 'react'
 import { useServices } from '@/app/services'
 import { getSetting } from '@/db/queries'
 import { DEFAULT_PREFERRED_LANGUAGES, pickEdition } from '@/domain/editions'
-import { rankCandidates, seedsFor, tasteProfile, type Candidate, type Recommendation, type TasteProfile } from '@/domain/recommendations'
+import { rankCandidates, seedsFor, tasteProfile, type Candidate, type Recommendation, type SeriesNext, type TasteProfile } from '@/domain/recommendations'
+import { nextInSeries } from '@/domain/series'
 import type { SearchResult } from '@/sources/types'
 import { useOnline } from '@/ui/hooks/useDebounced'
+import { useSeriesViews } from '@/ui/hooks/useSeries'
 import { useStatsModel } from '@/ui/hooks/useStats'
 
 /** Work ids of picks the reader said "not for me" to. Part of the backup like every setting. */
@@ -32,6 +34,17 @@ export function useRecommendations(limit = 12): RecommendationsState {
   const dismissed = useLiveQuery(() => getSetting<string[]>(db, SETTING_DISMISSED_PICKS, []), [db])
   const profile = useMemo(() => (model ? tasteProfile(model) : undefined), [model])
   const seeds = useMemo(() => (profile ? seedsFor(profile) : []), [profile])
+  const seriesViews = useSeriesViews()
+  // Not-owned next books of series in progress, by Open Library work id, so they rank first.
+  const seriesNext = useMemo<SeriesNext>(
+    () =>
+      new Map(
+        nextInSeries(seriesViews ?? []).flatMap((v) =>
+          v.next.member.olWorkId && !v.next.book ? [[v.next.member.olWorkId, { series: v.series.name, position: v.next.member.position }] as const] : [],
+        ),
+      ),
+    [seriesViews],
+  )
 
   const candidates = useQuery({
     queryKey: ['recommendations', db.name, ...seeds.map((s) => `${s.kind}:${s.label}`)],
@@ -56,8 +69,8 @@ export function useRecommendations(limit = 12): RecommendationsState {
   })
 
   const picks = useMemo(
-    () => (profile && candidates.data && dismissed ? rankCandidates(profile, candidates.data, { dismissed: new Set(dismissed), limit }) : undefined),
-    [profile, candidates.data, dismissed, limit],
+    () => (profile && candidates.data && dismissed ? rankCandidates(profile, candidates.data, { dismissed: new Set(dismissed), limit, seriesNext }) : undefined),
+    [profile, candidates.data, dismissed, limit, seriesNext],
   )
 
   if (!profile || !dismissed) return { status: 'loading' }

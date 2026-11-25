@@ -7,7 +7,7 @@
  * sessions, notes and lists are invented.
  */
 import type { BackupData } from '@/db/backup'
-import type { Author, Category, Edition, EditionFormat, LibraryEntry, List, ListItem, Note, Read, ReadingSession, Work } from '@/domain/types'
+import type { Author, Category, Edition, EditionFormat, LibraryEntry, List, ListItem, Note, Read, ReadingSession, Series, SeriesMember, Work } from '@/domain/types'
 
 interface SampleBook {
   title: string
@@ -23,10 +23,28 @@ interface SampleBook {
   plan: 'finish' | 'dnf' | 'reread' | 'to_read' | 'old'
   lists?: ListKey[]
   favourite?: boolean
+  /** Series and number in it. */
+  series?: [SeriesKey, number]
 }
 
 type GenreKey = 'crime' | 'scifi' | 'fantasy' | 'literary' | 'classic' | 'memoir' | 'science' | 'selfhelp' | 'poetry'
 type ListKey = 'classics' | 'summer' | 'club'
+type SeriesKey = 'copenhagen' | 'q' | 'earthsea' | 'dune' | 'kingkiller' | 'millennium' | 'threeBody'
+
+/** Series in the sample library, with the books the sample reader doesn't own yet. */
+const SERIES: Record<SeriesKey, { name: string; author: string; totalBooks?: number; missing: [string, number][] }> = {
+  copenhagen: { name: 'Københavnertrilogien', author: 'Tove Ditlevsen', missing: [] },
+  q: { name: 'Afdeling Q', author: 'Jussi Adler-Olsen', totalBooks: 10, missing: [['Flaskepost fra P', 3], ['Journal 64', 4], ['Marco Effekten', 5]] },
+  earthsea: {
+    name: 'Earthsea',
+    author: 'Ursula K. Le Guin',
+    missing: [['The Tombs of Atuan', 2], ['The Farthest Shore', 3], ['Tehanu', 4], ['Tales from Earthsea', 5], ['The Other Wind', 6]],
+  },
+  dune: { name: 'Dune', author: 'Frank Herbert', totalBooks: 6, missing: [['Dune Messiah', 2], ['Children of Dune', 3]] },
+  kingkiller: { name: 'The Kingkiller Chronicle', author: 'Patrick Rothfuss', missing: [["The Wise Man's Fear", 2], ['The Slow Regard of Silent Things', 2.5]] },
+  millennium: { name: 'Millennium', author: 'Stieg Larsson', missing: [['The Girl Who Played with Fire', 2], ["The Girl Who Kicked the Hornets' Nest", 3]] },
+  threeBody: { name: "Remembrance of Earth's Past", author: 'Cixin Liu', missing: [['The Dark Forest', 2], ["Death's End", 3]] },
+}
 
 const GENRES: Record<GenreKey, { name: string; isFiction: boolean }> = {
   crime: { name: 'Krimi', isFiction: true },
@@ -89,17 +107,17 @@ const BOOKS: SampleBook[] = [
   { title: 'Nineteen Eighty-Four', author: 'George Orwell', year: 1949, pages: 328, lang: 'eng', genre: 'classic', plan: 'reread' },
   { title: 'Frøken Smillas fornemmelse for sne', author: 'Peter Høeg', year: 1992, pages: 435, lang: 'dan', genre: 'crime', plan: 'finish', favourite: true },
   { title: 'The Martian', author: 'Andy Weir', year: 2011, pages: 369, lang: 'eng', genre: 'scifi', plan: 'finish', format: 'ebook' },
-  { title: 'Barndom', author: 'Tove Ditlevsen', year: 1967, pages: 112, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics', 'club'] },
-  { title: 'Ungdom', author: 'Tove Ditlevsen', year: 1967, pages: 128, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'] },
-  { title: 'Gift', author: 'Tove Ditlevsen', year: 1971, pages: 184, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'] },
+  { title: 'Barndom', author: 'Tove Ditlevsen', year: 1967, pages: 112, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics', 'club'], series: ['copenhagen', 1] },
+  { title: 'Ungdom', author: 'Tove Ditlevsen', year: 1967, pages: 128, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'], series: ['copenhagen', 2] },
+  { title: 'Gift', author: 'Tove Ditlevsen', year: 1971, pages: 184, lang: 'dan', genre: 'memoir', plan: 'finish', lists: ['classics'], series: ['copenhagen', 3] },
   { title: 'Sapiens', author: 'Yuval Noah Harari', year: 2011, pages: 443, lang: 'eng', orig: 'heb', genre: 'science', plan: 'finish' },
-  { title: 'Kvinden i buret', author: 'Jussi Adler-Olsen', year: 2007, pages: 400, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'] },
+  { title: 'Kvinden i buret', author: 'Jussi Adler-Olsen', year: 2007, pages: 400, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'], series: ['q', 1] },
   { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', year: 2011, pages: 499, lang: 'eng', genre: 'science', plan: 'dnf' },
-  { title: 'Fasandræberne', author: 'Jussi Adler-Olsen', year: 2008, pages: 456, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'] },
+  { title: 'Fasandræberne', author: 'Jussi Adler-Olsen', year: 2008, pages: 456, lang: 'dan', genre: 'crime', plan: 'finish', lists: ['summer'], series: ['q', 2] },
   { title: 'Educated', author: 'Tara Westover', year: 2018, pages: 334, lang: 'eng', genre: 'memoir', plan: 'finish', lists: ['club'] },
   { title: 'The Remains of the Day', author: 'Kazuo Ishiguro', year: 1989, pages: 245, lang: 'eng', genre: 'literary', plan: 'finish' },
   { title: 'Det forsømte forår', author: 'Hans Scherfig', year: 1940, pages: 208, lang: 'dan', genre: 'classic', plan: 'finish', lists: ['classics'] },
-  { title: 'Dune', author: 'Frank Herbert', year: 1965, pages: 617, lang: 'eng', genre: 'scifi', plan: 'finish', format: 'paperback' },
+  { title: 'Dune', author: 'Frank Herbert', year: 1965, pages: 617, lang: 'eng', genre: 'scifi', plan: 'finish', format: 'paperback', series: ['dune', 1] },
   { title: 'Normal People', author: 'Sally Rooney', year: 2018, pages: 266, lang: 'eng', genre: 'literary', plan: 'finish', lists: ['club'] },
   { title: 'Lykke-Per', author: 'Henrik Pontoppidan', year: 1898, pages: 704, lang: 'dan', genre: 'classic', plan: 'dnf', lists: ['classics'] },
   { title: 'Piranesi', author: 'Susanna Clarke', year: 2020, pages: 245, lang: 'eng', genre: 'fantasy', plan: 'finish', favourite: true },
@@ -109,7 +127,7 @@ const BOOKS: SampleBook[] = [
   { title: 'The Silent Patient', author: 'Alex Michaelides', year: 2019, pages: 336, lang: 'eng', genre: 'crime', plan: 'finish', lists: ['summer'] },
   { title: 'Det', author: 'Inger Christensen', year: 1969, pages: 240, lang: 'dan', genre: 'poetry', plan: 'finish' },
   { title: 'Klara og solen', author: 'Kazuo Ishiguro', year: 2021, pages: 320, lang: 'dan', orig: 'eng', genre: 'literary', plan: 'finish', lists: ['club'] },
-  { title: 'The Three-Body Problem', author: 'Cixin Liu', year: 2008, pages: 400, lang: 'eng', orig: 'chi', genre: 'scifi', plan: 'dnf' },
+  { title: 'The Three-Body Problem', author: 'Cixin Liu', year: 2008, pages: 400, lang: 'eng', orig: 'chi', genre: 'scifi', plan: 'dnf', series: ['threeBody', 1] },
   { title: 'Vejen', author: 'Cormac McCarthy', year: 2006, pages: 240, lang: 'dan', orig: 'eng', genre: 'literary', plan: 'finish' },
   { title: 'Hvis det er', author: 'Helle Helle', year: 2014, pages: 160, lang: 'dan', genre: 'literary', plan: 'finish' },
   { title: 'Circe', author: 'Madeline Miller', year: 2018, pages: 393, lang: 'eng', genre: 'fantasy', plan: 'finish', lists: ['summer'] },
@@ -119,11 +137,11 @@ const BOOKS: SampleBook[] = [
   { title: 'Pachinko', author: 'Min Jin Lee', year: 2017, pages: 490, lang: 'eng', genre: 'literary', plan: 'finish', lists: ['club'] },
   { title: 'The Left Hand of Darkness', author: 'Ursula K. Le Guin', year: 1969, pages: 304, lang: 'eng', genre: 'scifi', plan: 'finish' },
   { title: 'Never Let Me Go', author: 'Kazuo Ishiguro', year: 2005, pages: 288, lang: 'eng', genre: 'literary', plan: 'finish' },
-  { title: 'A Wizard of Earthsea', author: 'Ursula K. Le Guin', year: 1968, pages: 183, lang: 'eng', genre: 'fantasy', plan: 'finish' },
+  { title: 'A Wizard of Earthsea', author: 'Ursula K. Le Guin', year: 1968, pages: 183, lang: 'eng', genre: 'fantasy', plan: 'finish', series: ['earthsea', 1] },
   { title: 'Gone Girl', author: 'Gillian Flynn', year: 2012, pages: 419, lang: 'eng', genre: 'crime', plan: 'finish' },
-  { title: 'The Name of the Wind', author: 'Patrick Rothfuss', year: 2007, pages: 662, lang: 'eng', genre: 'fantasy', plan: 'finish' },
+  { title: 'The Name of the Wind', author: 'Patrick Rothfuss', year: 2007, pages: 662, lang: 'eng', genre: 'fantasy', plan: 'finish', series: ['kingkiller', 1] },
   { title: 'Barndommens gade', author: 'Tove Ditlevsen', year: 1943, pages: 224, lang: 'dan', genre: 'classic', plan: 'finish', lists: ['classics'] },
-  { title: 'The Girl with the Dragon Tattoo', author: 'Stieg Larsson', year: 2005, pages: 465, lang: 'eng', orig: 'swe', genre: 'crime', plan: 'to_read', lists: ['summer'] },
+  { title: 'The Girl with the Dragon Tattoo', author: 'Stieg Larsson', year: 2005, pages: 465, lang: 'eng', orig: 'swe', genre: 'crime', plan: 'to_read', lists: ['summer'], series: ['millennium', 1] },
   { title: 'A Short History of Nearly Everything', author: 'Bill Bryson', year: 2003, pages: 544, lang: 'eng', genre: 'science', plan: 'to_read' },
   { title: 'Braiding Sweetgrass', author: 'Robin Wall Kimmerer', year: 2013, pages: 391, lang: 'eng', genre: 'science', plan: 'to_read', lists: ['club'] },
 ]
@@ -261,8 +279,20 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
     works.push(work)
     editions.push(edition)
     entries.push(entry)
-    return { book, entry }
+    return { book, entry, work }
   })
+
+  // Series: the owned books at their numbers, plus the ones not owned yet.
+  const series: Series[] = []
+  const seriesMembers: SeriesMember[] = []
+  for (const [key, def] of Object.entries(SERIES) as [SeriesKey, (typeof SERIES)[SeriesKey]][]) {
+    const seriesId = `demo-series-${key}`
+    series.push({ id: seriesId, name: def.name, totalBooks: def.totalBooks, origin: 'manual', createdAt: `${first}T10:00:00.000Z` })
+    for (const { book, work } of books.filter((b) => b.book.series?.[0] === key))
+      seriesMembers.push({ id: id('member'), seriesId, workId: work.id, title: book.title, position: book.series![1], origin: 'manual', addedAt: `${first}T10:00:00.000Z` })
+    for (const [title, position] of def.missing)
+      seriesMembers.push({ id: id('member'), seriesId, title, authorName: def.author, position, origin: 'manual', addedAt: `${first}T10:00:00.000Z` })
+  }
 
   // Books finished before the history starts: dated reads without sessions.
   const old = books.filter((b) => b.book.plan === 'old' || b.book.plan === 'reread')
@@ -413,6 +443,8 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       // Counts as backed up today, so the backup reminder doesn't greet the demo.
       { key: 'lastBackupAt', value: now },
     ],
+    series,
+    seriesMembers,
   }
   return { data, ranOutAfter }
 }

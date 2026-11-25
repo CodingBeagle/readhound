@@ -1,4 +1,5 @@
 import type { Reason } from '@/domain/recommendations'
+import { formatPosition } from '@/domain/series'
 import { t } from '@/i18n'
 
 const r = t.recommendations
@@ -10,5 +11,7 @@ export function reasonText(reason: Reason): string {
       return r.because.author(reason.author, reason.book)
     case 'subject':
       return r.because.subject(reason.subject, reason.book)
+    case 'series':
+      return r.because.series(reason.series, formatPosition(reason.position))
   }
 }

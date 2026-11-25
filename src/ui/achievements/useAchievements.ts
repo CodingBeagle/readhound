@@ -10,5 +10,9 @@ export function useAchievements(): AchievementSummary | undefined {
   const { db } = useServices()
   const model = useStatsModel()
   const goals = useLiveQuery(() => db.goals.toArray(), [db])
-  return useMemo(() => (model && goals ? achievements({ model, goals }) : undefined), [model, goals])
+  const series = useLiveQuery(async () => {
+    const [list, members] = await Promise.all([db.series.toArray(), db.seriesMembers.toArray()])
+    return { series: list, members }
+  }, [db])
+  return useMemo(() => (model && goals && series ? achievements({ model, goals, series }) : undefined), [model, goals, series])
 }

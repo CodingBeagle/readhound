@@ -148,6 +148,17 @@ describe('ranking', () => {
     const again = rankCandidates(profile, candidates, { dismissed: new Set([martian]) })
     expect(again.map((p) => p.result.work.id)).not.toContain(martian)
   })
+
+  it('puts the next book of a series in progress first, outside the per-author cap', () => {
+    const dune = picks.find((p) => p.result.title === 'Dune')!.result.work.id
+    const artemis = picks.find((p) => p.result.title === 'Artemis')!.result.work.id
+    const withSeries = rankCandidates(profile, candidates, { seriesNext: new Map([[dune, { series: 'Dune', position: 1 }], [artemis, { series: 'Artemis' }]]) })
+    expect(withSeries.slice(0, 2).map((p) => p.result.work.id).sort()).toEqual([dune, artemis].sort())
+    expect(withSeries.find((p) => p.result.work.id === dune)!.reason).toEqual({ kind: 'series', series: 'Dune', position: 1 })
+    // Artemis is a series pick, so two more Andy Weir books still fit under the cap.
+    const weir = picks.filter((p) => p.result.authors[0]!.name === 'Andy Weir').length
+    expect(withSeries.filter((p) => p.result.authors[0]!.name === 'Andy Weir').length).toBeGreaterThanOrEqual(weir)
+  })
 })
 
 describe('owned and compilations', () => {

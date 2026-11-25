@@ -1,6 +1,6 @@
-import { LayoutGrid, List } from 'lucide-react'
+import { Layers, LayoutGrid, List } from 'lucide-react'
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { filterBooks, sortBooks, type LibrarySort } from '@/domain/bookView'
 import type { Status } from '@/domain/types'
@@ -11,6 +11,7 @@ import { Button } from '@/ui/components/ui/button'
 import { Input, Select } from '@/ui/components/ui/input'
 import { useCollections } from '@/ui/hooks/useCollections'
 import { useLibrary } from '@/ui/hooks/useLibrary'
+import { useSeriesNames } from '@/ui/hooks/useSeries'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 
@@ -34,7 +35,9 @@ export function LibraryScreen() {
   const language = params.get('lang') ?? ''
   const listId = params.get('list') ?? ''
   const categoryId = params.get('cat') ?? ''
+  const seriesId = params.get('series') ?? ''
   const collections = useCollections()
+  const seriesNames = useSeriesNames()
 
   const set = (key: string, value: string) =>
     setParams(
@@ -58,16 +61,31 @@ export function LibraryScreen() {
     () =>
       books
         ? sortBooks(
-            filterBooks(books, { status: status || undefined, text, language: language || undefined, categoryId: categoryId || undefined, listEntryIds }),
+            filterBooks(books, {
+              status: status || undefined,
+              text,
+              language: language || undefined,
+              categoryId: categoryId || undefined,
+              listEntryIds,
+              seriesId: seriesId || undefined,
+            }),
             sort,
           )
         : [],
-    [books, status, text, language, categoryId, listEntryIds, sort],
+    [books, status, text, language, categoryId, listEntryIds, seriesId, sort],
   )
 
   return (
     <>
-      <ScreenHeader title={t.screens.library.title} />
+      <div className="flex items-start justify-between gap-2">
+        <ScreenHeader title={t.screens.library.title} />
+        <Button asChild variant="outline" size="sm" className="rounded-full">
+          <Link to="/series">
+            <Layers />
+            {t.series.libraryLink}
+          </Link>
+        </Button>
+      </div>
       <div role="group" aria-label={t.screens.book.statusLabel} className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1">
         {STATUS_FILTERS.map((f) => (
           <Button
@@ -113,6 +131,16 @@ export function LibraryScreen() {
             </Select>
           )}
         </div>
+      )}
+      {seriesNames && seriesNames.length > 0 && (
+        <Select aria-label={t.series.filter} value={seriesId} onChange={(e) => set('series', e.target.value)} className="mb-2">
+          <option value="">{t.series.anySeries}</option>
+          {seriesNames.map((x) => (
+            <option key={x.id} value={x.id}>
+              {x.name}
+            </option>
+          ))}
+        </Select>
       )}
       <div className="mb-4 flex gap-2">
         <Select aria-label={t.screens.library.sort} value={sort} onChange={(e) => set('sort', e.target.value)} className="min-w-0 flex-1">

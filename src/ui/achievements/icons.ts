@@ -1,5 +1,7 @@
 import {
+  BookCopy,
   BookOpen,
+  ChevronsRight,
   CalendarCheck,
   CalendarRange,
   Coffee,
@@ -22,6 +24,7 @@ import {
   Star,
   Sun,
   Sunrise,
+  Tally3,
   Target,
   Weight,
   Zap,
@@ -59,4 +62,7 @@ export const ACHIEVEMENT_ICONS: Record<Family | Special, LucideIcon> = {
   everyMonth: CalendarRange,
   lifeIsShort: DoorOpen,
   critic: Star,
+  completionist: BookCopy,
+  trilogy: Tally3,
+  backToBack: ChevronsRight,
 }

@@ -208,6 +208,27 @@ interface Note {
 
 interface Goal { year: number; targetBooks?: number; targetPages?: number }
 
+interface Series {
+  id: string;
+  name: string;
+  totalBooks?: number;                // known size; else the number of members counts
+  wikidataId?: string;                // e.g. "Q1093045", when detected on Wikidata
+  origin: "manual" | "openlibrary" | "wikidata";   // a user edit sets "manual"
+  createdAt: string;
+}
+
+interface SeriesMember {              // one book's place in a series; linked per work
+  id: string;
+  seriesId: string;
+  workId?: string;                    // set when the book is in the library
+  title: string;                      // shown for books not owned; kept if the work is removed
+  authorName?: string;
+  position?: number;                  // decimals allowed for novellas (3.5); unnumbered sorts last
+  olWorkId?: string; wikidataId?: string;   // used to link the member when the book is added
+  origin: "manual" | "openlibrary" | "wikidata";
+  addedAt: string;
+}
+
 type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | "publishYear"
   | "pageCount" | "language" | "format" | "coverUrl";
 ```
@@ -231,6 +252,8 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 **Core flow:** search the catalog, pick a book (edition), and add it to my personal library.
 
 **Statuses:** every book in the library has one reading status: **to read**, **currently reading**, **finished** or **DNF** (did not finish). DNF books go into their own DNF pile, and the app remembers the page I stopped at.
+
+**Series:** see [Series](#series). A book's series is set on the work, so every edition I own counts toward it.
 
 **Lists:** I can create my own named lists (for example "Summer 2027" or "Danish classics") and put books in them. A book can be in several lists. Lists are separate from status and from categories.
 
@@ -257,6 +280,31 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 | finished or dnf | to\_read | allowed; no read changes |
 
 At most one open Read per entry. The **DNF pile** is the view of entries with `status = dnf`. All dates in these transitions can be edited afterwards.
+
+## Series
+
+Series tracking shows how far I am through a series, which book comes next, and the books of the series I don't own yet.
+
+**Data:** a `Series` and its `SeriesMember` rows (see Schema), in the tables `series` (`id, name, wikidataId`) and `seriesMembers` (`id, seriesId, workId, olWorkId, wikidataId`), added in Dexie schema version 2. A member is either a work in the library or a title only (a gap). Adding a book from Open Library links any gap with the same `olWorkId` to the new work. Removing a book leaves its member as a gap. A work can be in several series (e.g. a sub-series).
+
+**Manual editing:** the book screen has a Series section to add the book to an existing or new series with a number, renumber it, or remove it. The series screen edits the name and total, renumbers, adds a book not owned (title, author, number), removes members and deletes the series (books stay). Any user edit sets `origin = "manual"`, and detection never overwrites manual numbers, names or totals.
+
+**Detection** (`src/sources/series/`):
+
+1. **Wikidata first.** One SPARQL GET to `https://query.wikidata.org/sparql?format=json&query=…` finds the item whose Open Library ID (P648) is the work's OLID, or an edition item with that OLID and its work (P629). It returns each series (P179 "part of the series") with this book's ordinal (qualifier P1545), the series' number of parts (P2635) and every other member of the series with its ordinal, label (Danish, then English), author (P50) and Open Library work ID. Edition items (P31 Q3331189) are left out. No key and no custom headers are needed, so the browser makes a simple CORS request; responses are cached 30 days and throttled to 2 per second.
+2. **Open Library fallback.** If Wikidata knows nothing or fails, the edition's free-text `series` field is parsed (`parseSeriesLabel`): "Harry Potter, #1", "A Song of Ice and Fire #1", "Discworld -- 3", "Millennium ; 1", "(Afdeling Q ; bd. 2)", "Earthsea, book 2"; numbers of 1000 or more are treated as years, not positions.
+3. **Offered, not forced.** The book screen shows "Part of a series?" with each candidate, one tap to add it and "Not this" (stored in the setting `seriesSuggestionsDismissed`). Applying a candidate finds or creates the series (matched by Wikidata ID or folded name), places the book and adds the other members as gaps or links them to owned works. Library > Series has "Find series for my library", which applies the best candidate for every Open Library book without a series and reports how many it found.
+
+**Screens:**
+
+- **Library > Series** (`/series`): every series with "4 of 7 read", "5 of 7 in your library" and a cover strip in order. Books not owned are faded with a dashed outline.
+- **Series** (`/series/:id`): the books in order with their number, cover and state (Read, Reading, DNF, To read, Not in library), "Next in series" on the next one, and "Find it" for gaps (the Open Library work page when its ID is known, otherwise a search for title and author).
+- **Library filter:** "All series" or one series.
+- **Home:** "Next in series" lists up to three series continued in the last 120 days, most recent first, with one tap to start reading an owned book or to find a missing one.
+
+**Rules** (`src/domain/series.ts`): order by position, then unnumbered members by title. A book counts as read if any of its reads finished, so a reread in progress still counts. Total is `max(totalBooks, members)`. A series is complete when it has at least two books and all are read. The next book is the first unread member after the furthest one read (or the first unread one before it), and none while that book is being read or before any book is finished. `nextInSeries` and `preferredNextWorks` give recommendations the works (by `workId` or `olWorkId`) to rank first; the For you ranking uses them (see Recommendations).
+
+**Backup:** the backup format moves to version 2 with `series` and `seriesMembers`; version 1 files still import with no series. The library CSV has a Series column ("Afdeling Q #2").
 
 ## Reading tracking
 
@@ -371,24 +419,24 @@ Mobile-first: a bottom tab bar with five tabs. On wide screens it becomes a side
 
 | Tab | Contents |
 | --- | --- |
-| Home | Currently reading cards with progress bar, quick "I'm on page N" input and finish forecast; current streak; goal pace |
+| Home | Currently reading cards with progress bar, quick "I'm on page N" input and finish forecast; current streak; goal pace; next in series |
 | Search | Search box (text or ISBN), results list, work detail with edition picker, "Add manually" at the bottom of results and on empty results |
-| Library | Filter by status (to read, reading, finished, DNF pile), list, category, language; sort by added, title, author, finished date, rating; grid or list view |
+| Library | Filter by status (to read, reading, finished, DNF pile), list, category, series, language; sort by added, title, author, finished date, rating; grid or list view; link to Series |
 | Stats | Period filter; sections matching the stat groups; year in review entry point |
 | Profile | Theme, goals, lists and categories management, preferred languages, export and import, settings, danger zone |
 
-**Book detail** (from anywhere): cover, effective metadata with an edit button, status control, reads history with sessions, notes and quotes, lists and categories, rating, link to Open Library.
+**Book detail** (from anywhere): cover, effective metadata with an edit button, status control, reads history with sessions, notes and quotes, lists and categories, series (with detection suggestions), rating, link to Open Library.
 
 ## Achievements
 
-Achievements gamify reading. They are worked out purely from the stats model and the yearly goals (`src/domain/achievements.ts`), so imports, edits and deletes keep them right. Unlock dates are derived from the data: the date of the session, finish or rating that crossed the threshold.
+Achievements gamify reading. They are worked out purely from the stats model, the yearly goals and the series (`src/domain/achievements.ts`), so imports, edits and deletes keep them right. Unlock dates are derived from the data: the date of the session, finish or rating that crossed the threshold.
 
-- **Families**: 14 tiered achievements with bronze, silver, gold and platinum thresholds, in four groups.
+- **Families**: 15 tiered achievements with bronze, silver, gold and platinum thresholds, in four groups.
   - Reading: Bookworm (books finished 5/15/30/60), Page turner (pages 1k/5k/15k/40k), Marathoner (finished books of 500+ pages 1/3/6/12), Speed reader (books finished within 7 days of starting 1/3/8/20).
   - Habits: On a roll (longest streak 7/30/60/100 days), Devoted (reading days 30/100/250/500), Goal getter (yearly goals met 1/2/3/5).
   - Variety: Explorer (genres of finished books 3/5/8/12), Globetrotter (author countries 3/6/10/20), Polyglot (languages 2/3/4/5), Time traveller (publication decades 3/5/8/10), Superfan (most books by one author 3/5/8/12).
-  - Collection: Old friends (rereads 1/3/6/10), Collector (books in the library 25/50/100/250).
-- **Specials**: 13 one-off achievements: First chapter, Big day (100 pages in a day), Weekend binge (250 pages over a Saturday and Sunday), Night owl (a session starting 23:00 to 04:00), Early bird (a session starting 05:00 to 07:00), Doorstopper (800+ pages finished), Short and sweet (under 150 pages), Classic (published before 1900), Hot off the press (finished in its publication year), Lost in translation (a finished book read in translation), All year round (reading in all 12 months of one year), Life is short (first DNF), Critic (10 ratings).
+  - Collection: Old friends (rereads 1/3/6/10), Collector (books in the library 25/50/100/250), Completionist (series with every book read 1/3/5/10, unlocked the day the last one was finished).
+- **Specials**: 15 one-off achievements: First chapter, Big day (100 pages in a day), Weekend binge (250 pages over a Saturday and Sunday), Night owl (a session starting 23:00 to 04:00), Early bird (a session starting 05:00 to 07:00), Doorstopper (800+ pages finished), Short and sweet (under 150 pages), Classic (published before 1900), Hot off the press (finished in its publication year), Lost in translation (a finished book read in translation), All year round (reading in all 12 months of one year), Life is short (first DNF), Critic (10 ratings), Trilogy (complete a series of 3 or more), Back to back (finish the next book of a series right after the one before it).
 - **Points and levels**: bronze 10, silver 25, gold 50, platinum 100, special 25. Levels: Puppy 0, Fetcher 100, Sniffer 300, Tracker 700, Bloodhound 1,300, Readhound 2,100.
 - **Where it shows**: a level card on Home, Stats and Profile links to the Achievements screen (`/achievements`), which lists families by group with tier pips, next goal and progress, then the specials grid. Filters: All, Unlocked, Still to earn.
 - **Unlock moments**: the only stored state is the setting `achievementsSeen` ({ ids, level }). A newly earned achievement or level shows a toast with a confetti burst, once. The first run on a database (and in demo mode) is silent apart from a single welcome toast summarising what is already earned. Toasts honour reduced motion.
@@ -430,7 +478,9 @@ Each part of the profile is scaled to ±1 first. The ranking leaves out:
 - box sets and omnibus titles
 - books with no liked author or subject
 
-No author gets more than two picks, and there are up to 12 picks in all. More signals, such as text-embedding similarity in the browser, can be added later as further terms in `scoreCandidate`.
+**Series first:** a candidate whose Open Library work id is the next unread, not-owned book of a series in progress (`nextInSeries` in `src/domain/series.ts`) skips the liked-author/subject test, goes to the top, and doesn't count toward the per-author cap. Its reason reads "Next in <series>: book <n>".
+
+No author gets more than two picks (series picks aside), and there are up to 12 picks in all. More signals, such as text-embedding similarity in the browser, can be added later as further terms in `scoreCandidate`.
 
 **Reasons.** Each pick shows why it was chosen: "Because you loved <best-rated book by that author>", or "Because you like <subject>, such as <best-liked book in it>".
 
@@ -524,7 +574,7 @@ The TypeScript types in this document are meant to be used directly. Code is org
 
 ## Storage
 
-- **Local only:** all user data lives on the device. There is no backend and no account in version 1. The only network calls go to Open Library.
+- **Local only:** all user data lives on the device. There is no backend and no account in version 1. The only network calls go to Open Library and, for series detection, Wikidata's query service.
 - In the browser, data is stored in IndexedDB. The app requests persistent storage (`navigator.storage.persist()`) so the browser doesn't evict it.
 - Browser data can still be lost (cleared site data, a new phone), so **export and import are essential**. The app reminds the user to export a backup if the last one is more than 30 days old.
 - All storage access goes through a repository layer, so sync or a server can be added later without touching screens or stats.
@@ -588,4 +638,5 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Four themes (Classic, Aurora, Bookshop, Midnight), chosen per device in Profile; motion across screens and charts, all honouring reduced motion |
 | 2026-11-25 | Danger zone at the bottom of Profile: deletes the whole personal database (settings and cache included) after an export offer and typing DELETE; keeps the theme; hidden in demo mode and never touches the demo database |
 | 2026-11-25 | Achievement system replaces milestones: 14 tiered families (bronze to platinum), 13 specials, points and six dog-themed reader levels; derived from the data, only the seen state is stored so each unlock toasts once |
+| 2026-11-25 | Series tracking: series linked per work with decimal positions and not-owned gaps; detection from Wikidata (P179/P1545 by Open Library ID) with Open Library's series label as fallback, offered as one-tap suggestions plus a library scan; Library > Series, a series filter, Next in series on Home; Completionist, Trilogy and Back to back achievements; backup format version 2 |
 | 2026-11-25 | Recommendations from an on-device taste profile, built from ratings, favourites, finishes and DNFs. Open Library searches by the top authors and subjects, ranked by a weighted fit with a reason per pick; dismissals are stored in settings. Smarter in-browser similarity can come later as an extra ranking term |

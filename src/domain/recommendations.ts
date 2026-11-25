@@ -36,7 +36,13 @@ export interface TasteProfile {
   owned: { workIds: Set<string>; keys: Set<string> }
 }
 
-export type Reason = { kind: 'author'; author: string; book?: string } | { kind: 'subject'; subject: string; book?: string }
+export type Reason =
+  | { kind: 'author'; author: string; book?: string }
+  | { kind: 'subject'; subject: string; book?: string }
+  | { kind: 'series'; series: string; position?: number }
+
+/** Open Library work id → the series it is the next unread book of (see `nextInSeries` in series.ts). */
+export type SeriesNext = ReadonlyMap<string, { series: string; position?: number }>
 
 export interface Seed {
   kind: 'author' | 'subject'
@@ -272,7 +278,11 @@ function isCompilation(title: string): boolean {
  * dismissed ones, compilations and poor fits are left out, and no author
  * gets more than two of the picks.
  */
-export function rankCandidates(profile: TasteProfile, candidates: readonly Candidate[], { dismissed = new Set<string>(), limit = 12 } = {}): Recommendation[] {
+export function rankCandidates(
+  profile: TasteProfile,
+  candidates: readonly Candidate[],
+  { dismissed = new Set<string>(), limit = 12, seriesNext = new Map() as SeriesNext } = {},
+): Recommendation[] {
   const s = scalesFor(profile)
   const seen = new Set<string>()
   const scored: Recommendation[] = []
@@ -286,6 +296,12 @@ export function rankCandidates(profile: TasteProfile, candidates: readonly Candi
     if (owned || dismissed.has(result.work.id)) continue
 
     const score = scoreCandidate(result, s)
+    // The next book of a series the reader is part-way through goes first, whatever else it scores.
+    const next = seriesNext.get(result.work.id)
+    if (next) {
+      scored.push({ result, score: score.total + 10, reason: { kind: 'series', series: next.series, position: next.position } })
+      continue
+    }
     // A pick needs a reason: a liked author or a liked subject, not just era, length or popularity.
     const fits = (score.author?.value ?? 0) > 0 || (score.subject?.value ?? 0) > 0
     if (!fits || score.total <= 0.15) continue
@@ -298,8 +314,11 @@ export function rankCandidates(profile: TasteProfile, candidates: readonly Candi
   for (const r of scored) {
     const author = normalizeTerm(r.result.authors[0]!.name)
     const n = perAuthor.get(author) ?? 0
-    if (n >= 2) continue
-    perAuthor.set(author, n + 1)
+    // Series picks don't count toward the two-per-author cap.
+    if (r.reason.kind !== 'series') {
+      if (n >= 2) continue
+      perAuthor.set(author, n + 1)
+    }
     picks.push(r)
     if (picks.length === limit) break
   }

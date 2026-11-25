@@ -167,3 +167,44 @@ export interface Setting {
   key: string
   value: unknown
 }
+
+/**
+ * A book series, such as "Afdeling Q" or "Discworld". Series are linked at
+ * the work level, so any edition the user owns counts toward its series.
+ */
+export interface Series {
+  id: string
+  name: string
+  /** How many books the series has, when known. Falls back to the number of members. */
+  totalBooks?: number
+  /** Wikidata item of the series (e.g. "Q1093045"), when it was detected there. */
+  wikidataId?: string
+  /** Where the series came from. User edits never get overwritten by detection. */
+  origin: SeriesOrigin
+  createdAt: string
+}
+
+export type SeriesOrigin = 'manual' | 'openlibrary' | 'wikidata'
+
+/**
+ * One book's place in a series. A member is either a work in the library
+ * (`workId`) or a book the user doesn't own yet (title only), so a series can
+ * show its gaps. When the user later adds that book, the member is linked to
+ * the new work.
+ */
+export interface SeriesMember {
+  id: string
+  seriesId: string
+  /** Set when the book is in the library. */
+  workId?: string
+  /** Shown for books not in the library; kept as a fallback when the work is removed. */
+  title: string
+  authorName?: string
+  /** Order in the series; decimals allowed for novellas (e.g. 3.5). Undefined sorts last. */
+  position?: number
+  /** Catalog references, used to link the member when the user adds the book. */
+  olWorkId?: string
+  wikidataId?: string
+  origin: SeriesOrigin
+  addedAt: string
+}

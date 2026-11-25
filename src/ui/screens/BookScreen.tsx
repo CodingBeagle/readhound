@@ -15,6 +15,8 @@ import { BookCover } from '@/ui/books/BookCover'
 import { LogPageForm } from '@/ui/books/LogPageForm'
 import { Notes } from '@/ui/books/Notes'
 import { Organise } from '@/ui/books/Organise'
+import { SeriesSection } from '@/ui/books/SeriesSection'
+import { SeriesSuggestion } from '@/ui/books/SeriesSuggestion'
 import { SessionForm } from '@/ui/books/SessionForm'
 import { StatusBadge } from '@/ui/books/StatusBadge'
 import { Button } from '@/ui/components/ui/button'
@@ -76,6 +78,12 @@ export function BookScreen() {
 
       <Section title={b.organise}>
         <Organise entryId={book.entry.id} categoryIds={book.entry.categoryIds} />
+      </Section>
+
+      <Section title={t.series.section}>
+        <SeriesSection book={book}>
+          <SeriesSuggestion book={book} />
+        </SeriesSection>
       </Section>
 
       <Section title={b.notes}>

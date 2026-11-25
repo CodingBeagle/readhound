@@ -16,6 +16,8 @@ import type {
   Note,
   Read,
   ReadingSession,
+  Series,
+  SeriesMember,
   Setting,
   Work,
 } from '@/domain/types'
@@ -24,7 +26,8 @@ import type { Clock } from './clock'
 import type { ReadhoundDB } from './schema'
 
 export const BACKUP_FORMAT = 'readhound-backup'
-export const BACKUP_VERSION = 1
+/** Version 2 added series. Version 1 files still import (they simply have no series). */
+export const BACKUP_VERSION = 2
 
 export const SETTING_LAST_BACKUP = 'lastBackupAt'
 export const SETTING_BACKUP_SNOOZE = 'backupReminderSnoozedUntil'
@@ -43,6 +46,8 @@ export interface BackupData {
   notes: Note[]
   goals: Goal[]
   settings: Setting[]
+  series: Series[]
+  seriesMembers: SeriesMember[]
 }
 
 export interface Backup {
@@ -67,6 +72,8 @@ export const BACKUP_TABLES = [
   'notes',
   'goals',
   'settings',
+  'series',
+  'seriesMembers',
 ] as const satisfies readonly (keyof BackupData)[]
 
 /** Primary key field per table, used to sanity-check rows on import. */
@@ -83,6 +90,8 @@ const KEY_FIELDS: Record<keyof BackupData, readonly string[]> = {
   notes: ['id'],
   goals: ['year'],
   settings: ['key'],
+  series: ['id'],
+  seriesMembers: ['id', 'seriesId'],
 }
 
 export async function createBackup(db: ReadhoundDB, clock: Clock, appVersion: string): Promise<Backup> {
@@ -172,7 +181,7 @@ export function libraryCsv(books: readonly BookView[], lists: readonly List[], l
   }
   const header = [
     'Title', 'Subtitle', 'Authors', 'ISBN-13', 'ISBN-10', 'Publisher', 'Year', 'Pages', 'Language', 'Format',
-    'Status', 'Rating', 'Added', 'Times finished', 'Last finished', 'Lists', 'Categories',
+    'Status', 'Rating', 'Added', 'Times finished', 'Last finished', 'Lists', 'Categories', 'Series',
   ]
   const rows = books.map((b) => {
     const e = b.edition
@@ -182,6 +191,7 @@ export function libraryCsv(books: readonly BookView[], lists: readonly List[], l
       b.reads.filter((r) => r.outcome === 'finished').length, b.lastFinishedOn,
       joinNames(listsByEntry.get(b.entry.id) ?? []),
       joinNames(b.entry.categoryIds.flatMap((id) => categoryName.get(id) ?? [])),
+      joinNames(b.series.map((s) => (s.position !== undefined ? `${s.series.name} #${s.position}` : s.series.name))),
     ]
   })
   return toCsv(header, rows)

@@ -3,6 +3,7 @@
  * filter and sort the library.
  */
 import { effectiveEdition } from './effective'
+import type { BookSeries } from './series'
 import { currentPage } from './sessions'
 import type { Author, Edition, LibraryEntry, Read, ReadingSession, Status, Work } from './types'
 
@@ -21,6 +22,8 @@ export interface BookView {
   currentPage: number
   /** End date of the latest finished read. */
   lastFinishedOn: string | undefined
+  /** Series the book's work belongs to, by series name. */
+  series: BookSeries[]
 }
 
 export function buildBookView(input: {
@@ -30,6 +33,7 @@ export function buildBookView(input: {
   authors: Author[]
   reads: Read[]
   sessions: ReadingSession[]
+  series?: BookSeries[]
 }): BookView {
   const { entry, work, authors, reads, sessions } = input
   const openRead = reads.find((r) => r.outcome === undefined)
@@ -50,6 +54,7 @@ export function buildBookView(input: {
     openSessions,
     currentPage: currentPage(openSessions),
     lastFinishedOn,
+    series: input.series ?? [],
   }
 }
 
@@ -72,6 +77,7 @@ export interface LibraryFilter {
   language?: string
   categoryId?: string
   listEntryIds?: ReadonlySet<string>
+  seriesId?: string
 }
 
 export function filterBooks(books: readonly BookView[], filter: LibraryFilter): BookView[] {
@@ -82,6 +88,7 @@ export function filterBooks(books: readonly BookView[], filter: LibraryFilter): 
       (!filter.language || b.edition.language === filter.language) &&
       (!filter.categoryId || b.entry.categoryIds.includes(filter.categoryId)) &&
       (!filter.listEntryIds || filter.listEntryIds.has(b.entry.id)) &&
+      (!filter.seriesId || b.series.some((s) => s.series.id === filter.seriesId)) &&
       (!needle || foldText([b.edition.title, b.edition.subtitle ?? '', ...b.authorNames].join(' ')).includes(needle)),
   )
 }

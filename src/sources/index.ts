@@ -1,10 +1,12 @@
 import { HttpClient, type ResponseCache } from './http'
 import { OpenLibrarySource } from './openlibrary/OpenLibrarySource'
 import { SourceRegistry } from './registry'
+import { SeriesDetector, WikidataSeriesLookup } from './series'
 
 export { SourceRegistry, type SearchOutcome } from './registry'
 export { parseIsbn } from './isbn'
 export type * from './types'
+export { SeriesDetector, WikidataSeriesLookup, type SeriesCandidate } from './series'
 
 /**
  * Open Library asks apps to identify themselves with
@@ -26,4 +28,23 @@ export function createDefaultRegistry(cache?: ResponseCache): SourceRegistry {
     ? new HttpClient({ maxRequestsPerSecond: 1, cache })
     : new HttpClient({ maxRequestsPerSecond: 3, cache, headers: { 'User-Agent': openLibraryUserAgent() } })
   return new SourceRegistry([new OpenLibrarySource(http)])
+}
+
+/**
+ * Series detection: Wikidata, with Open Library's edition data as the
+ * fallback. Wikidata's query service asks for a gentle pace, so at most
+ * two requests a second, cached like Open Library responses.
+ */
+export function createSeriesDetector(registry: SourceRegistry, cache?: ResponseCache): SeriesDetector {
+  const inBrowser = typeof window !== 'undefined'
+  const http = new HttpClient({
+    maxRequestsPerSecond: 2,
+    cache,
+    timeoutMs: 20_000,
+    ...(!inBrowser && { headers: { 'User-Agent': openLibraryUserAgent() } }),
+  })
+  return new SeriesDetector({
+    wikidata: new WikidataSeriesLookup(http),
+    getEdition: async (ref) => (await registry.get(ref.source)?.getEdition(ref)) ?? null,
+  })
 }
