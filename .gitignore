@@ -25,3 +25,7 @@ dist-ssr
 
 # PWA dev service worker
 dev-dist
+
+# Playwright
+/test-results/
+/playwright-report/
