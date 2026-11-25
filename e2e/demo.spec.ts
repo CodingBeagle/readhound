@@ -1,20 +1,21 @@
 import { expect, test } from './fixtures.ts'
 
 test('demo mode fills the stats and leaves my library alone', async ({ page }) => {
-  // A book of my own, which demo mode must not touch.
+  // A book of my own, which demo mode must not touch. Its title is not in the sample data.
   await page.goto('/add/manual')
-  await page.getByLabel('Title', { exact: true }).fill('Kongens Fald')
-  await page.getByLabel('Author').fill('Johannes V. Jensen')
+  await page.getByLabel('Title', { exact: true }).fill('Min egen bog')
+  await page.getByLabel('Author').fill('Kasper Testesen')
   await page.getByRole('button', { name: /Save|Add/ }).last().click()
-  await expect(page.getByRole('heading', { name: 'Kongens Fald' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Min egen bog' })).toBeVisible()
 
   await page.goto('/demo')
   await page.getByRole('button', { name: 'Start demo mode' }).click()
   await expect(page.getByText('Demo mode: sample data')).toBeVisible()
 
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Library' }).click()
-  await expect(page.getByText('Kongens Fald')).toHaveCount(0)
+  // Wait for the sample library to show before checking my book isn't in it.
   await expect(page.getByText(/^\d+ books$/)).toBeVisible()
+  await expect(page.getByText('Min egen bog')).toHaveCount(0)
 
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Stats' }).click()
   await page.getByLabel('Period').selectOption('all')
@@ -38,7 +39,7 @@ test('demo mode fills the stats and leaves my library alone', async ({ page }) =
   await page.getByRole('status').filter({ hasText: 'Demo mode: sample data' }).getByRole('button', { name: 'Leave demo mode' }).click()
   await expect(page.getByText('Demo mode: sample data')).toHaveCount(0)
   await page.goto('/library')
-  await expect(page.getByText('Kongens Fald')).toBeVisible()
+  await expect(page.getByText('Min egen bog')).toBeVisible()
 })
 
 test('year in review steps through cards and saves an image', async ({ page }, testInfo) => {
