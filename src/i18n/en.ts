@@ -34,7 +34,7 @@ export const en = {
   owned: {
     section: 'My copy',
     own: 'I own this book',
-    ownHint: 'Owning is separate from reading, so it works with any status.',
+    ownHint: 'Owning is separate from reading: a book can be owned whether you have read it or not.',
     format: 'Format',
     unknownFormat: 'Format not set',
     badge: 'Owned',

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import { useServices } from '@/app/services'
@@ -34,6 +34,7 @@ export function ManualEntryScreen() {
     coverUrl: '',
   })
   const [owned, setOwned] = useState(false)
+  const hintId = useId()
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({})
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -115,10 +116,10 @@ export function ManualEntryScreen() {
           <Input type="url" value={form.coverUrl} onChange={set('coverUrl')} />
         </Field>
         <label className="flex min-h-11 items-center gap-3 text-sm">
-          <input type="checkbox" className="size-5 accent-[var(--chart-1)]" checked={owned} onChange={(e) => setOwned(e.target.checked)} />
+          <input type="checkbox" className="size-5 accent-[var(--chart-1)]" aria-label={t.owned.own} aria-describedby={hintId} checked={owned} onChange={(e) => setOwned(e.target.checked)} />
           <span>
             <span className="font-medium">{t.owned.own}</span>
-            <span className="block text-xs text-muted-foreground">{t.owned.ownHint}</span>
+            <span id={hintId} className="block text-xs text-muted-foreground">{t.owned.ownHint}</span>
           </span>
         </label>
         <Button type="submit" size="lg">

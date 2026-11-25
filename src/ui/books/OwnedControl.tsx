@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 import type { EditionFormat } from '@/domain/types'
 import { t } from '@/i18n'
 import { Select } from '@/ui/components/ui/input'
@@ -19,13 +21,14 @@ export function OwnedControl({
   onOwned: (owned: boolean) => void
   onFormat: (format: EditionFormat | undefined) => void
 }) {
+  const hintId = useId()
   return (
     <div className="flex flex-col gap-2">
       <label className="flex min-h-11 items-center gap-3 text-sm">
-        <input type="checkbox" className="size-5 accent-[var(--chart-1)]" checked={owned} onChange={(e) => onOwned(e.target.checked)} />
+        <input type="checkbox" className="size-5 accent-[var(--chart-1)]" aria-label={t.owned.own} aria-describedby={hintId} checked={owned} onChange={(e) => onOwned(e.target.checked)} />
         <span>
           <span className="font-medium">{t.owned.own}</span>
-          <span className="block text-xs text-muted-foreground">{t.owned.ownHint}</span>
+          <span id={hintId} className="block text-xs text-muted-foreground">{t.owned.ownHint}</span>
         </span>
       </label>
       {owned && (
