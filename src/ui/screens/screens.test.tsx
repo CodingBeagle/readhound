@@ -1,12 +1,12 @@
 import 'fake-indexeddb/auto'
 
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
 import { routes } from '@/app/routes'
-import { ServicesProvider, type Services } from '@/app/services'
-import { LibraryRepository } from '@/db/library'
+import { createServices, ServicesProvider, type Services } from '@/app/services'
+import { createBackup } from '@/db/backup'
 import { ReadhoundDB } from '@/db/schema'
 import { t } from '@/i18n'
 import { HttpClient } from '@/sources/http'
@@ -15,21 +15,29 @@ import { OpenLibrarySource } from '@/sources/openlibrary/OpenLibrarySource'
 import { SourceRegistry } from '@/sources/registry'
 
 let services: Services
+let demoDbName: string
 
 beforeEach(async () => {
   const db = new ReadhoundDB(`ui-${crypto.randomUUID()}`)
   await db.open()
   const http = new HttpClient({ fetch: fixtureFetch, sleep: async () => {} })
-  services = { db, library: new LibraryRepository(db), sources: new SourceRegistry([new OpenLibrarySource(http)]) }
+  demoDbName = `test-demo-${crypto.randomUUID()}`
+  try {
+    localStorage.clear()
+  } catch {
+    // ignore
+  }
+  services = { ...createServices(db), sources: new SourceRegistry([new OpenLibrarySource(http)]) }
 })
 afterEach(async () => {
   await services.db.delete()
+  await new ReadhoundDB(demoDbName).delete()
 })
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   render(
-    <ServicesProvider services={services}>
+    <ServicesProvider services={services} demoDbName={demoDbName}>
       <RouterProvider router={router} />
     </ServicesProvider>,
   )
@@ -146,5 +154,102 @@ describe('book screen', () => {
     renderAt(`/book/${id}`)
     await user.click(await screen.findByRole('button', { name: t.statusLong.to_read }))
     expect(await screen.findByText(t.screens.book.markDnfInstead)).toBeInTheDocument()
+  })
+})
+
+describe('profile: lists, categories and notes', () => {
+  it('creates a list and a genre, assigns them on the book page, and filters the library', async () => {
+    const id = await addManual('Kvinden i buret', 'Jussi Adler-Olsen', 'reading', 400)
+    await addManual('Project Hail Mary', 'Andy Weir')
+    const user = userEvent.setup()
+    const router = renderAt('/profile')
+
+    await user.type(await screen.findByLabelText(t.screens.profile.lists.name), 'Summer holiday')
+    await user.click(screen.getByRole('button', { name: t.screens.profile.lists.add }))
+    expect(await screen.findByText('Summer holiday')).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(t.screens.profile.categories.name), 'Krimi')
+    await user.selectOptions(screen.getByLabelText(t.screens.profile.categories.fiction), 'fiction')
+    await user.click(screen.getByRole('button', { name: t.screens.profile.categories.add }))
+    expect(await screen.findByText('Genre · Fiction')).toBeInTheDocument()
+
+    await act(() => router.navigate(`/book/${id}`))
+    const lists = await screen.findByRole('group', { name: t.screens.book.lists })
+    await user.click(within(lists).getByRole('button', { name: 'Summer holiday' }))
+    const cats = screen.getByRole('group', { name: t.screens.book.categories })
+    await user.click(within(cats).getByRole('button', { name: 'Krimi' }))
+    await within(cats).findByRole('button', { name: 'Krimi', pressed: true })
+
+    await act(() => router.navigate('/library'))
+    expect(await screen.findByText(t.screens.library.count(2))).toBeInTheDocument()
+    await user.selectOptions(screen.getByLabelText(t.screens.library.listFilter), 'Summer holiday')
+    expect(await screen.findByText(t.screens.library.count(1))).toBeInTheDocument()
+    expect(screen.getByText('Kvinden i buret')).toBeInTheDocument()
+  })
+
+  it('adds a quote with a page on the book page', async () => {
+    const id = await addManual('Det', 'Inger Christensen', 'reading', 240)
+    const user = userEvent.setup()
+    renderAt(`/book/${id}`)
+    await user.type(await screen.findByLabelText(t.screens.book.noteText), 'En linje jeg vil huske')
+    await user.selectOptions(screen.getByLabelText(t.screens.book.noteKind), 'quote')
+    await user.type(screen.getByLabelText(t.screens.book.notePage), '12')
+    await user.click(screen.getByRole('button', { name: t.screens.book.addNote }))
+    expect(await screen.findByText('En linje jeg vil huske')).toBeInTheDocument()
+    expect(screen.getByText('Quote · p. 12')).toBeInTheDocument()
+  })
+
+  it('saves a reading goal', async () => {
+    const user = userEvent.setup()
+    renderAt('/profile')
+    const year = new Date().getFullYear()
+    await user.type(await screen.findByLabelText(t.screens.profile.goal.books), '24')
+    await user.click(within(screen.getByRole('heading', { name: t.screens.profile.goal.title(year) }).closest('section')!).getByRole('button', { name: t.common.save }))
+    expect(await screen.findByText(t.screens.profile.goal.saved)).toBeInTheDocument()
+    expect(await services.db.goals.get(year)).toEqual({ year, targetBooks: 24 })
+  })
+})
+
+describe('backup', () => {
+  it('imports a backup file after confirming, replacing the library', async () => {
+    await addManual('Old book', 'Someone')
+    const backup = await createBackup(services.db, services.clock, 'test')
+    await services.library.addManual({ title: 'Added after backup', authors: ['X'] })
+    const user = userEvent.setup()
+    renderAt('/profile')
+    const file = new File([JSON.stringify(backup)], 'backup.json', { type: 'application/json' })
+    await user.upload(await screen.findByLabelText(t.screens.profile.backup.importJson, { selector: 'input' }), file)
+    expect(await screen.findByText(/This backup has 1 books/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: t.screens.profile.backup.importConfirm }))
+    expect(await screen.findByText(t.screens.profile.backup.imported)).toBeInTheDocument()
+    expect((await services.db.editions.toArray()).map((e) => e.title)).toEqual(['Old book'])
+  })
+
+  it('explains why a file is rejected', async () => {
+    const user = userEvent.setup()
+    renderAt('/profile')
+    const file = new File(['{"hello":1}'], 'other.json', { type: 'application/json' })
+    await user.upload(await screen.findByLabelText(t.screens.profile.backup.importJson, { selector: 'input' }), file)
+    expect(await screen.findByRole('alert')).toHaveTextContent('not a Readhound backup')
+  })
+})
+
+describe('demo mode', () => {
+  it('switches to sample data without touching the real library, and back', async () => {
+    await addManual('My real book', 'Me')
+    const user = userEvent.setup()
+    renderAt('/demo')
+    await user.click(await screen.findByRole('button', { name: t.demo.enter }))
+    expect(await screen.findByText(t.demo.banner, {}, { timeout: 5000 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: t.screens.home.title })).toBeInTheDocument()
+    expect(screen.queryByText('My real book')).not.toBeInTheDocument()
+    expect(await services.db.entries.count()).toBe(1)
+
+    await user.click(screen.getByRole('link', { name: t.tabs.library }))
+    expect(await screen.findByText(/^\d\d books$/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: t.demo.leave }))
+    expect(screen.queryByText(t.demo.banner)).not.toBeInTheDocument()
+    expect(await screen.findByText('My real book')).toBeInTheDocument()
   })
 })

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { BookGridItem, BookListItem } from '@/ui/books/BookListItem'
 import { Button } from '@/ui/components/ui/button'
 import { Input, Select } from '@/ui/components/ui/input'
+import { useCollections } from '@/ui/hooks/useCollections'
 import { useLibrary } from '@/ui/hooks/useLibrary'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
@@ -31,6 +32,9 @@ export function LibraryScreen() {
   const view = params.get('view') === 'grid' ? 'grid' : 'list'
   const text = params.get('q') ?? ''
   const language = params.get('lang') ?? ''
+  const listId = params.get('list') ?? ''
+  const categoryId = params.get('cat') ?? ''
+  const collections = useCollections()
 
   const set = (key: string, value: string) =>
     setParams(
@@ -46,9 +50,19 @@ export function LibraryScreen() {
     () => [...new Set((books ?? []).map((b) => b.edition.language).filter((l): l is string => Boolean(l)))].sort(),
     [books],
   )
+  const listEntryIds = useMemo(
+    () => (listId && collections ? new Set(collections.listItems.filter((i) => i.listId === listId).map((i) => i.entryId)) : undefined),
+    [listId, collections],
+  )
   const shown = useMemo(
-    () => (books ? sortBooks(filterBooks(books, { status: status || undefined, text, language: language || undefined }), sort) : []),
-    [books, status, text, language, sort],
+    () =>
+      books
+        ? sortBooks(
+            filterBooks(books, { status: status || undefined, text, language: language || undefined, categoryId: categoryId || undefined, listEntryIds }),
+            sort,
+          )
+        : [],
+    [books, status, text, language, categoryId, listEntryIds, sort],
   )
 
   return (
@@ -76,6 +90,30 @@ export function LibraryScreen() {
         onChange={(e) => set('q', e.target.value)}
         className="mb-2"
       />
+      {collections && (collections.lists.length > 0 || collections.categories.length > 0) && (
+        <div className="mb-2 flex gap-2">
+          {collections.lists.length > 0 && (
+            <Select aria-label={t.screens.library.listFilter} value={listId} onChange={(e) => set('list', e.target.value)} className="min-w-0 flex-1">
+              <option value="">{t.screens.library.anyList}</option>
+              {collections.lists.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </Select>
+          )}
+          {collections.categories.length > 0 && (
+            <Select aria-label={t.screens.library.categoryFilter} value={categoryId} onChange={(e) => set('cat', e.target.value)} className="min-w-0 flex-1">
+              <option value="">{t.screens.library.anyCategory}</option>
+              {collections.categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </div>
+      )}
       <div className="mb-4 flex gap-2">
         <Select aria-label={t.screens.library.sort} value={sort} onChange={(e) => set('sort', e.target.value)} className="min-w-0 flex-1">
           {SORTS.map(([value, label]) => (

@@ -41,6 +41,12 @@ One-time setup: in the repository's **Settings → Pages**, set **Source** to **
 
 Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>)`. Browsers can't send that header to Open Library (its CORS rules reject it), so the web app doesn't, and throttles itself to Open Library's unidentified limit of 1 request per second instead of 3. The header is sent outside the browser, and the contact email comes from `VITE_OPENLIBRARY_CONTACT_EMAIL` if set.
 
+## Backup and demo mode
+
+Everything lives in the browser's IndexedDB, so Profile has export (complete JSON, plus library and reads as CSV) and import. Home reminds you to export when the last backup is more than 30 days old.
+
+Demo mode (Profile → Demo mode, or `/demo`) switches the app to a separate `readhound-demo` database filled with about two years of generated reading from `src/demo/sampleLibrary.ts`, so the library and stats have something to show. A banner shows while it is on; leaving demo mode returns to the real library untouched.
+
 ## Tech stack
 
 React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router, and vite-plugin-pwa. Dexie stores everything locally and screens read it through `dexie-react-hooks` live queries; TanStack Query handles Open Library calls. Still to come as features land: Motion for animation, Visx/D3 and Recharts for charts, Playwright for end-to-end tests, and Capacitor for the iOS and Android apps.
@@ -50,7 +56,8 @@ React 19, TypeScript (strict), Vite, Tailwind CSS 4 with shadcn/ui, React Router
 ```
 src/
   app/        router, app root and the services provider (database, repositories, book sources)
-  db/         Dexie (IndexedDB) schema and repositories: the only way screens touch stored data
+  db/         Dexie (IndexedDB) schema, repositories, and backup export/import: the only way screens touch stored data
+  demo/       sample data generator for demo mode
   domain/     record types and pure logic: status transitions, session rules, effective values
   i18n/       UI strings (English now, Danish later)
   lib/        small shared helpers

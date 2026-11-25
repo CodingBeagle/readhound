@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router'
 import { AppShell } from '@/ui/layout/AppShell'
 import { AddBookScreen } from '@/ui/screens/AddBookScreen'
 import { BookScreen } from '@/ui/screens/BookScreen'
+import { DemoScreen } from '@/ui/screens/DemoScreen'
 import { HomeScreen } from '@/ui/screens/HomeScreen'
 import { LibraryScreen } from '@/ui/screens/LibraryScreen'
 import { ManualEntryScreen } from '@/ui/screens/ManualEntryScreen'
@@ -25,6 +26,7 @@ export const routes: RouteObject[] = [
       { path: 'library', element: <LibraryScreen /> },
       { path: 'stats', element: <StatsScreen /> },
       { path: 'profile', element: <ProfileScreen /> },
+      { path: 'demo', element: <DemoScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],
   },

@@ -13,11 +13,14 @@ import { t } from '@/i18n'
 import { BackLink } from '@/ui/books/BackLink'
 import { BookCover } from '@/ui/books/BookCover'
 import { LogPageForm } from '@/ui/books/LogPageForm'
+import { Notes } from '@/ui/books/Notes'
+import { Organise } from '@/ui/books/Organise'
 import { SessionForm } from '@/ui/books/SessionForm'
 import { StatusBadge } from '@/ui/books/StatusBadge'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { EmptyState } from '@/ui/layout/EmptyState'
+import { Section } from '@/ui/layout/Section'
 
 const b = t.screens.book
 
@@ -69,6 +72,14 @@ export function BookScreen() {
         <RatingControl book={book} />
       </Section>
 
+      <Section title={b.organise}>
+        <Organise entryId={book.entry.id} categoryIds={book.entry.categoryIds} />
+      </Section>
+
+      <Section title={b.notes}>
+        <Notes entryId={book.entry.id} pageCount={book.edition.pageCount} />
+      </Section>
+
       <Section title={b.details}>
         <Details book={book} rawEdition={rawEdition} />
       </Section>
@@ -82,14 +93,6 @@ export function BookScreen() {
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-6">
-      <h2 className="mb-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">{title}</h2>
-      {children}
-    </section>
-  )
-}
 
 function StatusControl({ book }: { book: BookView }) {
   const { library } = useServices()
@@ -179,7 +182,7 @@ function RatingControl({ book }: { book: BookView }) {
       aria-label={b.rating}
       value={book.entry.rating ?? ''}
       onChange={(e) => library.setRating(book.entry.id, e.target.value ? Number(e.target.value) : undefined)}
-      className="w-40"
+      className="w-48"
     >
       <option value="">{b.noRating}</option>
       {RATINGS.map((r) => (
@@ -312,23 +315,39 @@ function ReadHistory({ book, sessions }: { book: BookView; sessions: ReadingSess
         return (
           <li key={read.id} className="rounded-lg border p-3">
             <p className="mb-2 text-sm font-medium">{label}</p>
-            <ul className="flex flex-col gap-1">
-              {readSessions.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span>
-                    <span className="text-muted-foreground">{localDate(new Date(s.startedAt), s.timeZone)}</span>{' '}
-                    {b.sessionLine(s.fromPage, s.toPage, s.durationMinutes)}
-                  </span>
-                  <Button variant="ghost" size="icon" aria-label={b.deleteSession} onClick={() => library.deleteSession(s.id)}>
-                    <Trash2 />
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            {readSessions.length > SESSIONS_SHOWN ? (
+              <details>
+                <summary className="cursor-pointer py-2 text-sm text-muted-foreground">{b.showSessions(readSessions.length)}</summary>
+                <SessionList sessions={readSessions} onDelete={(id) => library.deleteSession(id)} />
+              </details>
+            ) : (
+              <SessionList sessions={readSessions} onDelete={(id) => library.deleteSession(id)} />
+            )}
           </li>
         )
       })}
     </ol>
+  )
+}
+
+/** Reads with more sessions than this fold them away, so long reads don't swamp the page. */
+const SESSIONS_SHOWN = 5
+
+function SessionList({ sessions, onDelete }: { sessions: ReadingSession[]; onDelete: (id: string) => unknown }) {
+  return (
+    <ul className="flex flex-col gap-1">
+      {sessions.map((s) => (
+        <li key={s.id} className="flex items-center justify-between gap-2 text-sm">
+          <span>
+            <span className="text-muted-foreground">{localDate(new Date(s.startedAt), s.timeZone)}</span>{' '}
+            {b.sessionLine(s.fromPage, s.toPage, s.durationMinutes)}
+          </span>
+          <Button variant="ghost" size="icon" aria-label={b.deleteSession} onClick={() => onDelete(s.id)}>
+            <Trash2 />
+          </Button>
+        </li>
+      ))}
+    </ul>
   )
 }
 

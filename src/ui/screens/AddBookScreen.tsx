@@ -8,8 +8,10 @@ import { t } from '@/i18n'
 import type { EditionDetails, SearchResult } from '@/sources/types'
 import { BackLink } from '@/ui/books/BackLink'
 import { BookCover } from '@/ui/books/BookCover'
+import { CollectionPicker } from '@/ui/books/Organise'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
+import { useCollections } from '@/ui/hooks/useCollections'
 
 interface AddState {
   edition: EditionDetails
@@ -30,6 +32,9 @@ export function AddBookScreen() {
   const [startedOn, setStartedOn] = useState(today)
   const [endedOn, setEndedOn] = useState(today)
   const [busy, setBusy] = useState(false)
+  const collections = useCollections()
+  const [listIds, setListIds] = useState<ReadonlySet<string>>(new Set())
+  const [categoryIds, setCategoryIds] = useState<ReadonlySet<string>>(new Set())
 
   if (!state?.edition) return <Navigate to="/search" replace />
   const { edition, work, fallbackCoverUrl } = state
@@ -43,7 +48,7 @@ export function AddBookScreen() {
         work: work && { firstPublishYear: work.firstPublishYear, medianPageCount: work.medianPageCount },
         fallbackCoverUrl,
       },
-      status === 'finished' ? { status, startedOn, endedOn } : { status },
+      { status, ...(status === 'finished' && { startedOn, endedOn }), listIds: [...listIds], categoryIds: [...categoryIds] },
     )
     navigate(`/book/${entryId}`, { replace: true })
   }
@@ -84,10 +89,28 @@ export function AddBookScreen() {
             </Field>
           </div>
         )}
+        {collections && (
+          <CollectionPicker
+            quiet
+            lists={collections.lists}
+            categories={collections.categories}
+            listIds={listIds}
+            categoryIds={categoryIds}
+            onList={(id, on) => setListIds(toggle(listIds, id, on))}
+            onCategory={(id, on) => setCategoryIds(toggle(categoryIds, id, on))}
+          />
+        )}
         <Button type="submit" size="lg" disabled={busy}>
           {t.screens.add.submit}
         </Button>
       </form>
     </>
   )
+}
+
+function toggle(set: ReadonlySet<string>, id: string, on: boolean): ReadonlySet<string> {
+  const next = new Set(set)
+  if (on) next.add(id)
+  else next.delete(id)
+  return next
 }

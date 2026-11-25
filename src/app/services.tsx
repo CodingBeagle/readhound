@@ -1,25 +1,71 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-import { db as defaultDb, IndexedDbCache, LibraryRepository, type ReadhoundDB } from '@/db'
+import { CollectionsRepository, db as defaultDb, IndexedDbCache, LibraryRepository, ReadhoundDB, systemClock, type Clock } from '@/db'
+import { DEMO_DB_NAME, seedDemo } from '@/demo/seed'
 import { createDefaultRegistry, type SourceRegistry } from '@/sources'
 
 export interface Services {
   db: ReadhoundDB
   library: LibraryRepository
+  collections: CollectionsRepository
   sources: SourceRegistry
+  clock: Clock
+}
+
+/** Demo mode swaps in a separate database full of sample data (see `demo/`). */
+export interface DemoControl {
+  active: boolean
+  /** Switches to the demo database, filling it with sample data the first time. */
+  enter(): Promise<void>
+  /** Back to the real library. */
+  leave(): void
+  /** Throws away the demo data and generates it again. */
+  reset(): Promise<void>
 }
 
 const ServicesContext = createContext<Services | null>(null)
+const DemoContext = createContext<DemoControl | null>(null)
 
-// oxlint-disable-next-line only-export-components
-export function createServices(db: ReadhoundDB = defaultDb): Services {
-  return { db, library: new LibraryRepository(db), sources: createDefaultRegistry(new IndexedDbCache(db)) }
+const DEMO_FLAG = 'readhound.demo'
+
+function readDemoFlag(): boolean {
+  try {
+    return localStorage.getItem(DEMO_FLAG) === '1'
+  } catch {
+    return false
+  }
 }
 
-/** Provides the database, repositories and book sources, plus TanStack Query for Open Library calls. */
-export function ServicesProvider({ services, children }: { services?: Services; children: ReactNode }) {
-  const [value] = useState(() => services ?? createServices())
+function writeDemoFlag(on: boolean) {
+  try {
+    if (on) localStorage.setItem(DEMO_FLAG, '1')
+    else localStorage.removeItem(DEMO_FLAG)
+  } catch {
+    // Without storage, demo mode just doesn't survive a reload.
+  }
+}
+
+// oxlint-disable-next-line only-export-components
+export function createServices(db: ReadhoundDB = defaultDb, clock: Clock = systemClock): Services {
+  return {
+    db,
+    clock,
+    library: new LibraryRepository(db, clock),
+    collections: new CollectionsRepository(db, clock),
+    sources: createDefaultRegistry(new IndexedDbCache(db)),
+  }
+}
+
+/**
+ * Provides the database, repositories and book sources, plus TanStack Query
+ * for Open Library calls. Tests pass their own `services` and a throwaway
+ * `demoDbName`.
+ */
+export function ServicesProvider({ services, demoDbName = DEMO_DB_NAME, children }: { services?: Services; demoDbName?: string; children: ReactNode }) {
+  const [real] = useState(() => services ?? createServices())
+  const [value, setValue] = useState(() => (!services && readDemoFlag() ? { ...createServices(new ReadhoundDB(demoDbName), real.clock), sources: real.sources } : real))
+  const active = value !== real
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -29,9 +75,36 @@ export function ServicesProvider({ services, children }: { services?: Services; 
         },
       }),
   )
+
+  // Reopening the app in demo mode: refill the demo database if the browser cleared it.
+  useEffect(() => {
+    if (!active) return
+    void value.db.entries.count().then((n) => (n === 0 ? seedDemo(value.db, value.clock) : undefined))
+  }, [active, value])
+
+  const demo: DemoControl = {
+    active,
+    async enter() {
+      if (active) return
+      const demoDb = new ReadhoundDB(demoDbName)
+      if ((await demoDb.entries.count()) === 0) await seedDemo(demoDb, real.clock)
+      writeDemoFlag(true)
+      setValue({ ...createServices(demoDb, real.clock), sources: real.sources })
+    },
+    leave() {
+      writeDemoFlag(false)
+      setValue(real)
+    },
+    async reset() {
+      if (active) await seedDemo(value.db, value.clock)
+    },
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ServicesContext value={value}>{children}</ServicesContext>
+      <DemoContext value={demo}>
+        <ServicesContext value={value}>{children}</ServicesContext>
+      </DemoContext>
     </QueryClientProvider>
   )
 }
@@ -41,4 +114,11 @@ export function useServices(): Services {
   const services = useContext(ServicesContext)
   if (!services) throw new Error('useServices must be used inside ServicesProvider')
   return services
+}
+
+// oxlint-disable-next-line react/only-export-components
+export function useDemo(): DemoControl {
+  const demo = useContext(DemoContext)
+  if (!demo) throw new Error('useDemo must be used inside ServicesProvider')
+  return demo
 }
