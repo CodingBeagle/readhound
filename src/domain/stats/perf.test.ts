@@ -1,5 +1,6 @@
 import { buildSampleLibrary } from '@/demo/sampleLibrary'
 
+import { achievements } from '../achievements'
 import * as st from './index'
 
 it('handles 2,000 books and 50,000 sessions quickly (design doc: under 500 ms)', () => {
@@ -41,7 +42,7 @@ it('handles 2,000 books and 50,000 sessions quickly (design doc: under 500 ms)',
   st.genresOverTime(model, all, 'year')
   st.topAuthors(model, all)
   st.languages(model, all)
-  st.milestones(model)
+  achievements({ model, goals: [{ year: 2026, targetBooks: 20 }] })
   st.waitBeforeStarting(model, all)
   st.rereads(model)
   const ms = performance.now() - start

@@ -269,9 +269,10 @@ describe('stats', () => {
     await act(() => router.navigate('/stats?period=all'))
     expect(await screen.findByText(t.screens.stats.booksPerMonth, {}, { timeout: 5000 })).toBeInTheDocument()
     for (const title of Object.values(t.screens.stats.sections)) expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
-    for (const title of [t.screens.stats.heatmap, t.screens.stats.genres, t.screens.stats.topAuthors, t.screens.stats.whereIStop, t.screens.stats.milestones])
+    for (const title of [t.screens.stats.heatmap, t.screens.stats.genres, t.screens.stats.topAuthors, t.screens.stats.whereIStop])
       expect(screen.getByRole('heading', { name: title })).toBeInTheDocument()
     expect(screen.getAllByText(t.screens.stats.showTable).length).toBeGreaterThan(10)
+    expect((await screen.findAllByText(t.achievements.open)).length).toBeGreaterThan(0)
     const rereadCard = screen.getByRole('heading', { name: t.screens.stats.rereads }).closest('section')!
     expect(within(rereadCard).getByText('The Hobbit')).toBeInTheDocument()
 

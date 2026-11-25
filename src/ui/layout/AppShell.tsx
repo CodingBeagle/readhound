@@ -1,8 +1,10 @@
 import { motion, MotionConfig } from 'motion/react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 
+import { useServices } from '@/app/services'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { AchievementToasts } from '@/ui/achievements/AchievementToasts'
 
 import { DemoBanner } from './DemoBanner'
 import { tabs } from './tabs'
@@ -25,10 +27,13 @@ function Indicator({ id, className }: { id: string; className: string }) {
 
 export function AppShell() {
   const { pathname } = useLocation()
+  const { db } = useServices()
   // Screens under a tab (a book, an edition list) share the tab's key, so only real screen changes animate.
   const screenKey = pathname.split('/').slice(0, 3).join('/')
   return (
     <MotionConfig reducedMotion="user">
+      {/* Keyed by database, so switching to demo mode starts a fresh celebration record. */}
+      <AchievementToasts key={db.name} />
       <div className="min-h-dvh md:flex">
         <nav
           aria-label={t.mainNav}

@@ -81,3 +81,26 @@ test('pick a theme in Profile and keep it after a reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'midnight')
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0a0d1c')
 })
+
+test('finishing a first book unlocks an achievement with a toast', async ({ page }) => {
+  await page.goto('/add/manual')
+  await page.getByLabel('Title', { exact: true }).fill('Kongens Fald')
+  await page.getByLabel('Author').fill('Johannes V. Jensen')
+  await page.getByLabel('Page count').fill('120')
+  await page.getByRole('button', { name: /Save|Add/ }).last().click()
+  await expect(page.getByRole('heading', { name: 'Kongens Fald' })).toBeVisible()
+
+  await page.getByRole('group', { name: 'Status' }).getByRole('button', { name: 'Finished' }).click()
+  await page.getByRole('button', { name: 'Save' }).click()
+
+  const toast = page.getByRole('button', { name: /Achievement unlocked/ })
+  await expect(toast.first()).toBeVisible()
+  await toast.first().click()
+  await expect(page).toHaveURL(/\/achievements$/)
+  await expect(page.getByRole('heading', { name: 'Achievements' })).toBeVisible()
+  // First chapter and Short and sweet (under 150 pages) are both earned.
+  await page.getByRole('button', { name: 'Unlocked', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'First chapter' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Short and sweet' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Night owl' })).toHaveCount(0)
+})

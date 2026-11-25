@@ -15,6 +15,8 @@ import { useBackup } from '@/ui/hooks/useBackup'
 import { useCollections } from '@/ui/hooks/useCollections'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 import { DangerZone } from '@/ui/profile/DangerZone'
+import { LevelCard } from '@/ui/achievements/LevelCard'
+import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 
@@ -29,6 +31,7 @@ export function ProfileScreen() {
         <p className="mb-3 text-sm text-muted-foreground">{p.appearance.intro}</p>
         <ThemePicker />
       </Section>
+      <AchievementsSection />
       <BackupSection />
       <GoalSection />
       <ListsSection />
@@ -45,6 +48,16 @@ export function ProfileScreen() {
       </Section>
       <DangerZone />
     </>
+  )
+}
+
+function AchievementsSection() {
+  const summary = useAchievements()
+  if (!summary) return null
+  return (
+    <Section title={t.achievements.title}>
+      <LevelCard summary={summary} />
+    </Section>
   )
 }
 
