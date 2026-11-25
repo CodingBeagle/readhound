@@ -3,8 +3,8 @@
  * has no series yet, applying what is found. Works the user dismissed
  * suggestions for, and manual works (nothing to look up), are skipped.
  */
-import type { SeriesDetector } from '@/sources/series'
-import type { SourceRef } from '@/sources/types'
+import { effectiveAuthorName, effectiveEdition } from '@/domain/effective'
+import type { DetectInput, SeriesDetector } from '@/sources/series'
 
 import type { ReadhoundDB } from './schema'
 import type { SeriesRepository } from './series'
@@ -27,23 +27,33 @@ export async function scanLibraryForSeries(
   detector: SeriesDetector,
   options: { onProgress?: (p: ScanProgress) => void; signal?: AbortSignal } = {},
 ): Promise<ScanResult> {
-  const [entries, editions, works, members, dismissed] = await Promise.all([
+  const [entries, editions, works, authors, members, dismissed] = await Promise.all([
     db.entries.toArray(),
     db.editions.toArray(),
     db.works.toArray(),
+    db.authors.toArray(),
     db.seriesMembers.toArray(),
     repo.dismissedWorks(),
   ])
   const inSeries = new Set(members.flatMap((m) => (m.workId ? [m.workId] : [])))
   const editionById = new Map(editions.map((e) => [e.id, e]))
   const workById = new Map(works.map((w) => [w.id, w]))
-  const todo = new Map<string, { work?: SourceRef; edition?: SourceRef }>()
+  const authorById = new Map(authors.map((a) => [a.id, a]))
+  const todo = new Map<string, DetectInput>()
   for (const entry of entries) {
     const edition = editionById.get(entry.editionId)
     const work = edition && workById.get(edition.workId)
     if (!edition || !work || inSeries.has(work.id) || dismissed.has(work.id) || todo.has(work.id)) continue
     if (work.sourceRef?.source !== 'openlibrary' && edition.sourceRef?.source !== 'openlibrary') continue
-    todo.set(work.id, { work: work.sourceRef, edition: edition.sourceRef })
+    todo.set(work.id, {
+      work: work.sourceRef,
+      edition: edition.sourceRef,
+      titles: [work.title, effectiveEdition(edition).title],
+      authors: work.authorIds.flatMap((id) => {
+        const a = authorById.get(id)
+        return a ? [effectiveAuthorName(a)] : []
+      }),
+    })
   }
 
   let found = 0

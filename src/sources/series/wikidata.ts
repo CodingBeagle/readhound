@@ -45,15 +45,47 @@ export interface SparqlResponse {
 
 const OLID = /^OL\d+[WM]$/
 
-/** The SPARQL query for the series of the books with these Open Library IDs (works or editions). */
-export function seriesQuery(olids: readonly string[]): string {
-  const values = olids
+/** What we know about the book: its Open Library IDs, and its titles and authors for when Wikidata lacks the IDs. */
+export interface BookLookup {
+  olids?: readonly string[]
+  titles?: readonly string[]
+  authors?: readonly string[]
+}
+
+/** Label languages tried when matching a book by title and author. "mul" holds names shared by every language. */
+const MATCH_LANGUAGES = ['en', 'da', 'mul']
+
+/** A SPARQL string literal: quotes, backslashes and line breaks escaped. */
+export function sparqlString(text: string): string {
+  return `"${text.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, ' ')}"`
+}
+
+/** Titles are written with straight or curly apostrophes ("Assassin's" / "Assassin’s"); try both. */
+const apostropheVariants = (text: string) => [text, text.replace(/'/g, '’'), text.replace(/’/g, "'")]
+
+const literals = (texts: readonly string[]) =>
+  [...new Set(texts.flatMap((t) => apostropheVariants(t.trim())).filter(Boolean))].flatMap((t) => MATCH_LANGUAGES.map((lang) => `${sparqlString(t)}@${lang}`)).join(' ')
+
+/**
+ * The SPARQL query for the series of one book. The book is found by its
+ * Open Library work or edition ID (P648, editions via P629), or, since many
+ * Wikidata books have no Open Library ID, by an exact title label together
+ * with an author (P50) whose name matches.
+ */
+export function seriesQuery(book: BookLookup | readonly string[]): string {
+  const { olids = [], titles = [], authors = [] } = Array.isArray(book) ? { olids: book as readonly string[] } : (book as BookLookup)
+  const ids = olids
     .filter((id) => OLID.test(id))
     .map((id) => `"${id}"`)
     .join(' ')
+  const byId = ids ? `{ VALUES ?olid { ${ids} } { ?work wdt:P648 ?olid . } UNION { ?edition wdt:P648 ?olid ; wdt:P629 ?work . } }` : ''
+  const byTitle =
+    titles.length && authors.length
+      ? `{ VALUES ?title { ${literals(titles)} } VALUES ?authorName { ${literals(authors)} } ?work rdfs:label ?title ; wdt:P50 ?writer . ?writer rdfs:label ?authorName . }`
+      : ''
+  const find = [byId, byTitle].filter(Boolean).join('\n  UNION\n  ')
   return `SELECT ?series ?seriesLabel ?ordinal ?parts ?member ?memberLabel ?memberOrdinal ?memberOl ?authorLabel WHERE {
-  VALUES ?olid { ${values} }
-  { ?work wdt:P648 ?olid . } UNION { ?edition wdt:P648 ?olid ; wdt:P629 ?work . }
+  ${find}
   ?work p:P179 ?statement . ?statement ps:P179 ?series .
   OPTIONAL { ?statement pq:P1545 ?ordinal . }
   OPTIONAL { ?series wdt:P2635 ?parts . }
@@ -135,10 +167,12 @@ export class WikidataSeriesLookup {
     this.http = http
   }
 
-  /** Series of the book with these Open Library IDs. Empty when Wikidata doesn't know the book. */
-  async seriesFor(olids: readonly string[], signal?: AbortSignal): Promise<WikidataSeries[]> {
-    if (!olids.some((id) => OLID.test(id))) return []
-    const url = `${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(seriesQuery(olids))}`
+  /** Series of the book. Empty when Wikidata doesn't know the book or it is in no series. */
+  async seriesFor(book: BookLookup, signal?: AbortSignal): Promise<WikidataSeries[]> {
+    const hasId = (book.olids ?? []).some((id) => OLID.test(id))
+    const hasTitle = (book.titles ?? []).some((t) => t.trim()) && (book.authors ?? []).some((a) => a.trim())
+    if (!hasId && !hasTitle) return []
+    const url = `${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(seriesQuery(book))}`
     const response = await this.http.getJson<SparqlResponse>(url, { cacheTtlMs: WIKIDATA_TTL_MS, signal })
     return response ? mapSeriesResponse(response) : []
   }

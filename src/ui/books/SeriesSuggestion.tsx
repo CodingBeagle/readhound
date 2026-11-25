@@ -26,8 +26,9 @@ export function SeriesSuggestion({ book }: { book: BookView }) {
   const [busy, setBusy] = useState(false)
   const enabled = dismissed === false && book.series.length === 0 && (work?.source === 'openlibrary' || edition?.source === 'openlibrary')
   const { data } = useQuery({
-    queryKey: ['series-detect', work?.id, edition?.id],
-    queryFn: ({ signal }) => seriesDetector.detect({ work, edition }, signal),
+    queryKey: ['series-detect', work?.id, edition?.id, book.edition.title, ...book.authorNames],
+    queryFn: ({ signal }) =>
+      seriesDetector.detect({ work, edition, titles: [book.work?.title, book.edition.title].filter((x): x is string => !!x), authors: book.authorNames }, signal),
     enabled,
     staleTime: Infinity,
   })

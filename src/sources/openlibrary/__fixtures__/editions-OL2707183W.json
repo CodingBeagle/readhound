@@ -1,0 +1,527 @@
+{
+ "size": 34,
+ "entries": [
+  {
+   "key": "/books/OL44127423M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2010"
+  },
+  {
+   "key": "/books/OL44143883M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2014"
+  },
+  {
+   "key": "/books/OL46114899M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2023",
+   "number_of_pages": 464
+  },
+  {
+   "key": "/books/OL35620097M",
+   "title": "Aprendiz de asesino",
+   "languages": [
+    {
+     "key": "/languages/spa"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2013-11-02",
+   "number_of_pages": 320
+  },
+  {
+   "key": "/books/OL33022811M",
+   "title": "The Farseer",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2010-03-03"
+  },
+  {
+   "key": "/books/OL37124236M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2011"
+  },
+  {
+   "key": "/books/OL37287074M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2019"
+  },
+  {
+   "key": "/books/OL37296828M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2019"
+  },
+  {
+   "key": "/books/OL27326620M",
+   "title": "Assassin's Apprentice (The Illustrated Edition)",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "Oct 01, 2019",
+   "number_of_pages": 464
+  },
+  {
+   "key": "/books/OL27279055M",
+   "title": "Assassin's Apprentice",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "Aug 24, 2001"
+  },
+  {
+   "key": "/books/OL32003065M",
+   "title": "Aprendiz de asesino",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2014"
+  },
+  {
+   "key": "/books/OL30518783M",
+   "title": "O Aprendiz de Assassino",
+   "languages": [
+    {
+     "key": "/languages/por"
+    }
+   ],
+   "series": [
+    "A Saga do Assassino"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2 setembro 2019",
+   "number_of_pages": 376
+  },
+  {
+   "key": "/books/OL27309661M",
+   "title": "Assassin's Apprentice (The Farseer Trilogy)",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "Oct 22, 2015"
+  },
+  {
+   "key": "/books/OL27299477M",
+   "title": "Ci ke xue tu",
+   "languages": [
+    {
+     "key": "/languages/chi"
+    }
+   ],
+   "series": [
+    "Ci ke zheng zhuan -- 1",
+    "Mo huan zhi cheng = -- Fantasy -- 002",
+    "Mo huan zhi cheng -- 002."
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2003",
+   "number_of_pages": 428
+  },
+  {
+   "key": "/books/OL26311694M",
+   "title": "Aprendiz de asesino",
+   "languages": [
+    {
+     "key": "/languages/spa"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2011",
+   "number_of_pages": 389
+  },
+  {
+   "key": "/books/OL26311685M",
+   "title": "La búsqueda del asesino",
+   "languages": [
+    {
+     "key": "/languages/spa"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2011",
+   "number_of_pages": 829
+  },
+  {
+   "key": "/books/OL32003078M",
+   "title": "La búsqueda del asesino",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2014"
+  },
+  {
+   "key": "/books/OL25652599M",
+   "title": "Aprendiz de Assassino",
+   "languages": [
+    {
+     "key": "/languages/por"
+    }
+   ],
+   "series": [
+    "A Saga do Assassino, 1"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2009",
+   "number_of_pages": 397
+  },
+  {
+   "key": "/books/OL7259162M",
+   "title": "Assassin's Apprentice (The Farseer Trilogy)",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "March 18, 1996",
+   "number_of_pages": 480
+  },
+  {
+   "key": "/books/OL9213877M",
+   "title": "Assassin's Apprentice (The Farseer Trilogy)",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "March 18, 1996",
+   "number_of_pages": 480
+  },
+  {
+   "key": "/books/OL7850929M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "Farseer Trilogy (1)"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "November 2002"
+  },
+  {
+   "key": "/books/OL1103902M",
+   "title": "Assassin's apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "The Farseer"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "1995",
+   "number_of_pages": 356
+  },
+  {
+   "key": "/books/OL22949088M",
+   "title": "Assassin's apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "Farseer",
+    "Bantam spectra book"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "1996",
+   "number_of_pages": 435
+  },
+  {
+   "key": "/books/OL17388089M",
+   "title": "The assassin's apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "The Farseer trilogy -- 1"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "1995",
+   "number_of_pages": 374
+  },
+  {
+   "key": "/books/OL24298474M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2002"
+  },
+  {
+   "key": "/books/OL22210201M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "The Farseer"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "1995",
+   "number_of_pages": 435
+  },
+  {
+   "key": "/books/OL23125096M",
+   "title": "Uchenik ubiĭt︠s︡y",
+   "languages": [
+    {
+     "key": "/languages/rus"
+    }
+   ],
+   "series": [
+    "Saga o vidi︠a︡shchikh"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2006",
+   "number_of_pages": 522
+  },
+  {
+   "key": "/books/OL18459518M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/und"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "1996"
+  },
+  {
+   "key": "/books/OL28167833M",
+   "title": "Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "The Farseer Trilogy"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "2014",
+   "number_of_pages": 392
+  },
+  {
+   "key": "/books/OL32335043M",
+   "title": "Assassin's Apprentice",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "Aug 07, 1995",
+   "number_of_pages": 400
+  },
+  {
+   "key": "/books/OL9145775M",
+   "title": "La Diplomacia del Asesino / Assassin's Apprentice (Fantasia / Fantasy)",
+   "languages": [
+    {
+     "key": "/languages/spa"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "January 2004",
+   "number_of_pages": 281
+  },
+  {
+   "key": "/books/OL7829766M",
+   "title": "Assassin's Apprentice (The Farseer Trilogy, Book 1)",
+   "languages": [
+    {
+     "key": "/languages/eng"
+    }
+   ],
+   "series": [
+    "Farseer Trilogy (1)"
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "March 1, 1996",
+   "number_of_pages": 464
+  },
+  {
+   "key": "/books/OL27328189M",
+   "title": "Assassin's Apprentice (The Farseer Trilogy, Book 1)",
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "Oct 03, 2019",
+   "number_of_pages": 400
+  },
+  {
+   "key": "/books/OL9145776M",
+   "title": "Aprendiz De Asesino / Assassin's Apprentice",
+   "languages": [
+    {
+     "key": "/languages/spa"
+    }
+   ],
+   "works": [
+    {
+     "key": "/works/OL2707183W"
+    }
+   ],
+   "publish_date": "January 2003",
+   "number_of_pages": 285
+  }
+ ]
+}
