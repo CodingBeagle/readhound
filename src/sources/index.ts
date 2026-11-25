@@ -21,6 +21,9 @@ export function openLibraryUserAgent(): string {
 /** Version 1 registry: Open Library only. Manual entry is handled by the UI when nothing is found. */
 export function createDefaultRegistry(): SourceRegistry {
   const inBrowser = typeof window !== 'undefined'
-  const http = new HttpClient({ headers: inBrowser ? {} : { 'User-Agent': openLibraryUserAgent() } })
+  // Open Library allows 3 requests per second to identified apps and 1 to everyone else.
+  const http = inBrowser
+    ? new HttpClient({ maxRequestsPerSecond: 1 })
+    : new HttpClient({ maxRequestsPerSecond: 3, headers: { 'User-Agent': openLibraryUserAgent() } })
   return new SourceRegistry([new OpenLibrarySource(http)])
 }

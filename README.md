@@ -39,7 +39,7 @@ One-time setup: in the repository's **Settings → Pages**, set **Source** to **
 
 `src/sources/` holds the pluggable book-source layer from the design doc: the `BookSource` interface, a `SourceRegistry` that asks sources in priority order (the UI only talks to the registry), ISBN helpers, a throttled and cached HTTP client, and the Open Library adapter. Its tests run against recorded Open Library responses in `src/sources/openlibrary/__fixtures__`, never the live API.
 
-Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>)`. Browsers can't send that header to Open Library (its CORS rules reject it), so the web app doesn't; it is sent outside the browser, and the contact email comes from `VITE_OPENLIBRARY_CONTACT_EMAIL` if set.
+Open Library asks apps to send `User-Agent: Readhound/<version> (<contact email>)`. Browsers can't send that header to Open Library (its CORS rules reject it), so the web app doesn't, and throttles itself to Open Library's unidentified limit of 1 request per second instead of 3. The header is sent outside the browser, and the contact email comes from `VITE_OPENLIBRARY_CONTACT_EMAIL` if set.
 
 ## Tech stack
 
