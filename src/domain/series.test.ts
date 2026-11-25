@@ -13,6 +13,9 @@ describe('parseSeriesLabel', () => {
     ['Wheel of Time vol. 4', 'Wheel of Time', 4],
     ['Discworld #3.5', 'Discworld', 3.5],
     ['Discworld 12', 'Discworld', 12],
+    ['Farseer Trilogy (1)', 'Farseer Trilogy', 1],
+    ['The Farseer trilogy -- 1', 'The Farseer trilogy', 1],
+    ['Discworld (Book 3)', 'Discworld', 3],
   ])('%s', (raw, name, position) => {
     expect(parseSeriesLabel(raw)).toEqual({ name, position })
   })

@@ -6,6 +6,7 @@ import authorHoeg from './__fixtures__/author-OL365301A.json'
 import authorHoeg2 from './__fixtures__/author-OL3218495A.json'
 import authorWeir from './__fixtures__/author-OL7234434A.json'
 import editionsMartian from './__fixtures__/editions-OL17091839W.json'
+import editionsFarseer from './__fixtures__/editions-OL2707183W.json'
 import editionsSmilla from './__fixtures__/editions-OL258333W.json'
 import isbnPhm from './__fixtures__/isbn-9780593135204.json'
 import searchAuthorWeir from './__fixtures__/search-author-andy-weir.json'
@@ -22,6 +23,7 @@ const byPath: Record<string, unknown> = {
   '/works/OL21745884W.json': workPhm,
   '/works/OL258333W.json': workSmilla,
   '/works/OL258333W/editions.json': editionsSmilla,
+  '/works/OL2707183W/editions.json': editionsFarseer,
   '/works/OL17091839W/editions.json': editionsMartian,
   '/authors/OL7234434A.json': authorWeir,
   '/authors/OL365301A.json': authorHoeg,

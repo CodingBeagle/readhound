@@ -170,6 +170,8 @@ const NUMBER = String.raw`(\d+(?:[.,]\d+)?)`
 export function parseSeriesLabel(raw: string): { name: string; position?: number } | null {
   let text = raw.trim().replace(/^\((.*)\)$/, '$1').trim()
   if (!text) return null
+  // A number in brackets at the end: "Farseer Trilogy (1)", "Discworld (Book 3)".
+  text = text.replace(/\s*\((?:book|bk\.?|vol\.?|volume|no\.?|nr\.?|bd\.?|bind|del|part)?\s*(\d+(?:[.,]\d+)?)\)\s*$/i, ' #$1')
   const patterns = [
     new RegExp(String.raw`^(.*?)[\s,;:\-–—]*#\s*${NUMBER}\s*$`, 'i'),
     new RegExp(String.raw`^(.*?)[\s,;:\-–—]*\b(?:book|bk\.?|vol\.?|volume|no\.?|nr\.?|number|bd\.?|bind|del|part|tome)\s*${NUMBER}\s*$`, 'i'),

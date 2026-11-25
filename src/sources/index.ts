@@ -46,5 +46,6 @@ export function createSeriesDetector(registry: SourceRegistry, cache?: ResponseC
   return new SeriesDetector({
     wikidata: new WikidataSeriesLookup(http),
     getEdition: async (ref) => (await registry.get(ref.source)?.getEdition(ref)) ?? null,
+    listEditions: async (ref) => (await registry.get(ref.source)?.listEditions(ref, { limit: 50 })) ?? [],
   })
 }
