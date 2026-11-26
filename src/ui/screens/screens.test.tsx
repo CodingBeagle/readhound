@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto'
 
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import confetti from 'canvas-confetti'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
 import { routes } from '@/app/routes'
@@ -25,6 +26,7 @@ let wikidataAnswer: unknown
 const wikidataFetch: typeof fetch = async () => new Response(JSON.stringify(wikidataAnswer), { status: 200 })
 
 beforeEach(async () => {
+  vi.mocked(confetti).mockClear()
   const db = new ReadhoundDB(`ui-${crypto.randomUUID()}`)
   await db.open()
   const http = new HttpClient({ fetch: fixtureFetch, sleep: async () => {} })
@@ -90,6 +92,8 @@ describe('search → edition → add', () => {
     expect(entry).toMatchObject({ status: 'reading', owned: true })
     expect((await services.db.editions.get(entry!.editionId))!.overrides.format).toBe('audiobook')
     expect(screen.getByText(t.owned.badge)).toBeInTheDocument()
+    // A new book gets the confetti splash (two corner cannons and a centre pop).
+    await waitFor(() => expect(confetti).toHaveBeenCalledTimes(3))
   })
 
   it('offers manual entry when nothing is found', async () => {
@@ -170,6 +174,7 @@ describe('manual entry', () => {
     await user.click(screen.getByRole('button', { name: t.screens.add.submit }))
     await screen.findByRole('button', { name: t.statusLong.to_read, pressed: true })
     expect(router.state.location.pathname).toMatch(/^\/book\//)
+    await waitFor(() => expect(confetti).toHaveBeenCalledTimes(3))
   })
 })
 

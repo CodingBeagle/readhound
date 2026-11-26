@@ -20,6 +20,7 @@ import { CoverPhotoPicker } from '@/ui/covers/CoverPhotoPicker'
 import { GenreSuggestionChips } from '@/ui/genres/GenreSuggestionChips'
 import { useGenreSuggestions } from '@/ui/genres/useGenreSuggestions'
 import { useCollections } from '@/ui/hooks/useCollections'
+import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
 
 interface AddState {
   edition: EditionDetails
@@ -115,6 +116,7 @@ export function AddBookScreen() {
       if (entry) await library.editEdition(entry.editionId, { format: format ?? null })
     }
     if (coverPhoto && !existing) await library.setCoverPhoto(entryId, coverPhoto)
+    if (!existing) void celebrateBookAdded()
     navigate(`/book/${entryId}`, { replace: true })
   }
   const sourceCover = edition.coverUrl ?? fallbackCoverUrl
