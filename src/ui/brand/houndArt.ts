@@ -47,6 +47,9 @@ export const houndShapes = {
   toes: 'M180 328v12M196 328v12M312 328v12M328 328v12',
 } as const
 
+/** Where the December Santa hat sits on the head (see `SantaHat.tsx`). Never part of the icons. */
+export const SANTA_HAT_ON_HEAD = 'translate(258 138) rotate(-9) scale(0.95)'
+
 export type HoundBackground = 'rounded' | 'square' | 'none'
 
 /**

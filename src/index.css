@@ -1148,3 +1148,22 @@
   .weekly-fill::after,
   .weekly-tip { display: none; }
 }
+
+/* ── December: Zico's Santa hat and the snow (src/ui/brand/SantaHat.tsx, src/ui/season/, design doc Seasonal). ── */
+.santa-hat-tip { transform-box: fill-box; transform-origin: 0% 100%; animation: santa-hat-bob 3.4s ease-in-out infinite; }
+.santa-hat-pom { transform-box: fill-box; transform-origin: 50% 0%; animation: santa-hat-pom 3.4s ease-in-out infinite; }
+.hound:hover .santa-hat-tip, .hound:active .santa-hat-tip, .buddy-poke .santa-hat-tip, .buddy-excited .santa-hat-tip { animation-duration: 0.5s; }
+.barker-in .santa-hat-tip, .barker-out .santa-hat-tip { animation-duration: 0.3s; }
+.barker-bark .santa-hat-tip { animation-duration: 0.24s; }
+@keyframes santa-hat-bob { 0%, 100% { rotate: 0deg; } 50% { rotate: 7deg; } }
+@keyframes santa-hat-pom { 0%, 100% { scale: 1; } 50% { scale: 1.06 0.94; } }
+@media (prefers-reduced-motion: reduce) { .santa-hat-tip, .santa-hat-pom { animation: none !important; } }
+
+/* On dark pages flakes are white with a glow in the theme's colour; on light pages they are a pale theme tint with a white halo, so they still read. */
+:root { --snow: #a7c4e6; --snow-glow: rgb(255 255 255 / 90%); }
+@media (prefers-color-scheme: dark) { :root { --snow: #ffffff; --snow-glow: rgb(147 197 253 / 65%); } }
+:root[data-theme='aurora'] { --snow: #c4b5fd; --snow-glow: rgb(255 255 255 / 90%); }
+@media (prefers-color-scheme: dark) { :root[data-theme='aurora'] { --snow: #fdf4ff; --snow-glow: rgb(244 114 182 / 70%); } }
+:root[data-theme='bookshop'] { --snow: #c9d6df; --snow-glow: rgb(255 250 240 / 90%); }
+@media (prefers-color-scheme: dark) { :root[data-theme='bookshop'] { --snow: #fffaf0; --snow-glow: rgb(240 140 90 / 55%); } }
+:root[data-theme='midnight'] { --snow: #f0fdff; --snow-glow: rgb(34 211 238 / 75%); }

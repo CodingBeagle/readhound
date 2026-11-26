@@ -466,6 +466,11 @@ export const en = {
         title: 'Demo mode',
         intro: 'Try the app with two years of sample reading.',
         open: 'Open demo mode',
+        december: 'December mode',
+        decemberHint: 'In December Zico wears a Santa hat and snow falls now and then. Turn this on to try it in demo mode any time of year.',
+        decemberOn: 'It is December, so Zico has his hat on already.',
+        snowNow: 'Make it snow',
+        snowReduced: 'Snow is off because your device asks for reduced motion.',
       },
       about: {
         title: 'About',
