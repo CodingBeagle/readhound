@@ -7,7 +7,20 @@ import { Link } from 'react-router'
 import { useServices } from '@/app/services'
 import { today as todayOf } from '@/db/clock'
 import { buddyState, hashOf, SETTING_BUDDY_INTRODUCED, type BuddyMood } from '@/domain/buddy'
-import { bookInLibrary, isQuoteTurn, quoteSearchText, quotesFor, quoteTheme, shuffledQuotes, type Quote, type QuoteData, type QuoteTheme } from '@/domain/quotes'
+import {
+  bookInLibrary,
+  isQuoteTurn,
+  parseQuoteHistory,
+  pickQuote,
+  quoteSearchText,
+  quotesFor,
+  quoteTheme,
+  rememberQuote,
+  SETTING_QUOTE_HISTORY,
+  type Quote,
+  type QuoteData,
+  type QuoteTheme,
+} from '@/domain/quotes'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { Button } from '@/ui/components/ui/button'
@@ -71,7 +84,8 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const quoteData = useQuoteData(quotesOn)
   const favourites = quoteSettings?.themes
   const daySeed = hashOf(today)
-  const quotes = useMemo(() => (quoteData && favourites ? shuffledQuotes(quotesFor(quoteData, favourites), daySeed) : []), [quoteData, favourites, daySeed])
+  const quotes = useMemo(() => (quoteData && favourites ? quotesFor(quoteData, favourites) : []), [quoteData, favourites])
+  const quoteHistory = useLiveQuery(async () => parseQuoteHistory((await db.settings.get(SETTING_QUOTE_HISTORY))?.value), [db])
 
   const [chatter, setChatter] = useState(0)
   /** Quotes skipped with a tap or the Another button. */
@@ -79,7 +93,19 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const [pokes, setPokes] = useState(0)
   const hasMilestone = Boolean(state?.milestone)
   const quoting = !introducing && quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
-  const quote = quoting ? quotes[(quoteTurnsBefore(chatter, daySeed, hasMilestone) + skipped) % quotes.length] : undefined
+  // Each quote turn, and each skip, draws a new random quote, avoiding the ones shown lately (also on earlier visits).
+  const [current, setCurrent] = useState<Quote>()
+  const pickKey = quoting ? `${chatter}:${skipped}` : undefined
+  const pickedFor = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!pickKey || !quoteHistory || pickedFor.current === pickKey) return
+    pickedFor.current = pickKey
+    const next = pickQuote(quotes, quoteHistory)
+    if (!next) return
+    setCurrent(next)
+    void db.settings.put({ key: SETTING_QUOTE_HISTORY, value: rememberQuote(quoteHistory, next.id) })
+  }, [pickKey, quoteHistory, quotes, db])
+  const quote = quoting && current && quotes.some((q) => q.id === current.id) ? current : undefined
   const rotates = introducing || (Boolean(state?.weekly) && !hasMilestone) || quotes.length > 0
   useEffect(() => {
     if (!rotates) return
@@ -182,13 +208,6 @@ export function BeagleBuddy({ className }: { className?: string }) {
       </div>
     </section>
   )
-}
-
-/** How many quote turns came before this one, so each quote turn moves on to the next quote. */
-function quoteTurnsBefore(turn: number, daySeed: number, hasMilestone: boolean): number {
-  let n = 0
-  for (let i = 0; i < turn; i++) if (isQuoteTurn(i, daySeed, hasMilestone)) n++
-  return n
 }
 
 /** A quote in the speech bubble: the line, the book, and a way to another quote or the book itself. */

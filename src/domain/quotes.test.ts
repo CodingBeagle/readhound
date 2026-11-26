@@ -6,7 +6,9 @@ import {
   QUOTE_THEMES,
   quotesFor,
   quoteTheme,
-  shuffledQuotes,
+  parseQuoteHistory,
+  pickQuote,
+  rememberQuote,
   type QuoteData,
 } from './quotes'
 import type { StatBook } from './stats/model'
@@ -82,11 +84,31 @@ describe('picking quotes', () => {
     expect(quoteTheme(data.quotes[1]!, [])).toBe('grief')
   })
 
-  it('shuffles the same way for the same day, and keeps every quote', () => {
-    const one = shuffledQuotes(QUOTE_DATA.quotes, 42).map((q) => q.id)
-    expect(shuffledQuotes(QUOTE_DATA.quotes, 42).map((q) => q.id)).toEqual(one)
-    expect(shuffledQuotes(QUOTE_DATA.quotes, 43).map((q) => q.id)).not.toEqual(one)
-    expect([...one].sort()).toEqual(QUOTE_DATA.quotes.map((q) => q.id).sort())
+  it('picks a quote not shown before, at random', () => {
+    expect(pickQuote(data.quotes, ['a', 'c'], () => 0.99)?.id).toBe('b')
+    const picks = new Set(Array.from({ length: 40 }, () => pickQuote(data.quotes, [])?.id))
+    expect(picks.size).toBeGreaterThan(1)
+    expect(pickQuote([], [])).toBeUndefined()
+  })
+
+  it('once every quote was shown, picks from the half shown longest ago', () => {
+    // History is oldest first: b was shown longest ago, a most recently.
+    expect(pickQuote(data.quotes, ['b', 'c', 'a'], () => 0.99)?.id).toBe('b')
+    expect(pickQuote(data.quotes, ['c', 'b', 'a'], () => 0)?.id).toBe('c')
+  })
+
+  it('goes through a whole theme before repeating a quote, across visits', () => {
+    const pool = QUOTE_DATA.quotes
+    let history: string[] = []
+    for (let i = 0; i < pool.length; i++) history = rememberQuote(history, pickQuote(pool, history)!.id)
+    expect(new Set(history).size).toBe(pool.length)
+  })
+
+  it('remembers the latest quotes, without duplicates, up to a limit', () => {
+    expect(rememberQuote(['a', 'b'], 'a')).toEqual(['b', 'a'])
+    expect(rememberQuote(['a', 'b', 'c'], 'd', 3)).toEqual(['b', 'c', 'd'])
+    expect(parseQuoteHistory(['a', 2, 'b'])).toEqual(['a', 'b'])
+    expect(parseQuoteHistory('nope')).toEqual([])
   })
 
   it('takes turns with the buddy’s own lines, and lets a milestone go first', () => {

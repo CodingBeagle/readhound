@@ -660,8 +660,9 @@ describe('genre suggestions', () => {
     expect(await screen.findByText(t.genres.backfill.done(3), {}, { timeout: 3000 })).toBeInTheDocument()
     expect(screen.getByText(t.genres.backfill.noSuggestion)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: t.genres.backfill.applyAll(2) }))
+    // The books are applied one after another, in no set order, so wait for both.
     await waitFor(async () => expect((await services.db.entries.get(b))!.categoryIds).toEqual([krimi]))
-    expect((await services.db.entries.get(a))!.categoryIds).toEqual([krimi])
+    await waitFor(async () => expect((await services.db.entries.get(a))!.categoryIds).toEqual([krimi]))
     expect((await services.db.entries.get(c))!.categoryIds).toEqual([])
     await waitFor(() => expect(screen.getAllByText(new RegExp(t.genres.backfill.applied))).toHaveLength(2))
   })

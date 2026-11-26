@@ -1,13 +1,13 @@
 import 'fake-indexeddb/auto'
 
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MotionGlobalConfig } from 'motion/react'
 import { MemoryRouter } from 'react-router'
 
 import { createServices, ServicesProvider, type Services } from '@/app/services'
 import { ReadhoundDB } from '@/db/schema'
-import { SETTING_BUDDY_QUOTES } from '@/domain/quotes'
+import { SETTING_BUDDY_QUOTES, SETTING_QUOTE_HISTORY } from '@/domain/quotes'
 import { t } from '@/i18n'
 
 import { BeagleBuddy, CHATTER_MS, QUOTE_MS, SETTING_BUDDY_INTRODUCED } from './BeagleBuddy'
@@ -60,6 +60,26 @@ describe('BeagleBuddy quotes', () => {
     const second = shownQuote(buddy)
     await user.click(within(buddy).getByRole('button', { name: q.another }))
     await waitFor(() => expect(shownQuote(buddy)).not.toBe(second))
+  })
+
+  it('does not replay the same quotes on the next visit', async () => {
+    servicesOn('2026-03-02')
+    await services.db.settings.put({ key: SETTING_BUDDY_QUOTES, value: { enabled: true, themes: ['adventure'] } })
+    const user = userEvent.setup()
+    let buddy = await renderBuddy()
+    await within(buddy).findByTestId('buddy-quote')
+    const firstVisit = [shownQuote(buddy)]
+    for (let i = 0; i < 3; i++) {
+      await user.click(within(buddy).getByRole('button', { name: q.another }))
+      await waitFor(() => expect(firstVisit).not.toContain(shownQuote(buddy)))
+      firstVisit.push(shownQuote(buddy))
+    }
+    await waitFor(async () => expect((await services.db.settings.get(SETTING_QUOTE_HISTORY))?.value).toEqual(firstVisit))
+    cleanup()
+
+    buddy = await renderBuddy()
+    await within(buddy).findByTestId('buddy-quote')
+    expect(firstVisit).not.toContain(shownQuote(buddy))
   })
 
   it('sticks to the favourite themes', async () => {
