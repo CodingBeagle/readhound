@@ -58,6 +58,10 @@ export function ProfileScreen() {
       </Section>
       <Section title={p.about.title}>
         <p className="text-sm text-muted-foreground">{p.about.version(__APP_VERSION__)}</p>
+        {/* The landing page is a separate page, so a full page load, not a router link. */}
+        <a href={`${import.meta.env.BASE_URL}welcome/`} className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
+          {p.about.landing}
+        </a>
       </Section>
       <DangerZone />
     </>

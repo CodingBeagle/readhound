@@ -19,14 +19,18 @@ type Props = {
   motion?: 'none' | 'idle' | 'peek' | 'sniff'
   /** Decorative by default; pass a label when the logo is the only content of a link. */
   label?: string
+  /** Dresses Zico regardless of the date and hour (the landing page shows off his outfits). */
+  outfit?: 'santa' | 'pyjamas'
   className?: string
 }
 
 /** Zico, the Readhound beagle, drawn from the shared artwork in `houndArt.ts` (design doc, Brand). */
-export function HoundLogo({ variant = 'badge', motion = 'idle', label, className }: Props) {
+export function HoundLogo({ variant = 'badge', motion = 'idle', label, outfit, className }: Props) {
   const gradientId = useId()
-  const festive = useFestive()
-  const bedtime = useBedtime()
+  const seasonFestive = useFestive()
+  const seasonBedtime = useBedtime()
+  const festive = outfit ? outfit === 'santa' : seasonFestive
+  const bedtime = outfit ? outfit === 'pyjamas' : seasonBedtime
   const [from, via, to] = c.gradient
   return (
     <svg
