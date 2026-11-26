@@ -101,6 +101,60 @@ describe('search → edition → add', () => {
   })
 })
 
+describe('barcode scanning', () => {
+  it('looks up a typed ISBN and goes straight to adding that edition', async () => {
+    const user = userEvent.setup()
+    const router = renderAt('/search')
+    await user.click(screen.getByRole('button', { name: t.scan.open }))
+    const dialog = await screen.findByRole('dialog', { name: t.scan.title })
+    // jsdom has no camera, so the dialog says so and offers typing and a photo.
+    await within(dialog).findByText(t.scan.noCamera)
+    expect(within(dialog).getByRole('button', { name: t.scan.photo })).toBeInTheDocument()
+
+    const input = within(dialog).getByLabelText(t.scan.typeLabel)
+    await user.type(input, '978-0-593-13520-5')
+    await user.click(within(dialog).getByRole('button', { name: t.scan.lookUp }))
+    expect(within(dialog).getByText(t.scan.invalid)).toBeInTheDocument()
+
+    await user.clear(input)
+    await user.type(input, '978-0-593-13520-4')
+    await user.click(within(dialog).getByRole('button', { name: t.scan.lookUp }))
+    await screen.findByRole('heading', { name: t.screens.add.title })
+    expect(screen.getByText('Project Hail Mary')).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/add')
+
+    await user.click(screen.getByRole('button', { name: t.screens.add.submit }))
+    await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/book\//))
+    const edition = (await services.db.editions.toArray())[0]!
+    expect(edition.isbn13).toBe('9780593135204')
+  })
+
+  it('opens manual entry with the ISBN and language filled in when Open Library has no match', async () => {
+    const user = userEvent.setup()
+    const router = renderAt('/add/isbn/9788702173543')
+    await screen.findByText(t.scan.notFound('9788702173543'))
+    expect(router.state.location.pathname).toBe('/add/manual')
+    expect(screen.getByLabelText(t.screens.manual.isbn)).toHaveValue('9788702173543')
+    expect(screen.getByLabelText(t.screens.manual.language, { exact: false })).toHaveValue('dan')
+
+    await user.type(screen.getByLabelText(t.screens.manual.bookTitle), 'Kongens Fald')
+    await user.type(screen.getByLabelText(t.screens.manual.authors, { exact: false }), 'Johannes V. Jensen')
+    await user.click(screen.getAllByRole('button', { name: /Save|Add/ }).at(-1)!)
+    await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/book\//))
+    const edition = (await services.db.editions.toArray())[0]!
+    expect(edition).toMatchObject({ isbn13: '9788702173543', language: 'dan' })
+  })
+
+  it('closes the scanner with Escape', async () => {
+    const user = userEvent.setup()
+    renderAt('/search')
+    await user.click(screen.getByRole('button', { name: t.scan.open }))
+    await screen.findByRole('dialog', { name: t.scan.title })
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+})
+
 describe('manual entry', () => {
   it('requires a title and author and rejects a bad ISBN', async () => {
     const user = userEvent.setup()

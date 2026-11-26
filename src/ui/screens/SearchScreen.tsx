@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, Sparkles } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router'
+import { ChevronRight, ScanBarcode, Sparkles } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { t } from '@/i18n'
@@ -11,6 +11,7 @@ import { Input } from '@/ui/components/ui/input'
 import { useDebounced, useDelayedFlag, useOnline } from '@/ui/hooks/useDebounced'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
+import { ScanDialog } from '@/ui/scan/ScanDialog'
 
 /** Search input is debounced by 400 ms; the loading state appears after 300 ms (design doc). */
 const DEBOUNCE_MS = 400
@@ -20,6 +21,8 @@ export function SearchScreen() {
   const { sources } = useServices()
   const [params, setParams] = useSearchParams()
   const text = params.get('q') ?? ''
+  const scanning = params.has('scan')
+  const navigate = useNavigate()
   const query = useDebounced(text.trim(), DEBOUNCE_MS)
   const online = useOnline()
 
@@ -35,16 +38,27 @@ export function SearchScreen() {
   return (
     <>
       <ScreenHeader title={t.screens.search.title} />
-      <Input
-        type="search"
-        enterKeyHint="search"
-        autoFocus
-        aria-label={t.screens.search.label}
-        placeholder={t.screens.search.placeholder}
-        value={text}
-        onChange={(e) => setParams(e.target.value ? { q: e.target.value } : {}, { replace: true })}
-        className="mb-4"
-      />
+      <div className="mb-4 flex gap-2">
+        <Input
+          type="search"
+          enterKeyHint="search"
+          autoFocus
+          aria-label={t.screens.search.label}
+          placeholder={t.screens.search.placeholder}
+          value={text}
+          onChange={(e) => setParams(e.target.value ? { q: e.target.value } : {}, { replace: true })}
+        />
+        <Button type="button" variant="outline" className="h-11 shrink-0" aria-label={t.scan.open} onClick={() => setParams({ scan: '1' })}>
+          <ScanBarcode />
+          {t.scan.short}
+        </Button>
+      </div>
+      {scanning && (
+        <ScanDialog
+          onClose={() => navigate(-1)}
+          onIsbn={(isbn) => navigate(`/add/isbn/${isbn}`, { replace: true })}
+        />
+      )}
 
       {query.length < 2 && (
         <Link to="/for-you" className="surface mb-4 flex min-h-11 items-center gap-2 p-3 text-sm font-medium">

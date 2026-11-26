@@ -5,7 +5,7 @@ import { useServices } from '@/app/services'
 import type { CoverPhotoInput } from '@/db'
 import type { EditionFormat } from '@/domain/types'
 import { t } from '@/i18n'
-import { parseIsbn } from '@/sources/isbn'
+import { languageFromIsbn, parseIsbn } from '@/sources/isbn'
 import { BackLink } from '@/ui/books/BackLink'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
@@ -22,14 +22,16 @@ export function ManualEntryScreen() {
   const navigate = useNavigate()
   const initialTitle = params.get('title') ?? ''
   // A query that is an ISBN prefills the ISBN field instead of the title.
-  const queryIsbn = parseIsbn(initialTitle)
+  // A scanned ISBN the catalog doesn't know arrives as `isbn`.
+  const queryIsbn = parseIsbn(params.get('isbn') ?? '') ?? parseIsbn(initialTitle)
+  const notFound = params.has('notFound') && !!queryIsbn
   const [form, setForm] = useState({
     title: queryIsbn ? '' : initialTitle,
     subtitle: '',
     authors: params.get('author') ?? '',
     isbn: queryIsbn ?? '',
     pageCount: '',
-    language: '',
+    language: (queryIsbn && languageFromIsbn(queryIsbn)) ?? '',
     publisher: '',
     publishYear: '',
     format: '',
@@ -78,7 +80,13 @@ export function ManualEntryScreen() {
     <>
       <BackLink />
       <h1 className="text-2xl title">{m.title}</h1>
-      <p className="mb-4 text-sm text-muted-foreground">{m.intro}</p>
+      {notFound ? (
+        <p role="status" className="surface mb-4 p-3 text-sm">
+          {t.scan.notFound(queryIsbn!)}
+        </p>
+      ) : (
+        <p className="mb-4 text-sm text-muted-foreground">{m.intro}</p>
+      )}
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field label={m.bookTitle} error={errors.title}>
           <Input value={form.title} onChange={set('title')} aria-invalid={Boolean(errors.title)} required />
