@@ -478,6 +478,7 @@ export const en = {
       about: {
         title: 'About',
         version: (v: string) => `Readhound ${v}. Book data from Open Library.`,
+        landing: 'Meet Zico and the tour of Readhound',
       },
     },
   },

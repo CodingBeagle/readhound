@@ -15,6 +15,15 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  build: {
+    rollupOptions: {
+      // The app, plus the landing page at /welcome/ (src/landing, design doc Landing page).
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        welcome: fileURLToPath(new URL('./welcome/index.html', import.meta.url)),
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -43,6 +52,8 @@ export default defineConfig({
         // Theme fonts: only the Latin subsets (English and Danish) are precached; others load on demand.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}', '**/*-latin-wght-normal-*.woff2', '**/*-latin-ext-wght-normal-*.woff2'],
         navigateFallback: 'index.html',
+        // The landing page is its own precached page, never the app shell.
+        navigateFallbackDenylist: [/\/welcome(\/|$)/],
       },
     }),
   ],
