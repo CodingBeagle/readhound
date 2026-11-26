@@ -34,7 +34,17 @@ test('during the day there are no pyjamas', async ({ page }) => {
   await expect(page.getByTestId('pyjamas')).toHaveCount(0)
 })
 
-test('the pyjamas go on at 18:00 and come off at 06:00 while the app is open', async ({ page }) => {
+test('from midnight Zico sleeps in his pyjamas', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-21T02:00:00+01:00'))
+  await page.goto('/')
+  const logo = page.getByTestId('hound-logo').first()
+  await expect(logo).toHaveAttribute('data-asleep', 'true')
+  await expect(logo.getByTestId('hound-zzz')).toBeAttached()
+  await expect(logo.getByTestId('pyjamas')).toBeAttached()
+  await expect(logo.getByTestId('nightcap')).toBeAttached()
+})
+
+test('the pyjamas go on at 18:00, he falls asleep at midnight and wakes at 06:00 while the app is open', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-11-20T17:59:40+01:00') })
   await page.goto('/')
   const logo = page.getByTestId('hound-logo').first()
@@ -42,10 +52,17 @@ test('the pyjamas go on at 18:00 and come off at 06:00 while the app is open', a
   await expect(page.getByTestId('pyjamas')).toHaveCount(0)
   await page.clock.runFor(30_000)
   await expect(logo.getByTestId('pyjamas')).toBeAttached()
+  await expect(logo).not.toHaveAttribute('data-asleep')
 
-  await page.clock.fastForward('11:59:00')
+  await page.clock.fastForward('05:59:00')
+  await page.clock.runFor(70_000)
+  await expect(logo).toHaveAttribute('data-asleep', 'true')
+  await expect(logo.getByTestId('pyjamas')).toBeAttached()
+
+  await page.clock.fastForward('05:59:00')
   await page.clock.runFor(70_000)
   await expect(page.getByTestId('pyjamas')).toHaveCount(0)
+  await expect(page.getByTestId('hound-zzz')).toHaveCount(0)
 })
 
 test('on December evenings the Santa hat stands in for the nightcap', async ({ page }) => {
@@ -74,6 +91,19 @@ test('the demo profile can put Zico in his pyjamas any time', async ({ page }) =
   await page.goto('/')
   await expect(page.getByTestId('buddy-art').first().getByTestId('pyjamas')).toBeAttached()
   await expect(page.getByTestId('buddy-art').first().getByTestId('nightcap')).toBeAttached()
+  await expect(page.getByTestId('beagle-buddy')).not.toHaveAttribute('data-asleep')
+
+  // The second switch puts him to sleep: snoozing on his book with sleepy lines.
+  await page.goto('/profile')
+  const asleep = page.getByRole('switch', { name: 'Fast asleep' })
+  await expect(asleep).not.toBeChecked()
+  await asleep.click()
+  await expect(asleep).toBeChecked()
+  await page.goto('/')
+  const buddy = page.getByTestId('beagle-buddy')
+  await expect(buddy).toHaveAttribute('data-asleep', 'true')
+  await expect(buddy.getByRole('status')).toContainText(/Zzz|Shh|asleep/)
+  await expect(page.getByTestId('hound-logo').first().getByTestId('hound-zzz')).toBeAttached()
 
   // The toggle lives in the demo data: my own library keeps the real time of day.
   await page.getByRole('button', { name: 'Leave demo mode' }).first().click()

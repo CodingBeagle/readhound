@@ -1166,6 +1166,15 @@
 @keyframes nightcap-sway { 0%, 100% { translate: 0 0; } 50% { translate: -4px 3px; } }
 @media (prefers-reduced-motion: reduce) { .nightcap-tip { animation: none !important; } }
 
+/* Asleep (midnight to 06:00): the logo's head nods down onto the book, breathing slowly, with z's drifting up. The Home buddy uses its snoozing face. */
+.hound-asleep .hound-eyes { animation: none !important; }
+.hound-asleep .hound-head { transform-box: view-box; transform-origin: 50% 70%; animation: hound-sleep-breathe 4s ease-in-out infinite; }
+.hound-zzz text { transform-box: fill-box; transform-origin: 50% 100%; animation: buddy-z 3.6s ease-in-out infinite both; }
+.hound-zzz text:nth-child(2) { animation-delay: 0.6s; }
+.hound-zzz text:nth-child(3) { animation-delay: 1.2s; }
+@keyframes hound-sleep-breathe { 0%, 100% { translate: 0 2.5%; rotate: 3deg; scale: 1; } 50% { translate: 0 3.5%; rotate: 3deg; scale: 1.015 0.99; } }
+@media (prefers-reduced-motion: reduce) { .hound-asleep .hound-head { animation: none !important; translate: 0 3%; rotate: 3deg; } }
+
 /* On dark pages flakes are white with a glow in the theme's colour; on light pages they are a pale theme tint with a white halo, so they still read. */
 :root { --snow: #a7c4e6; --snow-glow: rgb(255 255 255 / 90%); }
 @media (prefers-color-scheme: dark) { :root { --snow: #ffffff; --snow-glow: rgb(147 197 253 / 65%); } }

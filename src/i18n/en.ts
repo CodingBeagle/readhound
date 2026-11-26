@@ -472,8 +472,11 @@ export const en = {
         snowNow: 'Make it snow',
         snowReduced: 'Snow is off because your device asks for reduced motion.',
         pyjamas: 'Pyjama time',
-        pyjamasHint: 'From 18:00 to 06:00 Zico wears his pyjamas and a nightcap. Turn this on to try it in demo mode any time of day.',
-        pyjamasOn: 'It is evening, so Zico is in his pyjamas already.',
+        pyjamasHint: 'From 18:00 Zico wears his pyjamas and a nightcap. Turn this on to try it in demo mode any time of day.',
+        pyjamasOn: 'It is bedtime, so Zico is in his pyjamas already.',
+        asleep: 'Fast asleep',
+        asleepHint: 'From midnight to 06:00 Zico sleeps in his pyjamas. Turn this on to see him sleep any time of day.',
+        asleepOn: 'It is the middle of the night, so Zico is asleep already.',
       },
       about: {
         title: 'About',
@@ -544,6 +547,13 @@ export const en = {
     tapHint: 'Tap Zico',
     /** Zico's first words, shown once on Home before his usual lines. */
     intro: ['Woof! I’m Zico, your reading beagle. I’ll keep an eye on your books!', 'Hi, I’m Zico! I’ll sniff out your reading and cheer you on.'],
+    /** Midnight to 06:00: Zico is asleep in his pyjamas. */
+    asleep: {
+      mood: 'Fast asleep',
+      lines: ['Zzz… Zico is fast asleep. He’ll be up at 6.', 'Shh… Zico is dreaming of a very long book.', 'Zzz… snuggled up with a good book. Night night!', 'Zico is asleep. Reading this late? He won’t tell anyone.'],
+      /** When a tap half wakes him. */
+      stirred: ['Mmh… five more pages… zzz', '*yawn* Is it morning yet? Back to sleep…', 'Wha…? Oh, it’s you. Night night…'],
+    },
     quotes: {
       label: (theme: string) => `A quote on ${theme.toLowerCase()}`,
       by: (author: string, title: string) => `${author}, ${title}`,

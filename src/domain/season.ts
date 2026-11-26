@@ -50,13 +50,27 @@ export function showerIntensity(t: number, duration: number = SNOW.showerMs): nu
 const easeInOut = (x: number) => (1 - Math.cos(Math.PI * x)) / 2
 
 /**
- * Bedtime Easter egg (design doc, Seasonal): from 18:00 until 06:00 in the
- * device's local time Zico wears his pyjamas and a nightcap.
+ * Bedtime Easter egg (design doc, Seasonal), by the device's local clock:
+ * - `evening`, 18:00 to midnight: Zico wears his pyjamas and a nightcap.
+ * - `night`, midnight to 06:00: he is fast asleep, still in his pyjamas.
+ * - `day`, from 06:00: awake and dressed as usual.
  */
+export type BedtimePhase = 'day' | 'evening' | 'night'
+
 export const BEDTIME = { startHour: 18, endHour: 6 } as const
 
-/** Demo-database-only setting that forces pyjama time on, for trying it out. */
+/**
+ * Demo-database-only setting that forces a bedtime phase, for trying it out:
+ * `'evening'` or `'night'` (older demo databases may hold `true`, meaning evening).
+ */
 export const SETTING_DEMO_PYJAMAS = 'demoPyjamas'
+
+/** The phase a stored demo setting forces, or undefined for the real clock. */
+export function demoBedtimePhase(value: unknown): Exclude<BedtimePhase, 'day'> | undefined {
+  if (value === 'night') return 'night'
+  if (value === 'evening' || value === true) return 'evening'
+  return undefined
+}
 
 /** Seconds since local midnight for an instant in a time zone (default: the device's). */
 function localSecondOfDay(instant: Date, timeZone?: string): number {
@@ -65,20 +79,27 @@ function localSecondOfDay(instant: Date, timeZone?: string): number {
   return get('hour') * 3600 + get('minute') * 60 + get('second')
 }
 
-/** True from 18:00 up to (not including) 06:00 local time. */
-export function isBedtime(instant: Date, timeZone?: string): boolean {
+/** Which part of the day it is for Zico, by the local clock. */
+export function bedtimePhase(instant: Date, timeZone?: string): BedtimePhase {
   const hour = Math.floor(localSecondOfDay(instant, timeZone) / 3600)
-  return hour >= BEDTIME.startHour || hour < BEDTIME.endHour
+  if (hour >= BEDTIME.startHour) return 'evening'
+  if (hour < BEDTIME.endHour) return 'night'
+  return 'day'
+}
+
+/** True from 18:00 up to (not including) 06:00 local time: pyjamas on. */
+export function isBedtime(instant: Date, timeZone?: string): boolean {
+  return bedtimePhase(instant, timeZone) !== 'day'
 }
 
 /**
- * Milliseconds until the next 06:00 or 18:00 local time, plus a moment so the
- * check lands just after it. Never more than an hour, so a daylight saving
- * change or a sleeping device can only delay the switch, not lose it.
+ * Milliseconds until the next 06:00, 18:00 or midnight local time, plus a
+ * moment so the check lands just after it. Never more than an hour, so a
+ * daylight saving change or a sleeping device can only delay the switch, not lose it.
  */
 export function msUntilBedtimeChange(instant: Date, timeZone?: string): number {
-  const now = localSecondOfDay(instant, timeZone) + (instant.getMilliseconds() / 1000)
-  const marks = [BEDTIME.endHour * 3600, BEDTIME.startHour * 3600, 24 * 3600 + BEDTIME.endHour * 3600]
+  const now = localSecondOfDay(instant, timeZone) + instant.getMilliseconds() / 1000
+  const marks = [BEDTIME.endHour * 3600, BEDTIME.startHour * 3600, 24 * 3600]
   const next = marks.find((m) => m > now)!
   return Math.min(Math.round((next - now) * 1000) + 1000, 60 * 60 * 1000)
 }
