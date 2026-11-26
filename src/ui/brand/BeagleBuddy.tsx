@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { today as todayOf } from '@/db/clock'
-import { buddyState, hashOf, type BuddyMood } from '@/domain/buddy'
+import { buddyState, hashOf, SETTING_BUDDY_INTRODUCED, type BuddyMood } from '@/domain/buddy'
 import { bookInLibrary, isQuoteTurn, quoteSearchText, quotesFor, quoteTheme, shuffledQuotes, type Quote, type QuoteData, type QuoteTheme } from '@/domain/quotes'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
@@ -24,6 +24,7 @@ const b = t.buddy
 
 /** Settings key for the milestones the buddy has already cheered, so each one gets confetti once. */
 export const SETTING_BUDDY_CELEBRATED = 'buddyCelebrated'
+export { SETTING_BUDDY_INTRODUCED }
 const KEEP_CELEBRATED = 60
 /** How long a tapped sleepy buddy stays awake. */
 const AWAKE_MS = 4000
@@ -33,12 +34,13 @@ export const CHATTER_MS = 20_000
 export const QUOTE_MS = 30_000
 
 /**
- * The beagle buddy on Home (design doc, Beagle buddy): its mood follows the
+ * Zico, the beagle buddy on Home (design doc, Beagle buddy): its mood follows the
  * reader's reading, it says something in a speech bubble, and it cheers with
  * confetti once per fresh milestone. Tapping it gets a reaction, and wakes it
  * up for a moment when it is sleepy. With quotes on, it takes turns between its
  * own lines and a quote from a classic book; tapping it during a quote shows
- * another one.
+ * another one. The very first time, he introduces himself by name until his
+ * next comment, a tap, or news about the reading.
  */
 export function BeagleBuddy({ className }: { className?: string }) {
   const { db, clock } = useServices()
@@ -46,6 +48,14 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const summary = useAchievements()
   const goals = useLiveQuery(() => db.goals.toArray(), [db])
   const celebrated = useLiveQuery(async () => ((await db.settings.get(SETTING_BUDDY_CELEBRATED))?.value as string[] | undefined) ?? [], [db])
+  const introduced = useLiveQuery(async () => Boolean((await db.settings.get(SETTING_BUDDY_INTRODUCED))?.value), [db])
+  /** Set while this visit is the one where Zico says hello; stays on after the setting is saved. */
+  const [introducing, setIntroducing] = useState(false)
+  useEffect(() => {
+    if (introduced !== false) return
+    setIntroducing(true)
+    void db.settings.put({ key: SETTING_BUDDY_INTRODUCED, value: true })
+  }, [introduced, db])
   const weeklyTarget = useWeeklyGoal()
   const today = todayOf(clock)
   const reduce = useReducedMotion()
@@ -68,27 +78,36 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const [skipped, setSkipped] = useState(0)
   const [pokes, setPokes] = useState(0)
   const hasMilestone = Boolean(state?.milestone)
-  const quoting = quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
+  const quoting = !introducing && quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
   const quote = quoting ? quotes[(quoteTurnsBefore(chatter, daySeed, hasMilestone) + skipped) % quotes.length] : undefined
-  const rotates = (Boolean(state?.weekly) && !hasMilestone) || quotes.length > 0
+  const rotates = introducing || (Boolean(state?.weekly) && !hasMilestone) || quotes.length > 0
   useEffect(() => {
     if (!rotates) return
     // A new timer for every turn and every skipped quote, so a fresh quote gets its full time.
     const timer = setTimeout(
       () => {
+        if (introducing) return setIntroducing(false)
         setChatter((n) => n + 1)
         setPokes(0)
       },
       quoting ? QUOTE_MS : CHATTER_MS,
     )
     return () => clearTimeout(timer)
-  }, [rotates, quoting, chatter, skipped])
+  }, [rotates, quoting, chatter, skipped, introducing])
   const [poke, setPoke] = useState(0)
   const [awake, setAwake] = useState(false)
   const [cheer, setCheer] = useState(false)
   const cheered = useRef<string | null>(null)
 
   const milestoneKey = state?.milestone?.key
+  // The greeting gives way as soon as there is news: a milestone, a new mood or pages logged.
+  const newsKey = state && `${state.mood}:${milestoneKey ?? ''}:${state.weekly?.band ?? ''}:${state.weekly?.pages ?? ''}`
+  const introNews = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!introducing || !newsKey) return
+    if (introNews.current === undefined) introNews.current = newsKey
+    else if (introNews.current !== newsKey) setIntroducing(false)
+  }, [introducing, newsKey])
   useEffect(() => {
     if (!milestoneKey || !celebrated || cheered.current === milestoneKey || celebrated.includes(milestoneKey)) return
     cheered.current = milestoneKey
@@ -113,12 +132,13 @@ export function BeagleBuddy({ className }: { className?: string }) {
   if (!state) return null
   // A new band, or a new page count, gets a fresh comment; so does every chatter tick.
   const seed = hashOf(`${today}:${state.mood}:${milestoneKey ?? ''}:${state.weekly?.band ?? ''}`) + (state.weekly?.pages ?? 0) + chatter
-  const message = buddyMessage(state, seed, pokes)
+  const message = introducing && pokes === 0 ? b.intro[seed % b.intro.length]! : buddyMessage(state, seed, pokes)
   const drowsy = state.mood === 'sleepy' || state.mood === 'snoozing'
   const face: BuddyMood = awake && drowsy ? 'curious' : state.mood
 
   const onTap = () => {
     setPoke((n) => n + 1)
+    if (introducing) setIntroducing(false)
     if (quote) return setSkipped((n) => n + 1)
     setPokes((n) => n + 1)
     if (drowsy) setAwake(true)
@@ -130,9 +150,16 @@ export function BeagleBuddy({ className }: { className?: string }) {
         type="button"
         onClick={onTap}
         aria-label={`${b.label}: ${b.moods[state.mood]}. ${quote ? b.quotes.tapHint : b.tapHint}`}
-        className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <BuddyArt key={poke} mood={face} cheer={cheer} poked={poke > 0} className="size-24" />
+        <span
+          aria-hidden
+          data-testid="buddy-name-tag"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 rotate-[-4deg] rounded-full bg-primary px-2 py-0.5 text-[0.7rem] leading-none font-extrabold tracking-wide text-primary-foreground shadow-sm"
+        >
+          {b.nameTag}
+        </span>
       </button>
       <div className="relative min-w-0 flex-1">
         <span aria-hidden className="absolute top-1/2 -left-2 size-3 -translate-y-1/2 rotate-45 border-b border-l border-border bg-card" />

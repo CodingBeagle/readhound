@@ -1,5 +1,5 @@
 /**
- * Beagle buddy: the mascot on Home whose mood follows the reader's reading
+ * Beagle buddy: Zico, the mascot on Home whose mood follows the reader's reading
  * (design doc, Beagle buddy). Everything here is pure so the rules can be
  * tested against a fixed model and date.
  */
@@ -11,6 +11,9 @@ import type { Goal } from './types'
 import { weeklyProgress, type WeeklyProgress } from './weeklyGoal'
 
 export const BUDDY_MOODS = ['excited', 'happy', 'curious', 'sleepy', 'snoozing'] as const
+/** Settings key set once Zico has introduced himself, so his greeting shows only the first time. */
+export const SETTING_BUDDY_INTRODUCED = 'buddyIntroduced'
+
 export type BuddyMood = (typeof BUDDY_MOODS)[number]
 
 /** A milestone counts as fresh, and keeps the buddy excited, for this many days after it happened. */

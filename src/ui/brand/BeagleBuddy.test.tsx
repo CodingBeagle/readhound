@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto'
 
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MotionGlobalConfig } from 'motion/react'
 import { MemoryRouter } from 'react-router'
 
 import { createServices, ServicesProvider, type Services } from '@/app/services'
@@ -9,7 +10,10 @@ import { ReadhoundDB } from '@/db/schema'
 import { SETTING_BUDDY_QUOTES } from '@/domain/quotes'
 import { t } from '@/i18n'
 
-import { BeagleBuddy, CHATTER_MS, QUOTE_MS } from './BeagleBuddy'
+import { BeagleBuddy, CHATTER_MS, QUOTE_MS, SETTING_BUDDY_INTRODUCED } from './BeagleBuddy'
+
+// Fake timers move the clock that animations run on; skip them so speech bubbles swap at once.
+MotionGlobalConfig.skipAnimations = true
 
 const q = t.buddy.quotes
 let services: Services
@@ -26,7 +30,9 @@ afterEach(async () => {
   await services.db.delete()
 })
 
-function renderBuddy() {
+/** Renders the buddy; by default Zico has already said hello, so his usual lines show. */
+async function renderBuddy({ introduced = true } = {}) {
+  if (introduced) await services.db.settings.put({ key: SETTING_BUDDY_INTRODUCED, value: true })
   render(
     <ServicesProvider services={services} demoDbName={`buddy-demo-${crypto.randomUUID()}`}>
       <MemoryRouter>
@@ -49,7 +55,7 @@ describe('BeagleBuddy quotes', () => {
     expect(within(quote).getByRole('link', { name: q.find })).toHaveAttribute('href', expect.stringMatching(/^\/search\?q=/))
 
     const first = shownQuote(buddy)
-    await user.click(within(buddy).getByRole('button', { name: /Beagle buddy/ }))
+    await user.click(within(buddy).getByRole('button', { name: /^Zico/ }))
     await waitFor(() => expect(shownQuote(buddy)).not.toBe(first))
     const second = shownQuote(buddy)
     await user.click(within(buddy).getByRole('button', { name: q.another }))
@@ -81,5 +87,29 @@ describe('BeagleBuddy quotes', () => {
     const buddy = await renderBuddy()
     await waitFor(() => expect(within(buddy).getByRole('status')).toHaveTextContent(/first book|empty shelf/))
     expect(shownQuote(buddy)).toBeUndefined()
+  })
+})
+
+describe('Zico says hello', () => {
+  it('introduces himself by name the first time, then moves on to his usual lines', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    servicesOn('2026-03-03')
+    await services.db.settings.put({ key: SETTING_BUDDY_QUOTES, value: { enabled: false, themes: [] } })
+    const buddy = await renderBuddy({ introduced: false })
+    expect(within(buddy).getByTestId('buddy-name-tag')).toHaveTextContent(t.mascot)
+    await waitFor(() => expect(within(buddy).getByRole('status')).toHaveTextContent(/I’m Zico/))
+    await waitFor(async () => expect((await services.db.settings.get(SETTING_BUDDY_INTRODUCED))?.value).toBe(true))
+    await act(() => vi.advanceTimersByTimeAsync(CHATTER_MS))
+    await waitFor(() => expect(within(buddy).getByRole('status')).toHaveTextContent(/first book|empty shelf/))
+  })
+
+  it('stops the greeting on a tap', async () => {
+    servicesOn('2026-03-03')
+    await services.db.settings.put({ key: SETTING_BUDDY_QUOTES, value: { enabled: false, themes: [] } })
+    const user = userEvent.setup()
+    const buddy = await renderBuddy({ introduced: false })
+    await waitFor(() => expect(within(buddy).getByRole('status')).toHaveTextContent(/I’m Zico/))
+    await user.click(within(buddy).getByRole('button', { name: /^Zico/ }))
+    await waitFor(() => expect(within(buddy).getByRole('status')).not.toHaveTextContent(/I’m Zico/))
   })
 })

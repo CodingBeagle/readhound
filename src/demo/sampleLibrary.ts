@@ -7,6 +7,7 @@
  * sessions, notes and lists are invented.
  */
 import type { BackupData } from '@/db/backup'
+import { SETTING_BUDDY_INTRODUCED } from '@/domain/buddy'
 import { localParts } from '@/domain/stats/calendar'
 import { SETTING_WEEKLY_PAGES_GOAL, weekStartOf } from '@/domain/weeklyGoal'
 import type { Author, Category, Edition, EditionFormat, LibraryEntry, List, ListItem, Note, Read, ReadingSession, Series, SeriesMember, Work } from '@/domain/types'
@@ -448,6 +449,8 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       { key: 'preferredLanguages', value: ['dan', 'eng'] },
       // Counts as backed up today, so the backup reminder doesn't greet the demo.
       { key: 'lastBackupAt', value: now },
+      // Zico has met the sample reader already, so Home opens with his usual lines.
+      { key: SETTING_BUDDY_INTRODUCED, value: true },
       // A weekly goal the sample reader is most of the way to, so the bar shows off.
       { key: SETTING_WEEKLY_PAGES_GOAL, value: demoWeeklyGoal(sessions, today, timeZone) },
     ],

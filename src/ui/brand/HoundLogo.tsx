@@ -18,7 +18,7 @@ type Props = {
   className?: string
 }
 
-/** The Readhound beagle, drawn from the shared artwork in `houndArt.ts` (design doc, Brand). */
+/** Zico, the Readhound beagle, drawn from the shared artwork in `houndArt.ts` (design doc, Brand). */
 export function HoundLogo({ variant = 'badge', motion = 'idle', label, className }: Props) {
   const gradientId = useId()
   const [from, via, to] = c.gradient
