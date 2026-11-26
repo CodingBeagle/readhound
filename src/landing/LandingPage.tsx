@@ -1,9 +1,9 @@
-import { BookOpen, Check, Download, Flame, Lock, ScanBarcode, Search, Smartphone, Trophy, Upload, WifiOff } from 'lucide-react'
+import { BookOpen, Check, Download, Flame, Lock, ScanBarcode, Search, Smartphone, Trophy, Upload, UserX, WifiOff } from 'lucide-react'
 import { motion, MotionConfig } from 'motion/react'
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 
 import { HoundLogo } from '@/ui/brand/HoundLogo'
-import { WalkingHound } from '@/ui/brand/BarkingBeagle'
+import { BuddyArt } from '@/ui/brand/BeagleBuddy'
 import { playBark, primeBarkAudio } from '@/ui/motion/bookAddedBark'
 
 import { landing as l } from './copy'
@@ -16,7 +16,7 @@ type ChapterId = (typeof l.chapters)[number]['id']
 
 /**
  * The Readhound landing page (design doc, Landing page): a single scrolling
- * story in the Midnight theme. Zico trots in and introduces himself, then
+ * story in the Midnight theme. Zico pops up behind his book and introduces himself, then
  * walks the visitor through what the app does, one chapter at a time.
  * It is its own small Vite entry (`welcome/index.html`), so the app is untouched.
  */
@@ -39,7 +39,7 @@ export function LandingPage() {
         <main>
           <Hero />
           {l.chapters.map((chapter, i) => (
-            <Chapter key={chapter.id} chapter={chapter} flip={i % 2 === 1}>
+            <Chapter key={chapter.id} chapter={chapter} number={i + 1} flip={i % 2 === 1}>
               <Visual id={chapter.id} />
             </Chapter>
           ))}
@@ -51,13 +51,20 @@ export function LandingPage() {
   )
 }
 
-/** Zico trots in, barks, then introduces himself line by line. Tapping him makes him bark again. */
+/** Zico pops up behind his book, bouncing and barking, then settles into a happy wag. Tapping him sets him off again. */
 function Hero() {
   const [barks, setBarks] = useState(0)
+  const [excited, setExcited] = useState(true)
+  useEffect(() => {
+    if (!excited) return
+    const timer = setTimeout(() => setExcited(false), 2600)
+    return () => clearTimeout(timer)
+  }, [excited, barks])
   const bark = () => {
     primeBarkAudio()
     playBark()
     setBarks((n) => n + 1)
+    setExcited(true)
   }
   return (
     <section className="landing-hero" aria-labelledby="landing-hello">
@@ -67,7 +74,7 @@ function Hero() {
             <span className="landing-woof" aria-hidden>
               {l.hero.woof}
             </span>
-            <WalkingHound />
+            <BuddyArt mood={excited ? 'excited' : 'happy'} poked={barks > 0} className="landing-buddy" />
           </span>
         </button>
       </div>
@@ -76,17 +83,25 @@ function Hero() {
           {l.hero.lines[0]}
         </h1>
         {l.hero.lines.slice(1).map((line, i) => (
-          <p key={line} className="landing-speech-line" style={{ animationDelay: `${2.9 + i * 0.6}s` }}>
+          <p key={line} className="landing-speech-line" style={{ animationDelay: `${1.6 + i * 0.6}s` }}>
             {line}
           </p>
         ))}
       </div>
       <p className="landing-pitch">{l.hero.pitch}</p>
+      <ul className="landing-simple landing-pitch" aria-label={l.chapters[0].title}>
+        {SIMPLE_ICONS.map((Icon, i) => (
+          <li key={l.hero.simple[i]}>
+            <Icon className="size-5" aria-hidden />
+            {l.hero.simple[i]}
+          </li>
+        ))}
+      </ul>
       <div className="landing-actions landing-pitch">
         <a href={APP_URL} className="landing-button">
           {l.openApp}
         </a>
-        <a href="#find" className="landing-link">
+        <a href="#simple" className="landing-link">
           {l.hero.tour} <span className="landing-arrow">↓</span>
         </a>
       </div>
@@ -94,11 +109,13 @@ function Hero() {
   )
 }
 
-function Chapter({ chapter, flip, children }: { chapter: (typeof l.chapters)[number]; flip: boolean; children: ReactNode }) {
+const SIMPLE_ICONS = [UserX, WifiOff, Smartphone, Download]
+
+function Chapter({ chapter, number, flip, children }: { chapter: (typeof l.chapters)[number]; number: number; flip: boolean; children: ReactNode }) {
   return (
     <section id={chapter.id} className="landing-chapter" data-flip={flip || undefined} aria-labelledby={`${chapter.id}-title`}>
       <Reveal className="landing-copy">
-        <p className="landing-kicker">{chapter.kicker}</p>
+        <p className="landing-kicker">{l.chapter(number)}</p>
         <h2 id={`${chapter.id}-title`} className="landing-h2">
           {chapter.title}
         </h2>
@@ -152,7 +169,7 @@ function Visual({ id }: { id: ChapterId }) {
       return <CheerVisual />
     case 'outfits':
       return <OutfitsVisual />
-    case 'private':
+    case 'simple':
       return <PrivateVisual />
   }
 }

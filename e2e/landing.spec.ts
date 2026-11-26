@@ -4,7 +4,7 @@ test('the landing page introduces Zico and opens the app', async ({ page }) => {
   await page.goto('/welcome/')
   await expect(page.getByRole('heading', { level: 1, name: 'Hi, I’m Zico!' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'First, I sniff out your books' })).toBeAttached()
-  await expect(page.getByRole('heading', { name: 'Your books stay with you' })).toBeAttached()
+  await expect(page.getByRole('heading', { name: 'Simple, and yours alone' })).toBeAttached()
 
   await page.getByTestId('landing-open-app').scrollIntoViewIfNeeded()
   await page.getByTestId('landing-open-app').click()
