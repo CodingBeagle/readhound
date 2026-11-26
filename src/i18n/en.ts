@@ -453,6 +453,37 @@ export const en = {
     homeBanner: (year: number) => `Your ${year} in books is ready`,
     homeBannerAction: 'Take a look',
   },
+  buddy: {
+    label: 'Beagle buddy',
+    tapHint: 'Tap the beagle',
+    moods: { excited: 'Excited', happy: 'Happy', curious: 'Curious', sleepy: 'Sleepy', snoozing: 'Snoozing' },
+    milestone: {
+      goalBooks: (n: number) => [`You hit your goal of ${n} books this year! Best reader ever!`, `${n} books! Goal reached. I’m doing zoomies!`],
+      goalPages: (n: string) => [`${n} pages! You smashed your yearly goal!`, `Yearly goal of ${n} pages: done! Ears up for you!`],
+      finished: (title: string) => [`You finished ${title}! Good human!`, `The end of ${title}! What shall we sniff out next?`],
+      achievement: (name: string) => [`New medal: ${name}! Can I chew it?`, `You earned ${name}! I knew you could!`],
+      streak: (n: number) => [`${n} days in a row! My tail can’t stop wagging!`, `A ${n}-day streak! You’re on a roll!`],
+    },
+    happy: {
+      streak: (n: number) => [`${n} days in a row. Keep it going!`, `Day ${n} of our streak. Tail wags all round!`],
+      today: ['Nice reading today!', 'Pages read today. Treat time?', 'Reading buddies forever.'],
+      general: ['Good to see you!', 'Ready for a few pages?', 'Any good books lately?'],
+    },
+    curious: {
+      reading: (title: string) => [`What happens next in ${title}?`, `Sniff sniff… is ${title} getting good?`, `Shall we read a bit of ${title}?`],
+      nothingLogged: ['Log some pages and I’ll keep track!', 'What are we reading? I’m all ears.'],
+      empty: ['Let’s find a first book together!', 'An empty shelf! Let’s sniff out a book.'],
+    },
+    sleepy: (days: number) => [`It’s been ${days} days… *yawn* Read a page with me?`, `${days} days without a book. I’m getting drowsy…`],
+    snoozing: (days: number) => [`Zzz… (${days} days since we read)`, `Zzz… wake me with a page or two.`],
+    poked: {
+      excited: ['Again! Again!', 'Woof! So proud of you!', '*happy zoomies*'],
+      happy: ['Hehe, that tickles!', '*wags tail*', 'Woof!'],
+      curious: ['Hmm? What’s next?', '*tilts head*', 'Sniff sniff…'],
+      sleepy: ['Mmh… five more minutes…', '*yawns*', 'I’m awake! Mostly.'],
+      snoozing: ['Huh? I’m up! Shall we read?', '*stretches*', 'Zzz… oh, hi!'],
+    },
+  },
   achievements: {
     title: 'Achievements',
     intro: 'Earn medals as you read. Each one is worked out from your reading, so imports and edits keep them right.',

@@ -8,6 +8,7 @@ import { progress } from '@/domain/bookView'
 import { booksRead, currentStreak, finishForecast, goalPace, pagesRead, periodFor, reviewYears } from '@/domain/stats'
 import { t } from '@/i18n'
 import { BookCover } from '@/ui/books/BookCover'
+import { BeagleBuddy } from '@/ui/brand/BeagleBuddy'
 import { HoundLogo } from '@/ui/brand/HoundLogo'
 import { LogPageForm } from '@/ui/books/LogPageForm'
 import { ProgressBar } from '@/ui/books/ProgressBar'
@@ -46,6 +47,7 @@ export function HomeScreen() {
         {t.appName}
       </div>
       <BackupReminder />
+      <BeagleBuddy className="mb-5" />
       {model && (streak?.length || goal) ? (
         <div className="animate-rise mb-5 flex flex-col gap-3 surface p-4">
           {streak !== undefined && streak.length > 0 && (
