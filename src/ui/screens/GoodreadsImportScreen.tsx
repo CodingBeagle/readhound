@@ -17,6 +17,7 @@ import { BackLink } from '@/ui/books/BackLink'
 import { ProgressBar } from '@/ui/books/ProgressBar'
 import { setAchievementsQuiet } from '@/ui/achievements/quiet'
 import { Button } from '@/ui/components/ui/button'
+import { celebrateNewBook } from '@/ui/motion/bookAddedBark'
 import { useOnline } from '@/ui/hooks/useDebounced'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 
@@ -98,6 +99,8 @@ export function GoodreadsImportScreen() {
     }
     controller.current = null
     setAchievementsQuiet(false)
+    // One bark for the whole import, never one per book (design doc, Animation).
+    if (result.imported.length > 0) celebrateNewBook()
     setStep({ kind: 'done', result, series, stopped: false })
   }
 

@@ -94,6 +94,8 @@ describe('search → edition → add', () => {
     expect(screen.getByText(t.owned.badge)).toBeInTheDocument()
     // A new book gets the confetti splash (two corner cannons and a centre pop).
     await waitFor(() => expect(confetti).toHaveBeenCalledTimes(3))
+    // …and the beagle trots on from the app shell.
+    expect(screen.getByTestId('barking-beagle')).toBeInTheDocument()
   })
 
   it('offers manual entry when nothing is found', async () => {

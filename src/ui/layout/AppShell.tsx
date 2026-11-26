@@ -5,6 +5,7 @@ import { useServices } from '@/app/services'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { AchievementToasts } from '@/ui/achievements/AchievementToasts'
+import { BarkingBeagle } from '@/ui/brand/BarkingBeagle'
 import { HoundLogo } from '@/ui/brand/HoundLogo'
 
 import { DemoBanner } from './DemoBanner'
@@ -35,6 +36,7 @@ export function AppShell() {
     <MotionConfig reducedMotion="user">
       {/* Keyed by database, so switching to demo mode starts a fresh celebration record. */}
       <AchievementToasts key={db.name} />
+      <BarkingBeagle />
       <div className="min-h-dvh md:flex">
         <nav
           aria-label={t.mainNav}

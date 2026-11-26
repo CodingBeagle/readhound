@@ -347,7 +347,7 @@ Reads with a made-up start get `Read.startUnknown = true`. They count as books a
 5. **Series:** detection runs for the imported works only (when online); books it can't place go into the series named in their Goodreads title. **Skip** jumps to the Goodreads labels.
 6. **Done:** imported, matched, added by hand, already there, failed lookups, books placed in a series, any failures with the reason; Open library, **Suggest genres** (the `/genres/suggest` backfill, when books lack a genre) and Import another file.
 
-Achievement toasts hold back during the import; afterwards more than 3 new unlocks show as one "N new achievements" toast.
+Achievement toasts hold back during the import; afterwards more than 3 new unlocks show as one "N new achievements" toast. The confetti and barking beagle play once when the import finishes, never per book.
 
 ## Cover photos
 

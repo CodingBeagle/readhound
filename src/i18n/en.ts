@@ -385,6 +385,11 @@ export const en = {
         remove: (name: string) => `Delete ${name}`,
         confirmDelete: 'Delete this category? It is removed from all books.',
       },
+      sounds: {
+        title: 'Sounds',
+        bark: 'Bark when I add a book',
+        hint: 'The beagle trots on and gives a short, quiet bark. It stays silent when your phone is on mute. This is set for this device only.',
+      },
       languages: {
         title: 'Preferred languages',
         hint: 'Language codes, most preferred first, like dan, eng. Editions in these languages are listed first when you add a book.',
@@ -453,6 +458,7 @@ export const en = {
     homeBanner: (year: number) => `Your ${year} in books is ready`,
     homeBannerAction: 'Take a look',
   },
+  bark: { woof: 'Woof!' },
   buddy: {
     label: 'Beagle buddy',
     tapHint: 'Tap the beagle',
