@@ -50,27 +50,34 @@ export function quoteTheme(quote: Quote, favourites: readonly QuoteTheme[]): Quo
   return quote.themes.find((t) => favourites.includes(t)) ?? quote.themes[0]!
 }
 
-/** A small seeded random number generator (mulberry32), so a day's order of quotes can be tested. */
-function random(seed: number) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
+/** Settings key for the ids of the quotes shown most recently, oldest first, kept across visits. */
+export const SETTING_QUOTE_HISTORY = 'buddyQuoteHistory'
+/** How many shown quotes to remember: more than the whole quote book, so every quote gets its turn. */
+export const QUOTE_HISTORY_SIZE = 500
+
+/** Reads the stored history, dropping anything that is not a list of ids. */
+export function parseQuoteHistory(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []
 }
 
-/** The pool shuffled by a seed (the day), so the beagle goes through every quote before repeating one. */
-export function shuffledQuotes(pool: readonly Quote[], seed: number): Quote[] {
-  const out = [...pool]
-  const next = random(seed)
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(next() * (i + 1))
-    ;[out[i], out[j]] = [out[j]!, out[i]!]
-  }
-  return out
+/**
+ * The next quote, at random: one not shown before if there is any, otherwise one
+ * from the half of the pool that was shown longest ago. So a visit never replays
+ * the last visit's quotes, and favourite themes with few quotes still mix them up.
+ */
+export function pickQuote(pool: readonly Quote[], history: readonly string[], random: () => number = Math.random): Quote | undefined {
+  if (pool.length === 0) return undefined
+  const lastSeen = new Map(history.map((id, i) => [id, i]))
+  const fresh = pool.filter((q) => !lastSeen.has(q.id))
+  const candidates = fresh.length
+    ? fresh
+    : [...pool].sort((a, b) => lastSeen.get(a.id)! - lastSeen.get(b.id)!).slice(0, Math.max(1, Math.floor(pool.length / 2)))
+  return candidates[Math.min(candidates.length - 1, Math.floor(random() * candidates.length))]
+}
+
+/** The history with a quote just shown added at the end. */
+export function rememberQuote(history: readonly string[], id: string, size = QUOTE_HISTORY_SIZE): string[] {
+  return [...history.filter((h) => h !== id), id].slice(-size)
 }
 
 /**
