@@ -8,6 +8,7 @@ import { BookScreen } from '@/ui/screens/BookScreen'
 import { DemoScreen } from '@/ui/screens/DemoScreen'
 import { ForYouScreen } from '@/ui/screens/ForYouScreen'
 import { GenreBackfillScreen } from '@/ui/screens/GenreBackfillScreen'
+import { IsbnLookupScreen } from '@/ui/screens/IsbnLookupScreen'
 import { HomeScreen } from '@/ui/screens/HomeScreen'
 import { LibraryScreen } from '@/ui/screens/LibraryScreen'
 import { ManualEntryScreen } from '@/ui/screens/ManualEntryScreen'
@@ -32,6 +33,7 @@ export const routes: RouteObject[] = [
       { path: 'search/work/:workId', element: <WorkScreen /> },
       { path: 'add', element: <AddBookScreen /> },
       { path: 'add/manual', element: <ManualEntryScreen /> },
+      { path: 'add/isbn/:isbn', element: <IsbnLookupScreen /> },
       { path: 'book/:entryId', element: <BookScreen /> },
       { path: 'library', element: <LibraryScreen /> },
       { path: 'series', element: <SeriesListScreen /> },

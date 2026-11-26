@@ -276,6 +276,18 @@ type EditableField = "title" | "subtitle" | "isbn13" | "isbn10" | "publisher" | 
 4. App stores Work, Authors, Edition and LibraryEntry. If the edition lacks `pageCount`, copy the work's `medianPageCount` and set `borrowed.pageCount = true`; same for the cover, taking the first edition of the work with a cover.
 5. Adding an edition already in the library opens the existing entry instead.
 
+### Barcode scanning
+
+The fastest way to add a book is to scan the EAN-13 barcode on its back. That barcode *is* the ISBN-13 of the exact edition, which is what Readhound tracks.
+
+- **Entry point.** A "Scan" button next to the Search input opens the scanner dialog (`/search?scan=1`, `src/ui/scan/ScanDialog.tsx`). Back or Escape closes it.
+- **Reader** (`src/ui/scan/detector.ts`). The browser's own `BarcodeDetector` when it supports `ean_13` (Chrome on Android, macOS); otherwise the `barcode-detector` ponyfill (ZXing-C++ WebAssembly, `zxing-wasm` 3.1.7). The ~950 kB `.wasm` file is bundled with the app (Vite `?url` import, not precached) and loads only when a scan starts; nothing comes from a CDN. Formats: `ean_13`, `upc_a`.
+- **Camera.** `getUserMedia({ video: { facingMode: ideal "environment", 1280×720 ideal } })`, a muted inline `<video>`, read every 150 ms until a valid ISBN is seen, then the stream is stopped and the phone vibrates briefly. A Light (torch) toggle appears when the track reports `torch` capability. A 2:1 frame overlay shows where to aim.
+- **What counts as an ISBN** (`isbnFromBarcode` in `src/sources/isbn.ts`): the first 13 digits must start with 978 or 979 and pass the checksum. Any other barcode (shop sticker, ISSN 977…) shows "That barcode is not an ISBN" and scanning continues. A joined-on 5-digit price add-on is ignored.
+- **Fallbacks.** Camera denied → explains how to allow it; no camera or the camera failed → "Take a photo of the barcode" (file input with `capture=environment`, the photo is read by the same reader); no reader at all → typing only. Typing the ISBN is always available at the bottom of the dialog (ISBN-10 or 13, hyphens allowed, checksum checked).
+- **Lookup** (`/add/isbn/:isbn`, `IsbnLookupScreen`). `SourceRegistry.lookupIsbn` asks each source in order (Open Library `/isbn/{isbn}.json` today). Found → step 3 of *Adding a book* (`/add`) with that edition, so genre chips, the owned toggle and the cover photo offer (when there is no cover) work as usual. Not found → manual entry with the ISBN filled in and a note that Open Library doesn't know it; for Nordic registration groups the language is prefilled too (`languageFromIsbn`: 978-87 `dan`, 82 `nor`, 91 `swe`). Offline or Open Library error → a message with Add manually (and Try again on error).
+- **Tests.** Unit tests for the ISBN helpers and the typed/not-found flows; a Playwright test feeds Chromium's fake camera a generated Y4M video of a real EAN-13 barcode, so the ZXing wasm path is exercised end to end.
+
 ### Status transitions
 
 | From | To | Side effects |
