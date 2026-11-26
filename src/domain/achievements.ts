@@ -226,7 +226,7 @@ export function achievements({ model, goals, series }: AchievementsInput): Achie
   families.push(family('pageTurner', pages, sparse(pageThresholds, pageDates)))
   const long = finished.filter((r) => (r.book.pageCount ?? 0) >= LONG_BOOK)
   families.push(family('marathoner', long.length, long.map((r) => r.endedOn)))
-  const fast = finished.filter((r) => daysBetween(r.startedOn, r.endedOn) < FAST_READ_DAYS)
+  const fast = finished.filter((r) => !r.startUnknown && daysBetween(r.startedOn, r.endedOn) < FAST_READ_DAYS)
   families.push(family('speedReader', fast.length, fast.map((r) => r.endedOn)))
 
   // Habits: the streak tiers unlock on the day a run first reached them.

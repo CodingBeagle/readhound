@@ -306,6 +306,49 @@ The fastest way to add a book is to scan the EAN-13 barcode on its back. That ba
 
 At most one open Read per entry. The **DNF pile** is the view of entries with `status = dnf`. All dates in these transitions can be edited afterwards.
 
+## Goodreads import
+
+Profile → Backup → **Import from Goodreads** (`/import/goodreads`, `GoodreadsImportScreen`) reads the standard Goodreads export, `goodreads_library_export.csv` (goodreads.com → My Books → Import and export → Export Library). It adds to the library; nothing is replaced. Code: `src/domain/goodreads.ts` (parsing and mapping, pure), `src/db/goodreadsImport.ts` (duplicates, Open Library matching, writing), `parseCsv` in `src/domain/csv.ts`. Sample file: `src/domain/__fixtures__/goodreads_library_export.csv`.
+
+**File.** RFC 4180 CSV with a header row; `Title`, `Author` and `Exclusive Shelf` are required, otherwise the file is refused with how-to-export help. Rows without a title are skipped and counted.
+
+**Mapping.**
+
+| Goodreads column | Readhound |
+| --- | --- |
+| Title | Title; a trailing `(Series, #2)` is split off as the series label |
+| Author, Additional Authors | Authors, in order |
+| ISBN, ISBN13 | ISBNs; the `="…"` spreadsheet quoting is stripped and checksums checked |
+| Exclusive Shelf | `to-read` → to read, `currently-reading` → reading, `read` → finished; DNF-like names (`dnf`, `did-not-finish`, `abandoned`, `gave-up`, `unfinished`, …) → DNF; any other exclusive shelf → to read plus a list of that name |
+| Bookshelves | Owned-like shelves (`owned`, `own`, `my-library`, …) → owned; `favorites`/`favourites` → favourite; a shelf that names one of the 31 genres (by name or alias, e.g. `krimi`, `science-fiction`) → that genre category; every other shelf → a list ("summer-2026" → "Summer 2026"), reusing a list with the same name in any case |
+| My Rating | Rating 1–5; 0 means unrated |
+| Owned Copies | Owned when above 0 |
+| Binding | Format: Kindle/ebook → e-book, Audible/audio → audiobook, hardcover, paperback (mass market too), else other |
+| Number of Pages, Publisher, Year Published | Edition details for manual books; on a matched edition the page count fills a gap and the binding becomes a format override |
+| Original Publication Year | Work's first publish year when missing or earlier |
+| Date Added | Entry `addedAt` (local noon of that day) |
+| Date Read, Read Count, Date Started (if present) | Reads, below |
+| My Review | A note "My Goodreads review:" plus the text (`<br/>` → line breaks, tags stripped) |
+| Private Notes | A note |
+
+**Reads.** Goodreads exports only the last date a book was finished, so:
+- Finished: `max(1, Read Count)` finished reads. The last ends on Date Read (or Date Added when empty); earlier rereads end on Date Added. Each starts on its end date unless the file has Date Started.
+- Currently reading: an open read from Date Added (or Date Started); with a Date Read there is also one earlier finished read.
+- DNF: one DNF read from Date Added to Date Read (or Date Added).
+- To read: reads only when Date Read or Read Count says the book was read before.
+
+Reads with a made-up start get `Read.startUnknown = true`. They count as books and pages read (pages on the end date, as for any finished read without sessions), but time to finish, the fastest read in Year in review, wait before starting and the Speed reader achievement skip them.
+
+**Flow.**
+1. Pick the file. The preview shows books in the file, how many will be imported, a chip per status, finished reads and rereads, rated, owned, reviews, and the shelves that become lists, with a note on reread dates.
+2. **Duplicates:** a row is skipped when the library has the same ISBN (ISBN-10 compared as ISBN-13) or the same main title (before `:` or `(`, diacritics folded) and first author's surname, or when it repeats an earlier row. The skipped books are listed with links.
+3. **Match books on Open Library** (on by default, off and disabled offline): ISBN-13, then ISBN-10 lookup; then a title + author search, accepting a hit only when the main titles and the first author's surname agree, and choosing among the work's editions the one with the same publish year, page count (±5), format and publisher (score ≥ 3), else the usual one-tap pick. An edition already in the library counts as existing. Not found or a failed lookup → a manual book from the Goodreads details. The preview estimates the time at about 3 requests per book at 1 request a second.
+4. **Import** one book at a time with a progress bar, the current title and **Stop** (books already imported stay). Leaving the screen stops it too.
+5. **Series:** detection runs for the imported works only (when online); books it can't place go into the series named in their Goodreads title. **Skip** jumps to the Goodreads labels.
+6. **Done:** imported, matched, added by hand, already there, failed lookups, books placed in a series, any failures with the reason; Open library, **Suggest genres** (the `/genres/suggest` backfill, when books lack a genre) and Import another file.
+
+Achievement toasts hold back during the import; afterwards more than 3 new unlocks show as one "N new achievements" toast.
+
 ## Cover photos
 
 When a book has no cover in the catalog, or a bad one, the reader can take a photo of their copy or pick an image.
@@ -706,7 +749,7 @@ The TypeScript types in this document are meant to be used directly. Code is org
 - Where to host the static site (any free static host works)
 - Sync between devices later (decided for now: data lives only on the device; see Storage)
 - Accounts and sign-in, if data is synced
-- Importing an existing library, for example from Goodreads or a spreadsheet
+- Importing from a spreadsheet or other services than Goodreads
 - Barcode scanning of ISBNs with the phone camera
 - Source for author country (for example Wikidata, which Open Library authors often link to), or manual entry per author
 - Original language of translated books: Open Library doesn't always record it, so it may need user input
@@ -744,3 +787,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | Genres are prefilled automatically from a fixed list of 31 genres. Evidence comes from the book's subjects, its other editions, Wikidata P136, series and author fallbacks, and learned corrections. Suggestions are chips to confirm when adding a book, and a backfill screen covers the existing library. Subject tags are left out for now |
 | 2026-11-25 | "Owned" is a flag on each book, not a fifth status, because owning is independent of reading (an owned book can be to read, reading, finished or DNF). Format is the edition's existing format. Library gets an Owned chip that combines with the status chips, and stats get an "Owned but not read" card. No backup format change: the field is optional and absent means not owned |
 | 2026-11-25 | Cover photos: when a book has no cover or a bad one, the reader takes a photo or picks an image, crops it to 2:3 and it is saved on the device as a JPEG (at most 600 × 900) in a separate `covers` table, shown through the `coverUrl` override so removing it brings the source cover back. Included in backups (format version 3; older backups still import) |
+| 2026-11-26 | Goodreads import from the standard CSV export: adds to the library (duplicates by ISBN or title and author are skipped), matches Open Library by ISBN then title and author with manual books as fallback, maps shelves to statuses, owned, favourite, genres and lists, and makes dated reads from Date Read and Read Count. Reads without a known start are flagged `startUnknown` so time-to-finish stats skip them. Series detection then runs for the imported books, with the Goodreads series label as fallback |
