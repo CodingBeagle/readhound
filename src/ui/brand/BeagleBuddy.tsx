@@ -1,14 +1,19 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { BookOpen, Search, Shuffle } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { today as todayOf } from '@/db/clock'
 import { buddyState, hashOf, type BuddyMood } from '@/domain/buddy'
+import { bookInLibrary, isQuoteTurn, quoteSearchText, quotesFor, quoteTheme, shuffledQuotes, type Quote, type QuoteData, type QuoteTheme } from '@/domain/quotes'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { Button } from '@/ui/components/ui/button'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
+import { useQuoteData, useQuoteSettings } from '@/ui/hooks/useQuotes'
 import { useStatsModel } from '@/ui/hooks/useStats'
 import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
 
@@ -22,14 +27,18 @@ export const SETTING_BUDDY_CELEBRATED = 'buddyCelebrated'
 const KEEP_CELEBRATED = 60
 /** How long a tapped sleepy buddy stays awake. */
 const AWAKE_MS = 4000
-/** With a weekly goal the buddy moves on to another comment on the week this often. */
+/** The buddy moves on to its next comment this often (with a weekly goal or quotes on). */
 export const CHATTER_MS = 20_000
+/** A quote stays up a little longer, so there is time to read it. */
+export const QUOTE_MS = 30_000
 
 /**
  * The beagle buddy on Home (design doc, Beagle buddy): its mood follows the
  * reader's reading, it says something in a speech bubble, and it cheers with
  * confetti once per fresh milestone. Tapping it gets a reaction, and wakes it
- * up for a moment when it is sleepy.
+ * up for a moment when it is sleepy. With quotes on, it takes turns between its
+ * own lines and a quote from a classic book; tapping it during a quote shows
+ * another one.
  */
 export function BeagleBuddy({ className }: { className?: string }) {
   const { db, clock } = useServices()
@@ -47,14 +56,33 @@ export function BeagleBuddy({ className }: { className?: string }) {
         : undefined,
     [model, goals, summary, today, weeklyTarget],
   )
+  const quoteSettings = useQuoteSettings()
+  const quotesOn = Boolean(quoteSettings?.enabled)
+  const quoteData = useQuoteData(quotesOn)
+  const favourites = quoteSettings?.themes
+  const daySeed = hashOf(today)
+  const quotes = useMemo(() => (quoteData && favourites ? shuffledQuotes(quotesFor(quoteData, favourites), daySeed) : []), [quoteData, favourites, daySeed])
+
   const [chatter, setChatter] = useState(0)
-  const talksAboutWeek = Boolean(state?.weekly) && !state?.milestone
-  useEffect(() => {
-    if (!talksAboutWeek) return
-    const timer = setInterval(() => setChatter((n) => n + 1), CHATTER_MS)
-    return () => clearInterval(timer)
-  }, [talksAboutWeek])
+  /** Quotes skipped with a tap or the Another button. */
+  const [skipped, setSkipped] = useState(0)
   const [pokes, setPokes] = useState(0)
+  const hasMilestone = Boolean(state?.milestone)
+  const quoting = quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
+  const quote = quoting ? quotes[(quoteTurnsBefore(chatter, daySeed, hasMilestone) + skipped) % quotes.length] : undefined
+  const rotates = (Boolean(state?.weekly) && !hasMilestone) || quotes.length > 0
+  useEffect(() => {
+    if (!rotates) return
+    // A new timer for every turn and every skipped quote, so a fresh quote gets its full time.
+    const timer = setTimeout(
+      () => {
+        setChatter((n) => n + 1)
+        setPokes(0)
+      },
+      quoting ? QUOTE_MS : CHATTER_MS,
+    )
+    return () => clearTimeout(timer)
+  }, [rotates, quoting, chatter, skipped])
   const [poke, setPoke] = useState(0)
   const [awake, setAwake] = useState(false)
   const [cheer, setCheer] = useState(false)
@@ -90,8 +118,9 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const face: BuddyMood = awake && drowsy ? 'curious' : state.mood
 
   const onTap = () => {
-    setPokes((n) => n + 1)
     setPoke((n) => n + 1)
+    if (quote) return setSkipped((n) => n + 1)
+    setPokes((n) => n + 1)
     if (drowsy) setAwake(true)
   }
 
@@ -100,7 +129,7 @@ export function BeagleBuddy({ className }: { className?: string }) {
       <button
         type="button"
         onClick={onTap}
-        aria-label={`${b.label}: ${b.moods[state.mood]}. ${b.tapHint}`}
+        aria-label={`${b.label}: ${b.moods[state.mood]}. ${quote ? b.quotes.tapHint : b.tapHint}`}
         className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <BuddyArt key={poke} mood={face} cheer={cheer} poked={poke > 0} className="size-24" />
@@ -108,20 +137,69 @@ export function BeagleBuddy({ className }: { className?: string }) {
       <div className="relative min-w-0 flex-1">
         <span aria-hidden className="absolute top-1/2 -left-2 size-3 -translate-y-1/2 rotate-45 border-b border-l border-border bg-card" />
         <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={message}
-            role="status"
+          <motion.div
+            key={quote?.id ?? message}
             className="relative rounded-2xl border border-border bg-card px-3.5 py-2.5 text-sm font-medium shadow-sm"
             initial={reduce ? false : { opacity: 0, y: 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? undefined : { opacity: 0, y: -4 }}
             transition={{ duration: 0.22 }}
           >
-            {message}
-          </motion.p>
+            {quote && quoteData ? (
+              <QuoteBubble quote={quote} data={quoteData} favourites={favourites ?? []} onAnother={() => setSkipped((n) => n + 1)} />
+            ) : (
+              <p role="status">{message}</p>
+            )}
+          </motion.div>
         </AnimatePresence>
       </div>
     </section>
+  )
+}
+
+/** How many quote turns came before this one, so each quote turn moves on to the next quote. */
+function quoteTurnsBefore(turn: number, daySeed: number, hasMilestone: boolean): number {
+  let n = 0
+  for (let i = 0; i < turn; i++) if (isQuoteTurn(i, daySeed, hasMilestone)) n++
+  return n
+}
+
+/** A quote in the speech bubble: the line, the book, and a way to another quote or the book itself. */
+function QuoteBubble({ quote, data, favourites, onAnother }: { quote: Quote; data: QuoteData; favourites: readonly QuoteTheme[]; onAnother: () => void }) {
+  const model = useStatsModel()
+  const book = data.books[quote.book]!
+  const owned = model ? bookInLibrary(book, model.books) : undefined
+  const q = b.quotes
+  return (
+    <div data-testid="buddy-quote" data-quote={quote.id}>
+      <figure role="status" className="m-0">
+        <p className="mb-1 text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">{q.label(t.quoteThemes[quoteTheme(quote, favourites)])}</p>
+        <blockquote className="font-display text-[0.95rem] leading-snug font-normal italic">{quote.text}</blockquote>
+        <figcaption className="mt-1.5 text-xs font-medium text-muted-foreground">
+          — {q.by(book.author, book.title)}
+          {book.translator && <span className="block font-normal">{q.translated(book.translator)}</span>}
+        </figcaption>
+      </figure>
+      <div className="mt-1.5 -mb-1 -ml-2 flex flex-wrap">
+        <Button type="button" variant="ghost" size="sm" className="h-9 px-2" aria-label={q.another} onClick={onAnother}>
+          <Shuffle aria-hidden />
+          {q.anotherShort}
+        </Button>
+        <Button asChild variant="ghost" size="sm" className="h-9 px-2">
+          {owned ? (
+            <Link to={`/book/${owned.entry.id}`}>
+              <BookOpen aria-hidden />
+              {q.inLibrary}
+            </Link>
+          ) : (
+            <Link to={`/search?q=${encodeURIComponent(quoteSearchText(book))}`} aria-label={q.find}>
+              <Search aria-hidden />
+              {q.findShort}
+            </Link>
+          )}
+        </Button>
+      </div>
+    </div>
   )
 }
 

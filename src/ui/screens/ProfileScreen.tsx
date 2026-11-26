@@ -8,8 +8,10 @@ import { backupCounts, BackupError, parseBackup, restoreBackup, SETTING_PREFERRE
 import { entriesWithoutGenre } from '@/db/genres'
 import { getSetting } from '@/db/queries'
 import { DEFAULT_PREFERRED_LANGUAGES } from '@/domain/editions'
+import { QUOTE_THEMES, quotesFor, type QuoteTheme } from '@/domain/quotes'
 import type { Category } from '@/domain/types'
 import { t } from '@/i18n'
+import { ChipToggle } from '@/ui/components/ChipToggle'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { useBackup } from '@/ui/hooks/useBackup'
@@ -22,6 +24,7 @@ import { Section } from '@/ui/layout/Section'
 import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 import { useSetWeeklyGoal, useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
+import { useQuoteData, useQuoteSettings, useSaveQuoteSettings } from '@/ui/hooks/useQuotes'
 
 const p = t.screens.profile
 
@@ -35,6 +38,7 @@ export function ProfileScreen() {
         <ThemePicker />
       </Section>
       <SoundsSection />
+      <QuotesSection />
       <AchievementsSection />
       <BackupSection />
       <GoalSection />
@@ -65,6 +69,48 @@ function SoundsSection() {
         <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={bark} onChange={(e) => saveBarkSound(e.target.checked)} />
       </label>
       <p className="mt-1 text-sm text-muted-foreground">{p.sounds.hint}</p>
+    </Section>
+  )
+}
+
+function QuotesSection() {
+  const settings = useQuoteSettings()
+  const save = useSaveQuoteSettings()
+  const data = useQuoteData(true)
+  if (!settings) return null
+  const q = p.quotes
+  const toggle = (theme: QuoteTheme) =>
+    void save({ ...settings, themes: settings.themes.includes(theme) ? settings.themes.filter((x) => x !== theme) : [...settings.themes, theme] })
+  return (
+    <Section title={q.title}>
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4">
+        <span className="font-medium">{q.toggle}</span>
+        <input
+          type="checkbox"
+          role="switch"
+          className="size-5 accent-[var(--primary)]"
+          checked={settings.enabled}
+          onChange={(e) => void save({ ...settings, enabled: e.target.checked })}
+        />
+      </label>
+      <p className="mt-1 text-sm text-muted-foreground">{q.hint}</p>
+      {settings.enabled && (
+        <div role="group" aria-label={q.themes} className="mt-4">
+          <p className="font-medium">{q.themes}</p>
+          <p className="mb-2 text-sm text-muted-foreground">{q.themesHint}</p>
+          <div className="flex flex-wrap gap-2">
+            <ChipToggle pressed={settings.themes.length === 0} onClick={() => void save({ ...settings, themes: [] })}>
+              {q.all}
+            </ChipToggle>
+            {QUOTE_THEMES.map((theme) => (
+              <ChipToggle key={theme} pressed={settings.themes.includes(theme)} onClick={() => toggle(theme)}>
+                {t.quoteThemes[theme]}
+              </ChipToggle>
+            ))}
+          </div>
+          {data && <p className="mt-2 text-sm text-muted-foreground">{q.count(quotesFor(data, settings.themes).length)}</p>}
+        </div>
+      )}
     </Section>
   )
 }
