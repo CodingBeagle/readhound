@@ -182,6 +182,12 @@ function BackupSection() {
             </div>
           )}
         </div>
+        <div className="flex flex-col gap-1.5 border-t pt-4">
+          <Button asChild variant="outline">
+            <Link to="/import/goodreads">{t.goodreads.profileButton}</Link>
+          </Button>
+          <p className="text-xs text-muted-foreground">{t.goodreads.profileHint}</p>
+        </div>
         <Status>{message}</Status>
       </div>
     </Section>

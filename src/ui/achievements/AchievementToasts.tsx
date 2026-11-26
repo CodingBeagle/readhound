@@ -9,6 +9,7 @@ import { t } from '@/i18n'
 import { ConfettiBurst } from '@/ui/motion/Celebration'
 
 import { Medal } from './Medal'
+import { useAchievementsQuiet } from './quiet'
 import { useAchievements } from './useAchievements'
 
 const a = t.achievements
@@ -24,8 +25,11 @@ type Toast =
   | { kind: 'unlock'; key: string; achievement: Family | Special; tier: Tier | 'special' }
   | { kind: 'level'; key: string; name: string }
   | { kind: 'welcome'; key: string; count: number }
+  | { kind: 'batch'; key: string; count: number }
 
 const SHOW_MS = 4200
+/** More unlocks than this at once (after an import) get one toast together. */
+const BATCH_OVER = 3
 
 /**
  * Announces new achievements and level-ups as they happen, one toast at a time
@@ -42,9 +46,10 @@ export function AchievementToasts() {
   const [queue, setQueue] = useState<Toast[]>([])
   const [burst, setBurst] = useState(0)
   const navigate = useNavigate()
+  const quiet = useAchievementsQuiet()
 
   useEffect(() => {
-    if (!summary || seen === undefined) return
+    if (!summary || seen === undefined || quiet) return
     const ids = summary.unlocks.map((u) => u.id)
     if (celebrated.current === null) {
       if (seen === null) {
@@ -66,10 +71,12 @@ export function AchievementToasts() {
     void db.settings.put({ key: SETTING_ACHIEVEMENTS_SEEN, value: { ids: [...known], level: level.current } satisfies Seen })
     setQueue((q) => [
       ...q,
-      ...fresh.map((u): Toast => ({ kind: 'unlock', key: u.id, achievement: u.achievement, tier: u.tier })),
+      ...(fresh.length > BATCH_OVER
+        ? [{ kind: 'batch', key: `batch-${fresh[0]!.id}`, count: fresh.length } satisfies Toast]
+        : fresh.map((u): Toast => ({ kind: 'unlock', key: u.id, achievement: u.achievement, tier: u.tier }))),
       ...(levelUp ? [{ kind: 'level', key: `level-${summary.level.index}`, name: a.levels[summary.level.name] } satisfies Toast] : []),
     ])
-  }, [summary, seen, db])
+  }, [summary, seen, db, quiet])
 
   const current = queue[0]
   useEffect(() => {
@@ -132,6 +139,13 @@ function ToastBody({ toast }: { toast: Toast }) {
       <span className="flex min-w-0 flex-col">
         <span className="text-xs font-medium text-muted-foreground">{a.toastLevel}</span>
         <span className="title text-lg">{a.toastLevelBody(toast.name)}</span>
+      </span>
+    )
+  if (toast.kind === 'batch')
+    return (
+      <span className="flex min-w-0 flex-col">
+        <span className="text-xs font-medium text-muted-foreground">{a.toast}</span>
+        <span className="font-semibold">{a.toastBatch(toast.count)}</span>
       </span>
     )
   return (

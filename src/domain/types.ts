@@ -102,6 +102,12 @@ export interface Read {
   outcome?: 'finished' | 'dnf'
   /** For DNF. */
   stoppedAtPage?: number
+  /**
+   * The start date isn't known, so `startedOn` is a stand-in (Goodreads
+   * exports only the day a book was finished). Time-to-finish, fast-read and
+   * wait stats skip such reads.
+   */
+  startUnknown?: boolean
 }
 
 export interface ReadingSession {

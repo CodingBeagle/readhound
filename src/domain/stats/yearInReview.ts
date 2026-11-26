@@ -58,6 +58,8 @@ export function yearInReview(model: StatsModel, year: number): YearInReview {
   const period: Period = { from: `${year}-01-01`, to: `${year}-12-31` }
   const reads = finishedReads(model, period)
   const books = reads.map(yearBook)
+  // Imported reads without a real start date would all look like one-day reads.
+  const timed = books.filter((_, i) => !reads[i]!.startUnknown)
   const withPages = books.filter((b) => b.pages)
   const rated = books.filter((b) => b.rating !== undefined)
 
@@ -88,7 +90,7 @@ export function yearInReview(model: StatsModel, year: number): YearInReview {
       .slice(0, 5),
     longest: best(withPages, (a, b) => b.pages! - a.pages!),
     shortest: best(withPages, (a, b) => a.pages! - b.pages!),
-    fastest: best(books, (a, b) => a.days - b.days),
+    fastest: best(timed, (a, b) => a.days - b.days),
     highestRated: best(rated, (a, b) => b.rating! - a.rating!),
     streak,
     first: best(books, () => 0),

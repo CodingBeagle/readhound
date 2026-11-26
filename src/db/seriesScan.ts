@@ -25,7 +25,7 @@ export async function scanLibraryForSeries(
   db: ReadhoundDB,
   repo: SeriesRepository,
   detector: SeriesDetector,
-  options: { onProgress?: (p: ScanProgress) => void; signal?: AbortSignal } = {},
+  options: { onProgress?: (p: ScanProgress) => void; signal?: AbortSignal; /** Only these works (e.g. the books just imported). */ workIds?: ReadonlySet<string> } = {},
 ): Promise<ScanResult> {
   const [entries, editions, works, authors, members, dismissed] = await Promise.all([
     db.entries.toArray(),
@@ -43,7 +43,7 @@ export async function scanLibraryForSeries(
   for (const entry of entries) {
     const edition = editionById.get(entry.editionId)
     const work = edition && workById.get(edition.workId)
-    if (!edition || !work || inSeries.has(work.id) || dismissed.has(work.id) || todo.has(work.id)) continue
+    if (!edition || !work || (options.workIds && !options.workIds.has(work.id)) || inSeries.has(work.id) || dismissed.has(work.id) || todo.has(work.id)) continue
     if (work.sourceRef?.source !== 'openlibrary' && edition.sourceRef?.source !== 'openlibrary') continue
     todo.set(work.id, {
       work: work.sourceRef,

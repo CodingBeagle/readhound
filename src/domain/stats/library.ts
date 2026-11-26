@@ -52,7 +52,7 @@ export function waitBeforeStarting(model: StatsModel, period: Period) {
     if (!current || r.startedOn < current.startedOn) firstReads.set(r.entryId, r)
   }
   const waits = [...firstReads.values()]
-    .filter((r) => inPeriod(r.startedOn, period))
+    .filter((r) => !r.startUnknown && inPeriod(r.startedOn, period))
     .map((r) => daysBetween(r.book.entry.addedAt.slice(0, 10), r.startedOn))
     .filter((d) => d > 0)
   const bucket = (d: number) => (d < 7 ? 0 : d < 30 ? 1 : d < 182 ? 2 : d < 365 ? 3 : 4)

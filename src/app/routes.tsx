@@ -9,6 +9,7 @@ import { BookScreen } from '@/ui/screens/BookScreen'
 import { DemoScreen } from '@/ui/screens/DemoScreen'
 import { ForYouScreen } from '@/ui/screens/ForYouScreen'
 import { GenreBackfillScreen } from '@/ui/screens/GenreBackfillScreen'
+import { GoodreadsImportScreen } from '@/ui/screens/GoodreadsImportScreen'
 import { IsbnLookupScreen } from '@/ui/screens/IsbnLookupScreen'
 import { HomeScreen } from '@/ui/screens/HomeScreen'
 import { LibraryScreen } from '@/ui/screens/LibraryScreen'
@@ -59,6 +60,7 @@ export const routes: RouteObject[] = [
       { path: 'achievements', element: <AchievementsScreen /> },
       { path: 'for-you', element: <ForYouScreen /> },
       { path: 'genres/suggest', element: <GenreBackfillScreen /> },
+      { path: 'import/goodreads', element: <GoodreadsImportScreen /> },
       { path: 'demo', element: <DemoScreen /> },
       { path: '*', element: <NotFoundScreen /> },
     ],

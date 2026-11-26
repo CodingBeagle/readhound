@@ -118,7 +118,7 @@ export function finishForecast(read: StatRead, today: string): { date: string; p
 /** Days from start to finish (endedOn − startedOn + 1) for finished reads in the period, fastest first. */
 export function timeToFinish(model: StatsModel, period: Period): { read: StatRead; days: number }[] {
   return model.reads
-    .filter((r) => r.outcome === 'finished' && inPeriod(r.endedOn, period))
+    .filter((r) => r.outcome === 'finished' && !r.startUnknown && inPeriod(r.endedOn, period))
     .map((read) => ({ read, days: daysBetween(read.startedOn, read.endedOn!) + 1 }))
     .sort((a, b) => a.days - b.days || a.read.book.title.localeCompare(b.read.book.title))
 }
