@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 
+import { HoundLoader } from '@/ui/brand/HoundLoader'
 import { AppShell } from '@/ui/layout/AppShell'
 import { AchievementsScreen } from '@/ui/screens/AchievementsScreen'
 import { AddBookScreen } from '@/ui/screens/AddBookScreen'
@@ -41,7 +42,7 @@ export const routes: RouteObject[] = [
       {
         path: 'stats/year/:year',
         element: (
-          <Suspense fallback={null}>
+          <Suspense fallback={<HoundLoader />}>
             <YearInReviewScreen />
           </Suspense>
         ),
@@ -49,7 +50,7 @@ export const routes: RouteObject[] = [
       {
         path: 'stats',
         element: (
-          <Suspense fallback={null}>
+          <Suspense fallback={<HoundLoader />}>
             <StatsScreen />
           </Suspense>
         ),

@@ -8,6 +8,7 @@ import { progress } from '@/domain/bookView'
 import { booksRead, currentStreak, finishForecast, goalPace, pagesRead, periodFor, reviewYears } from '@/domain/stats'
 import { t } from '@/i18n'
 import { BookCover } from '@/ui/books/BookCover'
+import { HoundLogo } from '@/ui/brand/HoundLogo'
 import { LogPageForm } from '@/ui/books/LogPageForm'
 import { ProgressBar } from '@/ui/books/ProgressBar'
 import { Button } from '@/ui/components/ui/button'
@@ -39,6 +40,11 @@ export function HomeScreen() {
 
   return (
     <>
+      {/* Phones have no sidebar, so Home carries the brand. */}
+      <div className="title mb-4 flex items-center gap-2.5 text-lg md:hidden">
+        <HoundLogo className="size-9 drop-shadow-sm" />
+        {t.appName}
+      </div>
       <BackupReminder />
       {model && (streak?.length || goal) ? (
         <div className="animate-rise mb-5 flex flex-col gap-3 surface p-4">
