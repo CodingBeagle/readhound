@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useRef, useState } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
 
 import { useServices } from '@/app/services'
@@ -19,6 +19,7 @@ import { DangerZone } from '@/ui/profile/DangerZone'
 import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
+import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 
 const p = t.screens.profile
@@ -32,6 +33,7 @@ export function ProfileScreen() {
         <p className="mb-3 text-sm text-muted-foreground">{p.appearance.intro}</p>
         <ThemePicker />
       </Section>
+      <SoundsSection />
       <AchievementsSection />
       <BackupSection />
       <GoalSection />
@@ -49,6 +51,19 @@ export function ProfileScreen() {
       </Section>
       <DangerZone />
     </>
+  )
+}
+
+function SoundsSection() {
+  const bark = useSyncExternalStore(subscribeBarkSound, barkSoundEnabled, barkSoundEnabled)
+  return (
+    <Section title={p.sounds.title}>
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4">
+        <span className="font-medium">{p.sounds.bark}</span>
+        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={bark} onChange={(e) => saveBarkSound(e.target.checked)} />
+      </label>
+      <p className="mt-1 text-sm text-muted-foreground">{p.sounds.hint}</p>
+    </Section>
   )
 }
 
