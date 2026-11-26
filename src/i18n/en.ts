@@ -13,7 +13,9 @@ interface WeeklyLine {
 
 export const en = {
   appName: 'Readhound',
-  loading: 'Sniffing out your books…',
+  /** The Readhound beagle's name (he/him). Used wherever the mascot appears. */
+  mascot: 'Zico',
+  loading: 'Zico is sniffing out your books…',
   tabs: {
     home: 'Home',
     search: 'Search',
@@ -430,18 +432,18 @@ export const en = {
         confirmDelete: 'Delete this category? It is removed from all books.',
       },
       quotes: {
-        title: 'Beagle quotes',
+        title: 'Zico’s book quotes',
         toggle: 'Share quotes from classic books',
-        hint: 'Now and then the beagle on Home shares a line from a classic book, taking turns with its own comments. Tap it for another. All quotes come from public-domain books and work offline.',
+        hint: 'Now and then Zico, the beagle on Home, shares a line from a classic book, taking turns with his own comments. Tap him for another. All quotes come from public-domain books and work offline.',
         themes: 'Favourite themes',
-        themesHint: 'Pick the themes you like best. With none picked, the beagle uses all of them.',
+        themesHint: 'Pick the themes you like best. With none picked, Zico uses all of them.',
         all: 'All themes',
         count: (n: number) => `${n.toLocaleString('en')} quotes to choose from`,
       },
       sounds: {
         title: 'Sounds',
-        bark: 'Bark when I add a book',
-        hint: 'The beagle trots on and gives a short, quiet bark. It stays silent when your phone is on mute. This is set for this device only.',
+        bark: 'Zico barks when I add a book',
+        hint: 'Zico trots on and gives a short, quiet bark. It stays silent when your phone is on mute. This is set for this device only.',
       },
       languages: {
         title: 'Preferred languages',
@@ -528,8 +530,11 @@ export const en = {
     adventure: 'Adventure',
   },
   buddy: {
-    label: 'Beagle buddy',
-    tapHint: 'Tap the beagle',
+    label: 'Zico',
+    nameTag: 'Zico',
+    tapHint: 'Tap Zico',
+    /** Zico's first words, shown once on Home before his usual lines. */
+    intro: ['Woof! I’m Zico, your reading beagle. I’ll keep an eye on your books!', 'Hi, I’m Zico! I’ll sniff out your reading and cheer you on.'],
     quotes: {
       label: (theme: string) => `A quote on ${theme.toLowerCase()}`,
       by: (author: string, title: string) => `${author}, ${title}`,
@@ -539,7 +544,7 @@ export const en = {
       find: 'Find book on Open Library',
       findShort: 'Find book',
       inLibrary: 'In library',
-      tapHint: 'Tap the beagle for another quote',
+      tapHint: 'Tap Zico for another quote',
     },
     moods: { excited: 'Excited', happy: 'Happy', curious: 'Curious', sleepy: 'Sleepy', snoozing: 'Snoozing' },
     milestone: {
@@ -562,20 +567,20 @@ export const en = {
     },
     happy: {
       streak: (n: number) => [`${n} days in a row. Keep it going!`, `Day ${n} of our streak. Tail wags all round!`],
-      today: ['Nice reading today!', 'Pages read today. Treat time?', 'Reading buddies forever.'],
-      general: ['Good to see you!', 'Ready for a few pages?', 'Any good books lately?'],
+      today: ['Nice reading today!', 'Pages read today. Treat time?', 'Reading buddies forever.', 'Zico approves of today’s pages!'],
+      general: ['Good to see you!', 'Ready for a few pages?', 'Any good books lately?', 'Zico reporting for reading duty!'],
     },
     curious: {
       reading: (title: string) => [`What happens next in ${title}?`, `Sniff sniff… is ${title} getting good?`, `Shall we read a bit of ${title}?`],
       nothingLogged: ['Log some pages and I’ll keep track!', 'What are we reading? I’m all ears.'],
-      empty: ['Let’s find a first book together!', 'An empty shelf! Let’s sniff out a book.'],
+      empty: ['Let’s find a first book together!', 'An empty shelf! Let’s sniff out a book.', 'Zico’s nose is ready to sniff out a first book!'],
     },
     sleepy: (days: number) => [`It’s been ${days} days… *yawn* Read a page with me?`, `${days} days without a book. I’m getting drowsy…`],
     snoozing: (days: number) => [`Zzz… (${days} days since we read)`, `Zzz… wake me with a page or two.`],
     poked: {
       excited: ['Again! Again!', 'Woof! So proud of you!', '*happy zoomies*'],
-      happy: ['Hehe, that tickles!', '*wags tail*', 'Woof!'],
-      curious: ['Hmm? What’s next?', '*tilts head*', 'Sniff sniff…'],
+      happy: ['Hehe, that tickles!', '*wags tail*', 'Woof!', 'Zico at your service!'],
+      curious: ['Hmm? What’s next?', '*tilts head*', 'Sniff sniff…', 'Zico is all ears!'],
       sleepy: ['Mmh… five more minutes…', '*yawns*', 'I’m awake! Mostly.'],
       snoozing: ['Huh? I’m up! Shall we read?', '*stretches*', 'Zzz… oh, hi!'],
     },
@@ -828,7 +833,7 @@ export const en = {
   },
   demo: {
     title: 'Demo mode',
-    intro: 'Demo mode fills a separate database with about two years of made-up reading: Danish and English books, every status, a DNF pile, rereads, genres, lists, notes and daily reading sessions. Use it to try the library and the stats.',
+    intro: 'Zico has dug up some sample books for you. Demo mode fills a separate database with about two years of made-up reading: Danish and English books, every status, a DNF pile, rereads, genres, lists, notes and daily reading sessions. Use it to try the library and the stats.',
     safe: 'Your own library is kept apart and is not changed. Anything you do in demo mode only touches the sample data.',
     enter: 'Start demo mode',
     entering: 'Making sample data…',
@@ -840,7 +845,7 @@ export const en = {
   },
   notFound: {
     title: 'Page not found',
-    body: 'Our hound sniffed everywhere, but this page isn’t on any shelf.',
+    body: 'Zico sniffed everywhere, but this page isn’t on any shelf.',
     backHome: 'Back to Home',
   },
   pwa: {

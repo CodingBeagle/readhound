@@ -31,7 +31,7 @@ export function DemoScreen() {
       <ScreenHeader title={t.demo.title} />
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <HoundLogo motion="peek" className="size-16 drop-shadow-md" />
+          <HoundLogo motion="peek" label={t.mascot} className="size-16 drop-shadow-md" />
           <p>{t.demo.intro}</p>
         </div>
         <p className="flex gap-2 surface p-4 text-sm">

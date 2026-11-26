@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures.ts'
 
-test('the beagle trots on and barks when I add a book', async ({ page }) => {
+test('Zico trots on and barks when I add a book', async ({ page }) => {
   await page.goto('/add/manual')
   await page.getByLabel('Title', { exact: true }).fill('Kongens Fald')
   await page.getByLabel('Author').fill('Johannes V. Jensen')
@@ -17,14 +17,14 @@ test('the beagle trots on and barks when I add a book', async ({ page }) => {
 
 test('the bark sound can be turned off in Profile', async ({ page }) => {
   await page.goto('/profile')
-  const toggle = page.getByRole('switch', { name: 'Bark when I add a book' })
+  const toggle = page.getByRole('switch', { name: 'Zico barks when I add a book' })
   await expect(toggle).toBeChecked()
   await toggle.uncheck()
   await page.reload()
-  await expect(page.getByRole('switch', { name: 'Bark when I add a book' })).not.toBeChecked()
+  await expect(page.getByRole('switch', { name: 'Zico barks when I add a book' })).not.toBeChecked()
 })
 
-test('with reduced motion the beagle just appears and barks', async ({ page }) => {
+test('with reduced motion Zico just appears and barks', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/add/manual')
   await page.getByLabel('Title', { exact: true }).fill('Kongens Fald')

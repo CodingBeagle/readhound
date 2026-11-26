@@ -1,10 +1,10 @@
 import { expect, test } from './fixtures.ts'
 
-test('the beagle shares book quotes on my favourite themes', async ({ page }) => {
+test('Zico shares book quotes on my favourite themes', async ({ page }) => {
   // 2 March 2026 is a day the buddy opens with a quote.
   await page.clock.setFixedTime(new Date('2026-03-02T12:00:00'))
   await page.goto('/profile')
-  const section = page.locator('section', { has: page.getByRole('heading', { name: 'Beagle quotes' }) })
+  const section = page.locator('section', { has: page.getByRole('heading', { name: 'Zico’s book quotes' }) })
   await expect(section.getByRole('switch', { name: 'Share quotes from classic books' })).toBeChecked()
   await expect(section.getByRole('button', { name: 'All themes' })).toHaveAttribute('aria-pressed', 'true')
   await section.getByRole('button', { name: 'Grief' }).click()
@@ -12,8 +12,11 @@ test('the beagle shares book quotes on my favourite themes', async ({ page }) =>
   await expect(section.getByText(/\d+ quotes to choose from/)).toBeVisible()
 
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Home' }).click()
-  const buddy = page.getByRole('region', { name: 'Beagle buddy' })
+  const buddy = page.getByRole('region', { name: 'Zico' })
   const quote = buddy.getByTestId('buddy-quote')
+  // First he says hello; a tap moves him on to the day's quote.
+  await expect(buddy.getByRole('status')).toContainText('I’m Zico')
+  await buddy.getByRole('button', { name: /^Zico/ }).click()
   await expect(quote).toBeVisible()
   await expect(quote).toContainText('A quote on grief')
   const first = await quote.getAttribute('data-quote')
