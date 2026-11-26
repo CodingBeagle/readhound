@@ -1,6 +1,6 @@
 /** Reads barcodes from a video frame or a photo. */
 export interface BarcodeReader {
-  detect(source: HTMLVideoElement | ImageBitmap | Blob): Promise<{ rawValue: string }[]>
+  detect(source: HTMLVideoElement | HTMLCanvasElement | ImageBitmap | Blob): Promise<{ rawValue: string }[]>
 }
 
 /** Book barcodes are EAN-13; UPC-A covers some US paperbacks that carry an ISBN in it too. */
@@ -37,4 +37,32 @@ export async function createBarcodeReader(): Promise<BarcodeReader> {
     fireImmediately: true,
   })
   return new BarcodeDetector({ formats: [...FORMATS] })
+}
+
+/** Longest side of the scaled copies a photo is also read at. */
+const PHOTO_SIZES = [1600, 1000]
+
+/**
+ * Reads a photo of a barcode. A phone photo is 12 megapixels or more, and
+ * barcode readers often do better on a smaller copy, so when the full photo
+ * gives nothing it is read again at smaller sizes.
+ */
+export async function readPhoto(reader: BarcodeReader, photo: Blob): Promise<{ rawValue: string }[]> {
+  const full = await reader.detect(photo).catch(() => [])
+  if (full.length > 0) return full
+  const bitmap = await createImageBitmap(photo)
+  try {
+    for (const size of PHOTO_SIZES) {
+      const scale = Math.min(1, size / Math.max(bitmap.width, bitmap.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(bitmap.width * scale)
+      canvas.height = Math.round(bitmap.height * scale)
+      canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+      const codes = await reader.detect(canvas).catch(() => [])
+      if (codes.length > 0) return codes
+    }
+    return []
+  } finally {
+    bitmap.close()
+  }
 }
