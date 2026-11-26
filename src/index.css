@@ -582,3 +582,63 @@
     transition-duration: 1ms !important;
   }
 }
+
+/* ── The Readhound logo (src/ui/brand/HoundLogo.tsx, design doc Brand). ── */
+.hound .hound-head,
+.hound .hound-ear,
+.hound .hound-eyes,
+.hound .hound-paws {
+  transform-box: fill-box;
+}
+.hound .hound-ear-left { transform-origin: 80% 5%; }
+.hound .hound-ear-right { transform-origin: 20% 5%; }
+.hound .hound-eyes { transform-origin: center; }
+.hound .hound-head { transform-origin: 50% 100%; }
+.hound .hound-ear { transition: rotate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* Blink every few seconds. */
+.hound-idle .hound-eyes,
+.hound-peek .hound-eyes,
+.hound-sniff .hound-eyes {
+  animation: hound-blink 5.5s ease-in-out 1.2s infinite;
+}
+/* Ears flop when the logo is hovered or tapped. */
+.hound:hover .hound-ear-left,
+.hound:active .hound-ear-left,
+.hound-flop .hound-ear-left { rotate: 14deg; }
+.hound:hover .hound-ear-right,
+.hound:active .hound-ear-right,
+.hound-flop .hound-ear-right { rotate: -14deg; }
+/* Peek: the head rises from behind the book, then the ears settle. */
+.hound-peek .hound-head { animation: hound-peek 0.9s cubic-bezier(0.34, 1.45, 0.64, 1) 0.1s both; }
+.hound-peek .hound-ear-left { animation: hound-ear-settle-left 0.8s ease-out 0.75s both; }
+.hound-peek .hound-ear-right { animation: hound-ear-settle-right 0.8s ease-out 0.75s both; }
+.hound-peek .hound-paws { animation: hound-paws 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both; }
+/* Sniff: a busy little bob while something loads. */
+.hound-sniff .hound-head { animation: hound-sniff 0.9s ease-in-out infinite; }
+@keyframes hound-blink {
+  0%, 94%, 100% { scale: 1 1; }
+  97% { scale: 1 0.1; }
+}
+@keyframes hound-peek {
+  from { translate: 0 34%; rotate: -6deg; }
+}
+@keyframes hound-ear-settle-left {
+  30% { rotate: 12deg; }
+  65% { rotate: -5deg; }
+}
+@keyframes hound-ear-settle-right {
+  30% { rotate: -12deg; }
+  65% { rotate: 5deg; }
+}
+@keyframes hound-paws {
+  from { translate: 0 30%; opacity: 0; }
+}
+@keyframes hound-sniff {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 0 -3%; rotate: -3deg; }
+  50% { translate: 0 1%; rotate: 0deg; }
+  75% { translate: 0 -3%; rotate: 3deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hound *, #splash * { animation: none !important; }
+}

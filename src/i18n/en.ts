@@ -4,6 +4,7 @@
  */
 export const en = {
   appName: 'Readhound',
+  loading: 'Sniffing out your books…',
   tabs: {
     home: 'Home',
     search: 'Search',
@@ -653,6 +654,7 @@ export const en = {
   },
   notFound: {
     title: 'Page not found',
+    body: 'Our hound sniffed everywhere, but this page isn’t on any shelf.',
     backHome: 'Back to Home',
   },
   pwa: {

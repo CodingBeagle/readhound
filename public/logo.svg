@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1c1917"/>
-  <!-- open book -->
-  <path d="M96 168c56-24 112-24 160 8v216c-48-32-104-32-160-8z" fill="#fafaf9"/>
-  <path d="M416 168c-56-24-112-24-160 8v216c48-32 104-32 160-8z" fill="#e7e5e4"/>
-  <!-- dog-eared corner -->
-  <path d="M416 168v56l-44-44c16-6 30-10 44-12z" fill="#f59e0b"/>
-  <path d="M256 176v216" stroke="#1c1917" stroke-width="8"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="rh-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="0.55" stop-color="#db2777"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#rh-bg)"/><path d="M256 118c66 0 100 52 100 116c0 72-44 112-100 112s-100-40-100-112c0-64 34-116 100-116z" fill="#d08a4a"/><path d="M242 132c8-4 20-4 28 0l12 128h-52z" fill="#fff7ed"/><ellipse cx="256" cy="292" rx="66" ry="50" fill="#fff7ed"/><path d="M184 140c-52-6-86 44-84 120c2 56 22 94 52 90c28-4 36-44 36-100c0-46-2-86-4-110z" fill="#6b3518"/><path d="M328 140c52-6 86 44 84 120c-2 56-22 94-52 90c-28-4-36-44-36-100c0-46 2-86 4-110z" fill="#6b3518"/><circle cx="218" cy="222" r="14" fill="#1c1917"/><circle cx="223" cy="217" r="4.5" fill="#fff"/><circle cx="294" cy="222" r="14" fill="#1c1917"/><circle cx="299" cy="217" r="4.5" fill="#fff"/><path d="M232 262c0-10 48-10 48 0c0 14-14 24-24 24s-24-10-24-24z" fill="#1c1917"/><path d="M84 340c64-24 128-22 172 6v100c-44-28-108-30-172-6z" fill="#ffffff"/><path d="M428 340c-64-24-128-22-172 6v100c44-28 108-30 172-6z" fill="#fde7d4"/><path d="M256 346v100" stroke="#7c2d12" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/><ellipse cx="190" cy="336" rx="30" ry="20" fill="#fff7ed"/><ellipse cx="322" cy="336" rx="30" ry="20" fill="#fff7ed"/><path d="M180 328v12M196 328v12M312 328v12M328 328v12" stroke="#d08a4a" stroke-width="4" stroke-linecap="round"/></svg>

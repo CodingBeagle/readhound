@@ -16,9 +16,21 @@
         if (theme) document.documentElement.dataset.theme = theme
       } catch (e) {}
     </script>
+    <style>
+      /* Splash while the app loads; React replaces #root's content when it starts. */
+      #splash { position: fixed; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; font: 600 20px/1 system-ui, sans-serif; color: #57534e; background: #fafaf9; }
+      @media (prefers-color-scheme: dark) { #splash { color: #d6d3d1; background: #0c0a09; } }
+      #splash img { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 12px 32px -12px #db2777; animation: splash-in 0.7s cubic-bezier(0.34, 1.45, 0.64, 1) both, splash-bob 1.4s ease-in-out 0.7s infinite; }
+      @keyframes splash-in { from { opacity: 0; scale: 0.6; } }
+      @keyframes splash-bob { 50% { translate: 0 -6px; } }
+      :root[data-theme='midnight'] #splash { color: #cbd5e1; background: #0a0d1c; }
+      :root[data-theme='aurora'] #splash { background: #f6f4ff; }
+      :root[data-theme='bookshop'] #splash { background: #f5efe3; }
+      @media (prefers-reduced-motion: reduce) { #splash img { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="splash" aria-label="Readhound is loading" role="status"><img src="/logo.svg" alt="" />Readhound</div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 
 import { useDemo } from '@/app/services'
 import { t } from '@/i18n'
+import { HoundLogo } from '@/ui/brand/HoundLogo'
 import { Button } from '@/ui/components/ui/button'
 import { ScreenHeader } from '@/ui/layout/ScreenHeader'
 
@@ -29,7 +30,10 @@ export function DemoScreen() {
     <>
       <ScreenHeader title={t.demo.title} />
       <div className="flex flex-col gap-4">
-        <p>{t.demo.intro}</p>
+        <div className="flex items-center gap-4">
+          <HoundLogo motion="peek" className="size-16 drop-shadow-md" />
+          <p>{t.demo.intro}</p>
+        </div>
         <p className="flex gap-2 surface p-4 text-sm">
           <ShieldCheck aria-hidden className="size-5 shrink-0" />
           {t.demo.safe}

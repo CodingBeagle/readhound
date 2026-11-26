@@ -5,6 +5,7 @@ import { useServices } from '@/app/services'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { AchievementToasts } from '@/ui/achievements/AchievementToasts'
+import { HoundLogo } from '@/ui/brand/HoundLogo'
 
 import { DemoBanner } from './DemoBanner'
 import { tabs } from './tabs'
@@ -42,7 +43,10 @@ export function AppShell() {
             'md:sticky md:top-0 md:h-dvh md:w-56 md:shrink-0 md:border-t-0 md:border-r md:pb-0',
           )}
         >
-          <div className="title hidden px-5 py-6 text-xl md:block">{t.appName}</div>
+          <div className="title hidden items-center gap-2.5 px-5 py-6 text-xl md:flex">
+            <HoundLogo className="size-9 drop-shadow-sm" />
+            {t.appName}
+          </div>
           <ul className="flex md:flex-col md:gap-1 md:px-3">
             {tabs.map(({ to, label, icon: Icon }) => (
               <li key={to} className="flex-1 md:flex-none">
