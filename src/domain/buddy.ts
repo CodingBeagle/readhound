@@ -8,6 +8,7 @@ import { addDays, daysBetween } from './stats/calendar'
 import { currentStreak, readingDays } from './stats/habits'
 import type { StatsModel } from './stats/model'
 import type { Goal } from './types'
+import { weeklyProgress, type WeeklyProgress } from './weeklyGoal'
 
 export const BUDDY_MOODS = ['excited', 'happy', 'curious', 'sleepy', 'snoozing'] as const
 export type BuddyMood = (typeof BUDDY_MOODS)[number]
@@ -22,6 +23,7 @@ export const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365] as const
 
 export type Milestone =
   | { kind: 'goal'; key: string; on: string; unit: 'books' | 'pages'; target: number }
+  | { kind: 'weekly'; key: string; on: string; target: number }
   | { kind: 'finished'; key: string; on: string; title: string }
   | { kind: 'achievement'; key: string; on: string; achievement: Family | Special; tier: Tier | 'special' }
   | { kind: 'streak'; key: string; on: string; days: number }
@@ -37,6 +39,8 @@ export interface BuddyState {
   readingTitle?: string
   /** True when the library is empty. */
   empty: boolean
+  /** This week's progress, when a weekly pages goal is set. */
+  weekly?: WeeklyProgress
 }
 
 export interface BuddyInput {
@@ -44,6 +48,8 @@ export interface BuddyInput {
   goals: readonly Goal[]
   unlocks: readonly Unlock[]
   today: string
+  /** Weekly pages target, when one is set. */
+  weeklyTarget?: number
 }
 
 const fresh = (on: string | undefined, today: string): on is string => on !== undefined && on <= today && daysBetween(on, today) <= MILESTONE_FRESH_DAYS
@@ -72,7 +78,7 @@ function goalReachedOn(model: StatsModel, goal: Goal, unit: 'books' | 'pages', t
 }
 
 /** Every fresh milestone, most important first: a reached goal, a finished book, an achievement, a streak. */
-export function freshMilestones({ model, goals, unlocks, today }: BuddyInput): Milestone[] {
+export function freshMilestones({ model, goals, unlocks, today, weeklyTarget }: BuddyInput): Milestone[] {
   const out: Milestone[] = []
   const year = Number(today.slice(0, 4))
   const goal = goals.find((g) => g.year === year)
@@ -82,6 +88,11 @@ export function freshMilestones({ model, goals, unlocks, today }: BuddyInput): M
       const target = unit === 'books' ? goal.targetBooks : goal.targetPages
       if (fresh(on, today) && target) out.push({ kind: 'goal', key: `goal:${year}:${unit}`, on, unit, target })
     }
+  }
+  if (weeklyTarget) {
+    // One cheer per week, even if the target changes after it was reached.
+    const week = weeklyProgress(model, weeklyTarget, today)
+    if (fresh(week.reachedOn, today)) out.push({ kind: 'weekly', key: `weekly:${week.from}`, on: week.reachedOn, target: weeklyTarget })
   }
   const finished = model.reads
     .filter((r) => r.outcome === 'finished' && fresh(r.endedOn, today))
@@ -108,10 +119,16 @@ export function buddyState(input: BuddyInput): BuddyState {
   const readingTitle = reading.sort((a, b) => (b.sessions.at(-1)?.date ?? b.startedOn).localeCompare(a.sessions.at(-1)?.date ?? a.startedOn))[0]?.book.title
   const empty = model.books.length === 0
   const milestone = freshMilestones(input)[0]
-  const base = { daysSinceReading, streak, readingTitle, empty }
+  const weekly = input.weeklyTarget ? weeklyProgress(model, input.weeklyTarget, today) : undefined
+  const base = { daysSinceReading, streak, readingTitle, empty, weekly }
   if (milestone) return { ...base, mood: 'excited', milestone }
-  return { ...base, mood: moodFor(daysSinceReading, readingTitle !== undefined, empty) }
+  const mood = moodFor(daysSinceReading, readingTitle !== undefined, empty)
+  // Closing in on the weekly goal gets the buddy excited.
+  if (weekly && EXCITED_BANDS.has(weekly.band) && (mood === 'happy' || mood === 'curious')) return { ...base, mood: 'excited' }
+  return { ...base, mood }
 }
+
+const EXCITED_BANDS = new Set<WeeklyProgress['band']>(['close', 'almost', 'done', 'beyond'])
 
 function moodFor(daysSince: number | undefined, reading: boolean, empty: boolean): BuddyMood {
   if (empty) return 'curious'

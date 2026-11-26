@@ -21,6 +21,7 @@ import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
 import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
+import { useSetWeeklyGoal, useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
 
 const p = t.screens.profile
 
@@ -37,6 +38,7 @@ export function ProfileScreen() {
       <AchievementsSection />
       <BackupSection />
       <GoalSection />
+      <WeeklyGoalSection />
       <ListsSection />
       <CategoriesSection />
       <LanguagesSection />
@@ -244,6 +246,42 @@ function GoalForm({
           <Button type="submit">{t.common.save}</Button>
         </div>
         <Status>{message ?? p.goal.hint}</Status>
+      </form>
+    </Section>
+  )
+}
+
+// ---------- Weekly goal ----------
+
+function WeeklyGoalSection() {
+  const target = useWeeklyGoal()
+  const [message, setMessage] = useState<string>()
+  if (target === undefined) return null
+  return <WeeklyGoalForm key={target ?? 'none'} target={target ?? undefined} message={message} setMessage={setMessage} />
+}
+
+function WeeklyGoalForm({ target, message, setMessage }: { target?: number; message?: string; setMessage: (m: string) => void }) {
+  const setGoal = useSetWeeklyGoal()
+  const [value, setValue] = useState(target?.toString() ?? '')
+  const w = p.weeklyGoal
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault()
+    const n = toNumber(value) || undefined
+    await setGoal(n)
+    setMessage(n ? w.saved : w.removed)
+  }
+
+  return (
+    <Section title={w.title}>
+      <form onSubmit={save} className="flex flex-col gap-2">
+        <div className="grid grid-cols-[1fr_auto] items-end gap-2">
+          <Field label={w.pages}>
+            <Input inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))} />
+          </Field>
+          <Button type="submit">{t.common.save}</Button>
+        </div>
+        <Status>{message ?? w.hint}</Status>
       </form>
     </Section>
   )

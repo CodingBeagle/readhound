@@ -2,6 +2,15 @@
  * English UI strings. Every user-facing string lives here so a Danish file
  * (`da.ts`) with the same shape can be added later.
  */
+/** Numbers for the buddy's weekly goal lines, already formatted. */
+interface WeeklyLine {
+  pages: string
+  target: string
+  remaining: string
+  perDay: string
+  daysLeft: number
+}
+
 export const en = {
   appName: 'Readhound',
   loading: 'Sniffing out your books…',
@@ -68,6 +77,34 @@ export const en = {
       empty: 'Nothing on the go. Find a book in Search to start tracking it.',
       findBook: 'Find a book',
       streak: (n: number) => (n === 1 ? '1-day reading streak' : `${n}-day reading streak`),
+    },
+    weekly: {
+      label: 'Weekly pages goal',
+      title: 'This week',
+      setTitle: 'Set a weekly pages goal',
+      setIntro: 'How many pages do you want to read each week? Weeks run Monday to Sunday.',
+      preset: (n: number) => `${n}`,
+      custom: 'Pages per week',
+      set: 'Set goal',
+      edit: 'Change weekly goal',
+      remove: 'Remove goal',
+      progress: (pages: string, target: string) => `${pages} / ${target} pages`,
+      toGo: (n: string, days: number) => `${n} to go · ${days === 1 ? 'last day' : `${days} days left`}`,
+      perDay: (n: string) => `about ${n} a day`,
+      reached: 'Goal reached!',
+      beyond: (n: string) => `+${n}`,
+      barLabel: (pages: string, target: string) => `${pages} of ${target} pages this week`,
+      dayLabel: (day: string, pages: number) => `${day}: ${pages} pages`,
+      logLabel: 'Pages today',
+      logBook: 'Book',
+      logSubmit: 'Add',
+      logged: (n: number, title: string) => `Added ${n} ${n === 1 ? 'page' : 'pages'} of ${title}.`,
+      loggedEnd: (n: number, title: string) => `Added ${n} pages. You reached the end of ${title}!`,
+      atEnd: (title: string) => `You are already on the last page of ${title}.`,
+      invalid: 'Enter how many pages you read, like 25.',
+      noBook: 'Pages are logged on the book you are reading. Start a book to log pages here.',
+      startBook: 'Pick a book',
+      invalidGoal: 'Enter a number of pages above 0.',
     },
     search: {
       title: 'Search',
@@ -358,6 +395,13 @@ export const en = {
         hint: 'Leave both empty to remove the goal.',
         saved: 'Goal saved.',
       },
+      weeklyGoal: {
+        title: 'Weekly pages goal',
+        pages: 'Pages per week',
+        hint: 'Weeks run Monday to Sunday and count pages from every reading session. Leave empty to remove the goal.',
+        saved: 'Weekly goal saved.',
+        removed: 'Weekly goal removed.',
+      },
       lists: {
         title: 'Lists',
         intro: 'Your own lists, like “Summer 2027” or “Danish classics”. A book can be in several lists.',
@@ -469,6 +513,17 @@ export const en = {
       finished: (title: string) => [`You finished ${title}! Good human!`, `The end of ${title}! What shall we sniff out next?`],
       achievement: (name: string) => [`New medal: ${name}! Can I chew it?`, `You earned ${name}! I knew you could!`],
       streak: (n: number) => [`${n} days in a row! My tail can’t stop wagging!`, `A ${n}-day streak! You’re on a roll!`],
+      weekly: (n: string) => [`Weekly goal of ${n} pages: reached! Woof woof!`, `${n} pages this week! I’m so proud I could howl!`],
+    },
+    weekly: {
+      none: (w: WeeklyLine) => [`A fresh week! ${w.target} pages to sniff out.`, 'New week, new pages. Shall we start?', `0 of ${w.target} pages so far. My nose says today’s the day.`],
+      started: (w: WeeklyLine) => [`${w.pages} pages down, ${w.remaining} to go!`, 'Good start! I can smell a great week.', `${w.perDay} pages a day and we’ve got this.`],
+      going: (w: WeeklyLine) => [`A quarter of the way! ${w.pages} of ${w.target} pages.`, 'My tail is starting to wag…', `${w.remaining} pages to go. Keep sniffing!`],
+      halfway: (w: WeeklyLine) => ['Halfway there! *wags faster*', `${w.pages} pages! Over halfway to ${w.target}.`, `Just ${w.perDay} a day for ${w.daysLeft === 1 ? 'today' : `${w.daysLeft} more days`}.`],
+      close: (w: WeeklyLine) => ['Ooh, I can almost see the goal!', `Only ${w.remaining} pages left! My tail is a blur.`, 'So close! Ears up!'],
+      almost: (w: WeeklyLine) => [`${w.remaining} more ${w.remaining === '1' ? 'page' : 'pages'}! I can’t sit still!`, 'Nearly there! Just one more chapter?', 'This is it! Almost, almost…'],
+      done: (w: WeeklyLine) => ['Weekly goal reached! Best reader ever!', `${w.pages} pages this week! Zoomies time!`, 'Goal smashed! Treats for everyone!'],
+      beyond: (w: WeeklyLine) => [`${w.pages} pages! Way past your goal of ${w.target}!`, 'Over and beyond! You’re a reading machine!', 'Is there a goal above the goal? You found it!'],
     },
     happy: {
       streak: (n: number) => [`${n} days in a row. Keep it going!`, `Day ${n} of our streak. Tail wags all round!`],

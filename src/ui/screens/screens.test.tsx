@@ -666,3 +666,60 @@ describe('genre suggestions', () => {
     await waitFor(() => expect(screen.getAllByText(new RegExp(t.genres.backfill.applied))).toHaveLength(2))
   })
 })
+
+describe('weekly pages goal', () => {
+  it('sets a weekly goal on Home, logs today’s pages and keeps it in Profile', async () => {
+    const user = userEvent.setup()
+    const entryId = await addManual('Kongens fald', 'Johannes V. Jensen', 'reading', 300)
+    await services.library.logPage(entryId, 20)
+    renderAt('/')
+    const w = t.screens.weekly
+
+    const card = await screen.findByRole('region', { name: w.label })
+    await user.click(within(card).getByRole('button', { name: '100 pages a week' }))
+    expect((await services.db.settings.get('weeklyPagesGoal'))?.value).toBe(100)
+    await waitFor(() => expect(within(card).getByTestId('weekly-pages')).toHaveTextContent('20 / 100 pages'))
+
+    await user.type(within(card).getByLabelText(w.logLabel), '65')
+    await user.click(within(card).getByRole('button', { name: w.logSubmit }))
+    expect(await within(card).findByText(w.logged(65, 'Kongens fald'))).toBeInTheDocument()
+    await waitFor(() => expect(within(card).getByTestId('weekly-pages')).toHaveTextContent('85 / 100 pages'))
+    // The session continues from the current page, so the book moves on too.
+    const sessions = await services.db.sessions.toArray()
+    expect(sessions.map((s) => [s.fromPage, s.toPage])).toContainEqual([20, 85])
+    expect(within(card).getByTestId('weekly-bar')).toHaveAttribute('data-intensity', '4')
+    // The buddy talks about the week.
+    await waitFor(() => expect(screen.getByTestId('beagle-buddy')).toHaveAttribute('data-mood', 'excited'))
+
+    await user.type(within(card).getByLabelText(w.logLabel), '20')
+    await user.click(within(card).getByRole('button', { name: w.logSubmit }))
+    await waitFor(() => expect(within(card).getByTestId('weekly-bar')).toHaveAttribute('data-intensity', '5'))
+    expect(within(card).getByText(new RegExp(w.reached))).toBeInTheDocument()
+    // Reaching it is a milestone the buddy cheers with confetti, once.
+    await waitFor(async () => expect((await services.db.settings.get('buddyCelebrated'))?.value).toContainEqual(expect.stringMatching(/^weekly:/)))
+  })
+
+  it('points to the library when nothing is being read', async () => {
+    await services.db.settings.put({ key: 'weeklyPagesGoal', value: 200 })
+    renderAt('/')
+    const card = await screen.findByRole('region', { name: t.screens.weekly.label })
+    expect(within(card).getByText(t.screens.weekly.noBook)).toBeInTheDocument()
+    expect(within(card).getByRole('link', { name: t.screens.weekly.startBook })).toHaveAttribute('href', '/library')
+  })
+
+  it('saves and removes the weekly goal in Profile', async () => {
+    const user = userEvent.setup()
+    renderAt('/profile')
+    const w = t.screens.profile.weeklyGoal
+    const input = await screen.findByLabelText(w.pages)
+    await user.type(input, '250')
+    const section = input.closest('section')!
+    await user.click(within(section as HTMLElement).getByRole('button', { name: t.common.save }))
+    expect(await screen.findByText(w.saved)).toBeInTheDocument()
+    expect((await services.db.settings.get('weeklyPagesGoal'))?.value).toBe(250)
+    await user.clear(screen.getByLabelText(w.pages))
+    await user.click(within(screen.getByLabelText(w.pages).closest('section') as HTMLElement).getByRole('button', { name: t.common.save }))
+    expect(await screen.findByText(w.removed)).toBeInTheDocument()
+    expect(await services.db.settings.get('weeklyPagesGoal')).toBeUndefined()
+  })
+})

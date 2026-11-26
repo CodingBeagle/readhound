@@ -94,3 +94,35 @@ describe('beagle buddy mood', () => {
     expect(state({ reads: [current], sessions: [session('r1', '2026-11-25')], unlocks }).milestone).toMatchObject({ kind: 'achievement', achievement: 'devoted' })
   })
 })
+
+describe('beagle buddy and the weekly goal', () => {
+  function weekly(pages: number, target: number, date = TODAY) {
+    const books = [book('1', 'reading')]
+    const model = buildStatsModel({
+      entries: books.map((b) => b.entry),
+      editions: books.map((b) => b.edition),
+      works: books.map((b) => b.work),
+      authors: [],
+      reads: [current],
+      sessions: pages ? [session('r1', date, pages)] : [],
+      categories: [],
+    })
+    return buddyState({ model, goals: [], unlocks: [], today: TODAY, weeklyTarget: target })
+  }
+
+  it('tracks this week’s progress', () => {
+    expect(weekly(40, 200).weekly).toMatchObject({ pages: 40, band: 'started' })
+  })
+
+  it('gets excited close to the goal', () => {
+    expect(weekly(170, 200).mood).toBe('excited')
+    expect(weekly(170, 200).milestone).toBeUndefined()
+    expect(weekly(60, 200).mood).toBe('happy')
+  })
+
+  it('cheers once for a weekly goal reached this week', () => {
+    expect(weekly(220, 200).milestone).toMatchObject({ kind: 'weekly', key: 'weekly:2026-11-23', target: 200 })
+    // Reached last week: nothing to cheer this week.
+    expect(weekly(220, 200, '2026-11-20').milestone).toBeUndefined()
+  })
+})

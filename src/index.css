@@ -1020,3 +1020,131 @@
 @media (prefers-reduced-motion: reduce) {
   .barker, .walker * { animation: none !important; }
 }
+
+/* ── Weekly pages goal bar (src/ui/weekly/WeeklyGoalBar.tsx, design doc Weekly pages goal).
+   data-intensity 0–5 builds up: colour → shimmer → glow → pulse and sparks → flowing rainbow. ── */
+.weekly-bar {
+  --weekly-sat: 0.65;
+  --weekly-glow: 0px;
+  --weekly-height: 10px;
+  --weekly-shimmer: 0;
+  --weekly-shimmer-speed: 2.8s;
+  position: relative;
+}
+.weekly-bar[data-intensity='1'] { --weekly-sat: 0.85; }
+.weekly-bar[data-intensity='2'] { --weekly-sat: 1; --weekly-shimmer: 0.45; }
+.weekly-bar[data-intensity='3'] { --weekly-sat: 1.2; --weekly-glow: 8px; --weekly-height: 12px; --weekly-shimmer: 0.6; --weekly-shimmer-speed: 1.9s; }
+.weekly-bar[data-intensity='4'] { --weekly-sat: 1.4; --weekly-glow: 14px; --weekly-height: 14px; --weekly-shimmer: 0.8; --weekly-shimmer-speed: 1.2s; }
+.weekly-bar[data-intensity='5'] { --weekly-sat: 1.3; --weekly-glow: 18px; --weekly-height: 14px; --weekly-shimmer: 0.9; --weekly-shimmer-speed: 1s; }
+.weekly-track {
+  height: var(--weekly-height);
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: hidden;
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.weekly-fill {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--goal-fill);
+  background-image: var(--fill-paint);
+  filter: saturate(var(--weekly-sat));
+  transform-origin: left center;
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+  animation: grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  overflow: hidden;
+}
+/* The glow sits on the bar (the track clips the fill). */
+.weekly-bar[data-intensity='3'] .weekly-track,
+.weekly-bar[data-intensity='4'] .weekly-track,
+.weekly-bar[data-intensity='5'] .weekly-track {
+  overflow: visible;
+}
+.weekly-bar[data-intensity='3'] .weekly-fill,
+.weekly-bar[data-intensity='4'] .weekly-fill,
+.weekly-bar[data-intensity='5'] .weekly-fill {
+  box-shadow: 0 0 var(--weekly-glow) color-mix(in oklab, var(--goal-fill) 70%, transparent);
+}
+/* A highlight sweeps along the fill, faster as the goal gets near. */
+.weekly-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 75%) 50%, transparent 70%);
+  opacity: var(--weekly-shimmer);
+  translate: -100% 0;
+  animation: weekly-shimmer var(--weekly-shimmer-speed) ease-in-out 1s infinite;
+}
+.weekly-bar[data-intensity='0'] .weekly-fill::after,
+.weekly-bar[data-intensity='1'] .weekly-fill::after {
+  display: none;
+}
+/* Close to the goal the bar breathes. */
+.weekly-bar[data-intensity='4'] .weekly-fill {
+  animation:
+    grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both,
+    weekly-pulse 1.3s ease-in-out 1s infinite;
+}
+/* Goal reached: the theme's chart colours flow along the bar after a burst. */
+.weekly-bar[data-intensity='5'] .weekly-fill {
+  background-image: linear-gradient(90deg, var(--chart-1), var(--chart-5), var(--chart-4), var(--chart-3), var(--chart-1));
+  background-size: 200% 100%;
+  animation:
+    weekly-burst 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    weekly-flow 3s linear 0.8s infinite,
+    weekly-pulse 2s ease-in-out 0.8s infinite;
+}
+/* Sparks drift up from the tip of a nearly full bar. */
+.weekly-tip {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.weekly-tip i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--chart-4);
+  box-shadow: 0 0 6px var(--chart-4);
+  opacity: 0;
+  animation: weekly-spark 1.4s ease-out infinite;
+}
+.weekly-tip i:nth-child(2) { animation-delay: 0.45s; background: var(--chart-5); box-shadow: 0 0 6px var(--chart-5); }
+.weekly-tip i:nth-child(3) { animation-delay: 0.9s; background: var(--goal-fill); box-shadow: 0 0 6px var(--goal-fill); }
+.weekly-bar[data-intensity='5'] .weekly-tip { left: calc(100% - 4px) !important; }
+@keyframes weekly-shimmer {
+  0% { translate: -100% 0; }
+  60%, 100% { translate: 100% 0; }
+}
+@keyframes weekly-pulse {
+  0%, 100% { filter: saturate(var(--weekly-sat)) brightness(1); }
+  50% { filter: saturate(calc(var(--weekly-sat) + 0.25)) brightness(1.15); }
+}
+@keyframes weekly-flow {
+  from { background-position: 0% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes weekly-burst {
+  0% { scale: 0.96 1; filter: brightness(1.6); }
+  60% { scale: 1.02 1.35; }
+  100% { scale: 1 1; filter: brightness(1); }
+}
+@keyframes weekly-spark {
+  0% { opacity: 0; translate: 0 0; scale: 0.6; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: 8px -22px; scale: 1.2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the colour and glow, drop everything that moves. */
+  .weekly-fill,
+  .weekly-fill::after,
+  .weekly-bar[data-intensity] .weekly-fill { animation: none !important; transition: none !important; }
+  .weekly-fill::after,
+  .weekly-tip { display: none; }
+}
