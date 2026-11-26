@@ -281,3 +281,71 @@ describe('IndexedDbCache', () => {
     expect(await cache.get('https://y')).toBeUndefined()
   })
 })
+
+describe('cover photos', () => {
+  const photo = { dataUrl: 'data:image/jpeg;base64,AAAA', width: 600, height: 900 }
+  const shownCover = async (entryId: string) => {
+    const entry = (await db.entries.get(entryId))!
+    return effective((await db.editions.get(entry.editionId))!, 'coverUrl')
+  }
+
+  it('shows a photo instead of the source cover, and the source cover again once it is removed', async () => {
+    const { entryId } = await repo.addFromSource({ edition: await projectHailMary() })
+    await repo.setCoverPhoto(entryId, photo)
+    const ref = await shownCover(entryId)
+    expect(ref).toMatch(/^readhound-cover:/)
+    const covers = await db.covers.toArray()
+    expect(covers).toHaveLength(1)
+    expect(covers[0]).toMatchObject({ dataUrl: photo.dataUrl, width: 600, height: 900, createdAt: '2026-11-25T09:00:00.000Z' })
+    expect(ref).toBe(`readhound-cover:${covers[0]!.id}`)
+
+    await repo.removeCoverPhoto(entryId)
+    expect(await shownCover(entryId)).toBe('https://covers.openlibrary.org/b/id/12455001-M.jpg')
+    expect(await db.covers.count()).toBe(0)
+  })
+
+  it('keeps one photo per book: a new photo replaces the old one', async () => {
+    const { entryId } = await repo.addFromSource({ edition: await projectHailMary() })
+    await repo.setCoverPhoto(entryId, photo)
+    await repo.setCoverPhoto(entryId, { ...photo, dataUrl: 'data:image/jpeg;base64,BBBB' })
+    const covers = await db.covers.toArray()
+    expect(covers.map((c) => c.dataUrl)).toEqual(['data:image/jpeg;base64,BBBB'])
+    expect(await shownCover(entryId)).toBe(`readhound-cover:${covers[0]!.id}`)
+  })
+
+  it('keeps the photo through a refresh from the source', async () => {
+    const edition = await projectHailMary()
+    const { entryId } = await repo.addFromSource({ edition })
+    await repo.setCoverPhoto(entryId, photo)
+    const entry = (await db.entries.get(entryId))!
+    await repo.refreshEdition(entry.editionId, { ...edition, coverUrl: 'https://covers.openlibrary.org/b/id/2-M.jpg' })
+    expect(await shownCover(entryId)).toMatch(/^readhound-cover:/)
+  })
+
+  it('takes a photo when adding a book by hand', async () => {
+    const { entryId } = await repo.addManual({ title: 'Kongens Fald', authors: ['Johannes V. Jensen'], coverPhoto: photo })
+    expect(await shownCover(entryId)).toMatch(/^readhound-cover:/)
+    expect(await db.covers.count()).toBe(1)
+  })
+
+  it('drops the photo when a cover address is typed in its place', async () => {
+    const { entryId } = await repo.addManual({ title: 'Kongens Fald', authors: ['Johannes V. Jensen'], coverPhoto: photo })
+    const entry = (await db.entries.get(entryId))!
+    await repo.editEdition(entry.editionId, { coverUrl: 'https://example.com/cover.jpg' })
+    expect(await shownCover(entryId)).toBe('https://example.com/cover.jpg')
+    expect(await db.covers.count()).toBe(0)
+  })
+
+  it('refuses anything but an image', async () => {
+    const { entryId } = await repo.addFromSource({ edition: await projectHailMary() })
+    await expect(repo.setCoverPhoto(entryId, { ...photo, dataUrl: 'javascript:alert(1)' })).rejects.toThrow()
+    await expect(repo.setCoverPhoto(entryId, { ...photo, dataUrl: 'data:text/html;base64,AAAA' })).rejects.toThrow()
+  })
+
+  it('deletes the photo with its edition when orphans are pruned', async () => {
+    const { entryId } = await repo.addManual({ title: 'Kongens Fald', authors: ['Johannes V. Jensen'], coverPhoto: photo })
+    await repo.deleteEntry(entryId)
+    await repo.pruneOrphans()
+    expect(await db.covers.count()).toBe(0)
+  })
+})

@@ -176,6 +176,34 @@ describe('owned books', () => {
   })
 })
 
+describe('cover photos', () => {
+  const photo = { dataUrl: 'data:image/jpeg;base64,/9j/AAAA', width: 600, height: 900 }
+
+  it('offers a cover photo for a book without a cover, and shows a stored one until it is removed', async () => {
+    const entryId = await addManual('Kongens fald', 'Johannes V. Jensen')
+    const user = userEvent.setup()
+    renderAt(`/book/${entryId}`)
+    await user.click(await screen.findByRole('button', { name: t.covers.add }))
+    expect(screen.getByLabelText(t.covers.takePhotoLabel)).toHaveAttribute('capture', 'environment')
+    expect(screen.getByLabelText(t.covers.chooseImageLabel)).toHaveAttribute('accept', 'image/*')
+    expect(screen.queryByRole('button', { name: t.covers.remove })).not.toBeInTheDocument()
+
+    await act(() => services.library.setCoverPhoto(entryId, photo))
+    await waitFor(() => expect(document.querySelector(`header img[src="${photo.dataUrl}"]`)).not.toBeNull())
+    await user.click(screen.getByRole('button', { name: t.covers.remove }))
+    await waitFor(() => expect(document.querySelector('header img')).toBeNull())
+    expect(screen.getByLabelText(`${t.common.noCover}: Kongens fald`)).toBeInTheDocument()
+    expect(await services.db.covers.count()).toBe(0)
+  })
+
+  it('shows the stored photo in the library too', async () => {
+    const entryId = await addManual('Kongens fald', 'Johannes V. Jensen')
+    await services.library.setCoverPhoto(entryId, photo)
+    renderAt('/library')
+    await waitFor(() => expect(document.querySelector(`img[src="${photo.dataUrl}"]`)).not.toBeNull())
+  })
+})
+
 describe('book screen', () => {
   it('logs a page and offers to finish at the last page', async () => {
     const id = await addManual('Kort bog', 'A. Forfatter', 'reading', 100)

@@ -449,6 +449,7 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
     ],
     series,
     seriesMembers,
+    covers: [],
   }
   return { data, ranOutAfter }
 }

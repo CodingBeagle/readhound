@@ -1,11 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ExternalLink, Trash2 } from 'lucide-react'
+import { Camera, ExternalLink, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useServices } from '@/app/services'
 import { loadBook } from '@/db/queries'
 import type { BookView } from '@/domain/bookView'
+import { isLocalCoverRef } from '@/domain/covers'
 import { localDate } from '@/domain/dates'
 import { isBorrowed } from '@/domain/effective'
 import { STATUSES, type EditableField, type Edition, type EditionFormat, type ReadingSession, type Status } from '@/domain/types'
@@ -21,6 +22,7 @@ import { SeriesSuggestion } from '@/ui/books/SeriesSuggestion'
 import { SessionForm } from '@/ui/books/SessionForm'
 import { StatusBadge } from '@/ui/books/StatusBadge'
 import { Button } from '@/ui/components/ui/button'
+import { CoverPhotoPicker } from '@/ui/covers/CoverPhotoPicker'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { EmptyState } from '@/ui/layout/EmptyState'
 import { FinishCelebration } from '@/ui/motion/Celebration'
@@ -32,6 +34,7 @@ export function BookScreen() {
   const { entryId = '' } = useParams()
   const { db } = useServices()
   const data = useLiveQuery(() => loadBook(db, entryId), [db, entryId])
+  const [coverOpen, setCoverOpen] = useState(false)
 
   if (data === undefined) return null
   if (data === null)
@@ -57,8 +60,10 @@ export function BookScreen() {
             <StatusBadge status={book.entry.status} />
             {book.entry.owned && <OwnedBadge />}
           </div>
+          <CoverButton book={book} open={coverOpen} onOpen={() => setCoverOpen(true)} />
         </div>
       </header>
+      {coverOpen && <CoverPanel book={book} onClose={() => setCoverOpen(false)} />}
 
       <Section title={b.statusLabel}>
         <StatusControl book={book} />
@@ -109,6 +114,50 @@ export function BookScreen() {
   )
 }
 
+/** Opens the cover photo panel; "Add cover photo" when the book has no cover. */
+function CoverButton({ book, open, onOpen }: { book: BookView; open: boolean; onOpen: () => void }) {
+  if (open) return null
+  return (
+    <Button variant="ghost" size="sm" className="-ml-3 self-start" onClick={onOpen}>
+      <Camera />
+      {book.edition.coverUrl ? t.covers.change : t.covers.add}
+    </Button>
+  )
+}
+
+function CoverPanel({ book, onClose }: { book: BookView; onClose: () => void }) {
+  const { library } = useServices()
+  const [message, setMessage] = useState<string>()
+  const hasPhoto = isLocalCoverRef(book.edition.coverUrl)
+  return (
+    <section aria-label={t.covers.change} className="surface relative mb-5 flex flex-col gap-3 p-3">
+      <Button variant="ghost" size="icon" aria-label={t.covers.close} className="absolute top-1 right-1" onClick={onClose}>
+        <X />
+      </Button>
+      <p className="pr-10 text-sm text-muted-foreground">{t.covers.hint}</p>
+      <CoverPhotoPicker
+        onPhoto={async (photo) => {
+          await library.setCoverPhoto(book.entry.id, photo)
+          setMessage(t.covers.saved)
+        }}
+        onRemove={
+          hasPhoto
+            ? async () => {
+                await library.removeCoverPhoto(book.entry.id)
+                setMessage(t.covers.removed)
+              }
+            : undefined
+        }
+      />
+      {hasPhoto && <p className="text-xs text-muted-foreground">{t.covers.removeHint}</p>}
+      {message && (
+        <p role="status" className="text-sm">
+          {message}
+        </p>
+      )}
+    </section>
+  )
+}
 
 function StatusControl({ book }: { book: BookView }) {
   const { library } = useServices()
@@ -281,7 +330,11 @@ function Details({ book, rawEdition }: { book: BookView; rawEdition: Edition }) 
 
 function EditDetails({ rawEdition, onDone }: { rawEdition: Edition; onDone: () => void }) {
   const { library } = useServices()
-  const shown = (f: EditableField) => String(rawEdition.overrides[f] ?? rawEdition[f] ?? '')
+  // A cover photo is shown as an empty address; typing one replaces the photo.
+  const shown = (f: EditableField) => {
+    const value = rawEdition.overrides[f] ?? rawEdition[f]
+    return f === 'coverUrl' && isLocalCoverRef(value as string | undefined) ? '' : String(value ?? '')
+  }
   const [values, setValues] = useState(() => Object.fromEntries([...EDIT_FIELDS.map(({ field }) => [field, shown(field)]), ['format', shown('format')]]) as Record<EditableField, string>)
 
   async function save(ev: React.FormEvent) {

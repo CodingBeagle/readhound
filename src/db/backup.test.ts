@@ -33,6 +33,7 @@ async function seed(db: ReadhoundDB) {
     { title: 'Frøken Smillas fornemmelse for sne', authors: ['Peter Høeg'], pageCount: 435, isbn13: '9788702034516' },
     { status: 'reading', listIds: [list], categoryIds: [genre], owned: true },
   )
+  await library.setCoverPhoto(entryId, { dataUrl: 'data:image/jpeg;base64,/9j/AAAA', width: 600, height: 900 })
   await library.logPage(entryId, 120)
   time = new Date('2026-11-26T09:00:00Z')
   await library.logPage(entryId, 180)
@@ -58,6 +59,20 @@ describe('JSON backup', () => {
     const again = await createBackup(target, clock, '0.1.0')
     expect(again.data).toEqual(backup.data)
     expect(again.data.entries[0]!.owned).toBe(true)
+    expect(again.data.covers).toHaveLength(1)
+    expect(again.data.covers[0]!.dataUrl).toBe('data:image/jpeg;base64,/9j/AAAA')
+  })
+
+  it('restores version 2 backups, made before cover photos, with no photos', async () => {
+    const source = await newDb()
+    await seed(source)
+    const backup = await createBackup(source, clock, '0.1.0')
+    const old = { ...backup, version: 2, data: { ...backup.data, covers: undefined } }
+    for (const edition of old.data.editions) edition.overrides = {}
+    const target = await newDb()
+    await restoreBackup(target, parseBackup(JSON.stringify(old)))
+    expect(await target.covers.count()).toBe(0)
+    expect(await target.editions.count()).toBe(1)
   })
 
   it('restores older backups, made before books could be owned, as not owned', async () => {

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 
 import { useServices } from '@/app/services'
+import type { CoverPhotoInput } from '@/db'
 import { categoryForGenre, categoryGenres, recordGenreChoice, type GenreBook } from '@/db/genres'
 import { normalizeFormat } from '@/db/library'
 import { localDate } from '@/domain/dates'
@@ -15,6 +16,7 @@ import { CollectionPicker } from '@/ui/books/Organise'
 import { OwnedControl } from '@/ui/books/OwnedControl'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
+import { CoverPhotoPicker } from '@/ui/covers/CoverPhotoPicker'
 import { GenreSuggestionChips } from '@/ui/genres/GenreSuggestionChips'
 import { useGenreSuggestions } from '@/ui/genres/useGenreSuggestions'
 import { useCollections } from '@/ui/hooks/useCollections'
@@ -39,6 +41,7 @@ export function AddBookScreen() {
   const [endedOn, setEndedOn] = useState(today)
   const [busy, setBusy] = useState(false)
   const [owned, setOwned] = useState(false)
+  const [coverPhoto, setCoverPhoto] = useState<CoverPhotoInput>()
   const sourceFormat = state?.edition ? normalizeFormat(state.edition.format) : undefined
   const [format, setFormat] = useState<EditionFormat | undefined>(sourceFormat)
   const collections = useCollections()
@@ -88,7 +91,7 @@ export function AddBookScreen() {
         chosen,
       )
     }
-    const { entryId } = await library.addFromSource(
+    const { entryId, existing } = await library.addFromSource(
       {
         edition,
         work: work && {
@@ -111,15 +114,21 @@ export function AddBookScreen() {
       const entry = await db.entries.get(entryId)
       if (entry) await library.editEdition(entry.editionId, { format: format ?? null })
     }
+    if (coverPhoto && !existing) await library.setCoverPhoto(entryId, coverPhoto)
     navigate(`/book/${entryId}`, { replace: true })
   }
+  const sourceCover = edition.coverUrl ?? fallbackCoverUrl
 
   return (
     <>
       <BackLink />
       <h1 className="title mb-5 text-3xl">{t.screens.add.title}</h1>
       <div className="mb-5 flex gap-4">
-        <BookCover url={edition.coverUrl ?? fallbackCoverUrl} title={edition.title} className="w-20" />
+        {coverPhoto ? (
+          <img src={coverPhoto.dataUrl} alt={t.covers.manualPhoto} className="aspect-[2/3] w-20 shrink-0 rounded-md object-cover shadow" />
+        ) : (
+          <BookCover url={sourceCover} title={edition.title} className="w-20" />
+        )}
         <div className="flex flex-col gap-1">
           <span className="font-semibold">{edition.title}</span>
           <span className="text-sm text-muted-foreground">{edition.authors.map((a) => a.name).join(', ')}</span>
@@ -130,6 +139,13 @@ export function AddBookScreen() {
           </span>
         </div>
       </div>
+      {/* No cover in the catalog: offer a photo of my copy (design doc, Cover photos). */}
+      {!sourceCover && (
+        <div className="mb-5 flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">{t.covers.hint}</p>
+          <CoverPhotoPicker onPhoto={setCoverPhoto} onRemove={coverPhoto ? () => setCoverPhoto(undefined) : undefined} />
+        </div>
+      )}
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Field label={t.screens.add.status}>
           <Select value={status} onChange={(e) => setStatus(e.target.value as Status)}>
