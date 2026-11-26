@@ -13,10 +13,16 @@ test('the library as a bookshelf: filters apply and a spine pulls out and opens'
   const spines = shelf.getByRole('button', { name: / by / })
 
   // Every book in the filtered library gets a spine.
+  const total = Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
   await page.getByRole('group', { name: 'Status' }).getByRole('button', { name: 'Finished' }).click()
+  // Read the count only once the filter has applied, not the unfiltered one.
+  await expect(page).toHaveURL(/status=finished/)
+  await expect(page.getByText(/^\d+ books?$/)).not.toHaveText(`${total} books`)
   const count = Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
   await expect(spines).toHaveCount(count)
   await page.getByRole('button', { name: 'Owned' }).click()
+  await expect(page).toHaveURL(/owned=1/)
+  await expect(page.getByText(/^\d+ books?$/)).not.toHaveText(`${count} books`)
   const owned = Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
   expect(owned).toBeLessThan(count)
   await expect(spines).toHaveCount(owned)
