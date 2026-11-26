@@ -8,6 +8,7 @@ import { buddyState, hashOf, type BuddyMood } from '@/domain/buddy'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { useAchievements } from '@/ui/achievements/useAchievements'
+import { useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
 import { useStatsModel } from '@/ui/hooks/useStats'
 import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
 
@@ -21,6 +22,8 @@ export const SETTING_BUDDY_CELEBRATED = 'buddyCelebrated'
 const KEEP_CELEBRATED = 60
 /** How long a tapped sleepy buddy stays awake. */
 const AWAKE_MS = 4000
+/** With a weekly goal the buddy moves on to another comment on the week this often. */
+export const CHATTER_MS = 20_000
 
 /**
  * The beagle buddy on Home (design doc, Beagle buddy): its mood follows the
@@ -34,12 +37,23 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const summary = useAchievements()
   const goals = useLiveQuery(() => db.goals.toArray(), [db])
   const celebrated = useLiveQuery(async () => ((await db.settings.get(SETTING_BUDDY_CELEBRATED))?.value as string[] | undefined) ?? [], [db])
+  const weeklyTarget = useWeeklyGoal()
   const today = todayOf(clock)
   const reduce = useReducedMotion()
   const state = useMemo(
-    () => (model && goals && summary ? buddyState({ model, goals, unlocks: summary.unlocks, today }) : undefined),
-    [model, goals, summary, today],
+    () =>
+      model && goals && summary && weeklyTarget !== undefined
+        ? buddyState({ model, goals, unlocks: summary.unlocks, today, weeklyTarget: weeklyTarget ?? undefined })
+        : undefined,
+    [model, goals, summary, today, weeklyTarget],
   )
+  const [chatter, setChatter] = useState(0)
+  const talksAboutWeek = Boolean(state?.weekly) && !state?.milestone
+  useEffect(() => {
+    if (!talksAboutWeek) return
+    const timer = setInterval(() => setChatter((n) => n + 1), CHATTER_MS)
+    return () => clearInterval(timer)
+  }, [talksAboutWeek])
   const [pokes, setPokes] = useState(0)
   const [poke, setPoke] = useState(0)
   const [awake, setAwake] = useState(false)
@@ -69,7 +83,8 @@ export function BeagleBuddy({ className }: { className?: string }) {
   }, [awake])
 
   if (!state) return null
-  const seed = hashOf(`${today}:${state.mood}:${milestoneKey ?? ''}`)
+  // A new band, or a new page count, gets a fresh comment; so does every chatter tick.
+  const seed = hashOf(`${today}:${state.mood}:${milestoneKey ?? ''}:${state.weekly?.band ?? ''}`) + (state.weekly?.pages ?? 0) + chatter
   const message = buddyMessage(state, seed, pokes)
   const drowsy = state.mood === 'sleepy' || state.mood === 'snoozing'
   const face: BuddyMood = awake && drowsy ? 'curious' : state.mood

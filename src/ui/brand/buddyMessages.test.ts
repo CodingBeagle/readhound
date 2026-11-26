@@ -1,6 +1,8 @@
 import type { BuddyState } from '@/domain/buddy'
 
-import { buddyMessage } from './buddyMessages'
+import { WEEKLY_BANDS, weeklyProgress } from '@/domain/weeklyGoal'
+
+import { buddyMessage, weeklyMessages } from './buddyMessages'
 
 const base: BuddyState = { mood: 'happy', streak: 0, empty: false, daysSinceReading: 0 }
 
@@ -18,5 +20,22 @@ describe('buddy messages', () => {
   it('says something new on each tap', () => {
     const said = [0, 1, 2].map((pokes) => buddyMessage(base, 0, pokes))
     expect(new Set(said).size).toBe(3)
+  })
+})
+
+describe('weekly goal lines', () => {
+  it('has a few lines for every band', () => {
+    for (const band of WEEKLY_BANDS) {
+      const week = { ...weeklyProgress({ pagesByDate: new Map([['2026-11-24', 50]]) }, 200, '2026-11-26'), band }
+      const lines = weeklyMessages(week)
+      expect(lines.length).toBeGreaterThanOrEqual(3)
+      expect(new Set(lines).size).toBe(lines.length)
+    }
+  })
+
+  it('talks about the week instead of the usual lines', () => {
+    const weekly = weeklyProgress({ pagesByDate: new Map([['2026-11-24', 150]]) }, 200, '2026-11-26')
+    const said = [0, 1, 2].map((n) => buddyMessage({ ...base, weekly }, n, 0))
+    expect(said.some((m) => m.includes('50 pages'))).toBe(true)
   })
 })

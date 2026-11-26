@@ -23,6 +23,7 @@ import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { NextInSeries } from '@/ui/series/NextInSeries'
 import { HomePicks } from '@/ui/recommendations/HomePicks'
+import { WeeklyGoalCard } from '@/ui/weekly/WeeklyGoalCard'
 
 export function HomeScreen() {
   const books = useLibrary()
@@ -48,6 +49,7 @@ export function HomeScreen() {
       </div>
       <BackupReminder />
       <BeagleBuddy className="mb-5" />
+      {reading && <WeeklyGoalCard reading={reading} className="mb-5" />}
       {model && (streak?.length || goal) ? (
         <div className="animate-rise mb-5 flex flex-col gap-3 surface p-4">
           {streak !== undefined && streak.length > 0 && (

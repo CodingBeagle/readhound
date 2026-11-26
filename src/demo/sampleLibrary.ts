@@ -7,6 +7,8 @@
  * sessions, notes and lists are invented.
  */
 import type { BackupData } from '@/db/backup'
+import { localParts } from '@/domain/stats/calendar'
+import { SETTING_WEEKLY_PAGES_GOAL, weekStartOf } from '@/domain/weeklyGoal'
 import type { Author, Category, Edition, EditionFormat, LibraryEntry, List, ListItem, Note, Read, ReadingSession, Series, SeriesMember, Work } from '@/domain/types'
 
 interface SampleBook {
@@ -446,10 +448,22 @@ function simulate(options: SampleOptions, pace: number): { data: BackupData; ran
       { key: 'preferredLanguages', value: ['dan', 'eng'] },
       // Counts as backed up today, so the backup reminder doesn't greet the demo.
       { key: 'lastBackupAt', value: now },
+      // A weekly goal the sample reader is most of the way to, so the bar shows off.
+      { key: SETTING_WEEKLY_PAGES_GOAL, value: demoWeeklyGoal(sessions, today, timeZone) },
     ],
     series,
     seriesMembers,
     covers: [],
   }
   return { data, ranOutAfter }
+}
+
+/** A round weekly target about 80 % reached by this week's sample sessions (at least 50). */
+export function demoWeeklyGoal(sessions: readonly ReadingSession[], today: string, timeZone: string): number {
+  const from = weekStartOf(today)
+  const pages = sessions.reduce((sum, s) => {
+    const { date } = localParts(s.startedAt, s.timeZone || timeZone)
+    return date >= from && date <= today ? sum + s.pagesRead : sum
+  }, 0)
+  return Math.max(50, Math.ceil(pages / 0.8 / 25) * 25)
 }
