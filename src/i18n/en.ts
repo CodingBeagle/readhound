@@ -471,6 +471,9 @@ export const en = {
         decemberOn: 'It is December, so Zico has his hat on already.',
         snowNow: 'Make it snow',
         snowReduced: 'Snow is off because your device asks for reduced motion.',
+        pyjamas: 'Pyjama time',
+        pyjamasHint: 'From 18:00 to 06:00 Zico wears his pyjamas and a nightcap. Turn this on to try it in demo mode any time of day.',
+        pyjamasOn: 'It is evening, so Zico is in his pyjamas already.',
       },
       about: {
         title: 'About',

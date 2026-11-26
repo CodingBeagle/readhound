@@ -22,7 +22,7 @@ import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
 import { prefersReducedMotion } from '@/ui/motion/bookAddedConfetti'
-import { letItSnow, useDemoDecember, useFestive, useSetDemoDecember } from '@/ui/season/season'
+import { letItSnow, useBedtime, useDemoDecember, useDemoPyjamas, useFestive, useSetDemoDecember, useSetDemoPyjamas } from '@/ui/season/season'
 import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 import { useSetWeeklyGoal, useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
@@ -54,6 +54,7 @@ export function ProfileScreen() {
           <Link to="/demo">{p.demo.open}</Link>
         </Button>
         <DemoDecember />
+        <DemoPyjamas />
       </Section>
       <Section title={p.about.title}>
         <p className="text-sm text-muted-foreground">{p.about.version(__APP_VERSION__)}</p>
@@ -87,6 +88,25 @@ function DemoDecember() {
             {d.snowNow}
           </Button>
         ))}
+    </div>
+  )
+}
+
+/** Demo only: put Zico in his pyjamas whatever the time. */
+function DemoPyjamas() {
+  const demo = useDemo()
+  const forced = useDemoPyjamas()
+  const setForced = useSetDemoPyjamas()
+  const bedtime = useBedtime()
+  if (!demo.active || forced === undefined) return null
+  const d = p.demo
+  return (
+    <div className="mt-4 border-t pt-4">
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4">
+        <span className="font-medium">{d.pyjamas}</span>
+        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={forced || bedtime} disabled={bedtime && !forced} onChange={(e) => void setForced(e.target.checked)} />
+      </label>
+      <p className="mt-1 text-sm text-muted-foreground">{bedtime && !forced ? d.pyjamasOn : d.pyjamasHint}</p>
     </div>
   )
 }

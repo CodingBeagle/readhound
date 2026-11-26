@@ -703,6 +703,15 @@ An Easter egg for the whole of December, by the device's local date (`src/domain
 - The app re-checks the date around midnight, so the hat goes on by itself on 1 December.
 - Demo mode only: Profile > Demo mode has a "December mode" switch (setting `demoDecember`, stored in the demo database so the real library never sees it) and a "Make it snow" button.
 
+### Seasonal: bedtime pyjamas
+
+From 18:00 until 06:00 by the device's local clock (`isBedtime` in `src/domain/season.ts`), Zico wears his pyjamas wherever he appears:
+- The logo and Home buddy get a striped nightcap (placed with the Santa hat's transform) and striped pyjama sleeves with cuffs under his paws; the barking beagle gets a striped pyjama body, collar, buttons and trouser cuffs. Art and colours live in `src/ui/brand/Pyjamas.tsx`; never part of the app icons.
+- The switch is live: the app checks again just after the next 06:00 or 18:00 (at most an hour away) and whenever it comes back to the screen.
+- In December the Santa hat replaces the nightcap and the pyjamas turn Christmas red with cream stripes and green trim.
+- The nightcap's pom-pom sways gently, faster when he trots or is tapped; still with reduced motion.
+- Demo mode only: Profile > Demo mode has a "Pyjama time" switch (setting `demoPyjamas` in the demo database).
+
 ## Tech stack
 
 | Concern | Choice |
