@@ -11,6 +11,7 @@ import type { SearchResult } from '@/sources/types'
 import { useOnline } from '@/ui/hooks/useDebounced'
 import { useSeriesViews } from '@/ui/hooks/useSeries'
 import { useStatsModel } from '@/ui/hooks/useStats'
+import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
 
 /** Work ids of picks the reader said "not for me" to. Part of the backup like every setting. */
 export const SETTING_DISMISSED_PICKS = 'recommendationsDismissed'
@@ -93,10 +94,11 @@ export function usePickActions() {
       const [editions, preferred] = await Promise.all([source.listEditions(result.work, { limit: 20 }), getSetting(db, 'preferredLanguages', DEFAULT_PREFERRED_LANGUAGES)])
       const edition = pickEdition(editions, preferred)
       if (!edition) return undefined
-      const { entryId } = await library.addFromSource(
+      const { entryId, existing } = await library.addFromSource(
         { edition, work: { firstPublishYear: result.firstPublishYear, medianPageCount: result.medianPageCount, subjects: result.subjects }, fallbackCoverUrl: result.coverUrl },
         { status: 'to_read' },
       )
+      if (!existing) void celebrateBookAdded()
       return entryId
     },
     async dismiss(workId: string) {
