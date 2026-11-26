@@ -5,7 +5,10 @@ import { cn } from '@/lib/utils'
 import { prefersReducedMotion } from '@/ui/motion/bookAddedConfetti'
 import { onBookAdded, playBark, primeBarkAudio } from '@/ui/motion/bookAddedBark'
 
+import { useFestive } from '@/ui/season/season'
+
 import { houndColors as c } from './houndArt'
+import { SantaHat } from './SantaHat'
 
 /** Darker fur for the far legs, so the trot reads as four legs, not two. */
 const FAR_FUR = '#a8672f'
@@ -84,6 +87,7 @@ export function BarkingBeagle() {
 
 /** The beagle side on, facing right, on a 240 × 150 canvas. Parts are classed so CSS can trot them. */
 export function WalkingHound({ className }: { className?: string }) {
+  const festive = useFestive()
   return (
     <svg viewBox="0 0 240 150" className={cn('walker overflow-visible', className)}>
       <ellipse className="walker-shadow" cx="112" cy="141" rx="72" ry="6" fill="currentColor" opacity="0.14" />
@@ -123,6 +127,8 @@ export function WalkingHound({ className }: { className?: string }) {
           <circle cx="172" cy="42" r="4.6" fill={c.ink} />
           <circle cx="173.6" cy="40.4" r="1.6" fill="#fff" />
           <path className="walker-ear" d="M156 30c-10 0-16 10-16 26c0 16 4 28 11 28c8 0 11-14 11-30c0-12-2-20-6-24z" fill={c.ear} />
+          {/* Mirrored, so the tip flops back over his ear as he trots. */}
+          {festive && <SantaHat transform="translate(165 27) rotate(12) scale(-0.27 0.27)" />}
         </g>
       </g>
     </svg>

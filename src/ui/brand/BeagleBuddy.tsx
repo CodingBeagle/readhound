@@ -29,9 +29,11 @@ import { useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
 import { useQuoteData, useQuoteSettings } from '@/ui/hooks/useQuotes'
 import { useStatsModel } from '@/ui/hooks/useStats'
 import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
+import { useFestive } from '@/ui/season/season'
 
 import { buddyMessage } from './buddyMessages'
-import { HOUND_VIEWBOX, houndColors as c, houndShapes as s } from './houndArt'
+import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
+import { SantaHat } from './SantaHat'
 
 const b = t.buddy
 
@@ -252,6 +254,7 @@ function QuoteBubble({ quote, data, favourites, onAnother }: { quote: Quote; dat
 /** The hound artwork with a face for each mood. Shares its shapes with the logo. */
 export function BuddyArt({ mood, cheer, poked, className }: { mood: BuddyMood; cheer?: boolean; poked?: boolean; className?: string }) {
   const openEyes = mood === 'happy' || mood === 'curious'
+  const festive = useFestive()
   return (
     <svg
       viewBox={`0 0 ${HOUND_VIEWBOX} ${HOUND_VIEWBOX}`}
@@ -269,6 +272,7 @@ export function BuddyArt({ mood, cheer, poked, className }: { mood: BuddyMood; c
           <Eyes mood={mood} />
           <path d={s.nose} fill={c.ink} />
           <Mouth mood={mood} />
+          {festive && <SantaHat transform={SANTA_HAT_ON_HEAD} />}
         </g>
         <g stroke={c.spine} strokeOpacity={0.25} strokeWidth={6} strokeLinejoin="round">
           <path d={s.pageLeft} fill={c.page} />

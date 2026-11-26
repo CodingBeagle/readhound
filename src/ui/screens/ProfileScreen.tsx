@@ -1,9 +1,9 @@
-import { ArrowDown, ArrowUp, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Pencil, Snowflake, Sparkles, Trash2 } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
 
-import { useServices } from '@/app/services'
+import { useDemo, useServices } from '@/app/services'
 import { backupCounts, BackupError, parseBackup, restoreBackup, SETTING_PREFERRED_LANGUAGES, type Backup } from '@/db/backup'
 import { entriesWithoutGenre } from '@/db/genres'
 import { getSetting } from '@/db/queries'
@@ -21,6 +21,8 @@ import { DangerZone } from '@/ui/profile/DangerZone'
 import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
+import { prefersReducedMotion } from '@/ui/motion/bookAddedConfetti'
+import { letItSnow, useDemoDecember, useFestive, useSetDemoDecember } from '@/ui/season/season'
 import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 import { useSetWeeklyGoal, useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
@@ -51,12 +53,41 @@ export function ProfileScreen() {
         <Button asChild variant="outline">
           <Link to="/demo">{p.demo.open}</Link>
         </Button>
+        <DemoDecember />
       </Section>
       <Section title={p.about.title}>
         <p className="text-sm text-muted-foreground">{p.about.version(__APP_VERSION__)}</p>
       </Section>
       <DangerZone />
     </>
+  )
+}
+
+/** Demo only: put Zico's December hat and snow on whenever you like. */
+function DemoDecember() {
+  const demo = useDemo()
+  const forced = useDemoDecember()
+  const setForced = useSetDemoDecember()
+  const festive = useFestive()
+  if (!demo.active || forced === undefined) return null
+  const d = p.demo
+  return (
+    <div className="mt-4 border-t pt-4">
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4">
+        <span className="font-medium">{d.december}</span>
+        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={forced || festive} disabled={festive && !forced} onChange={(e) => void setForced(e.target.checked)} />
+      </label>
+      <p className="mt-1 text-sm text-muted-foreground">{festive && !forced ? d.decemberOn : d.decemberHint}</p>
+      {festive &&
+        (prefersReducedMotion() ? (
+          <p className="mt-2 text-sm text-muted-foreground">{d.snowReduced}</p>
+        ) : (
+          <Button variant="outline" className="mt-3" onClick={letItSnow}>
+            <Snowflake aria-hidden />
+            {d.snowNow}
+          </Button>
+        ))}
+    </div>
   )
 }
 

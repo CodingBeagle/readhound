@@ -2,7 +2,10 @@ import { useId } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { HOUND_VIEWBOX, houndColors as c, houndShapes as s } from './houndArt'
+import { useFestive } from '@/ui/season/season'
+
+import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
+import { SantaHat } from './SantaHat'
 
 type Props = {
   /** `badge` is the app icon (gradient tile); `mark` is just the hound and its book. */
@@ -21,6 +24,7 @@ type Props = {
 /** Zico, the Readhound beagle, drawn from the shared artwork in `houndArt.ts` (design doc, Brand). */
 export function HoundLogo({ variant = 'badge', motion = 'idle', label, className }: Props) {
   const gradientId = useId()
+  const festive = useFestive()
   const [from, via, to] = c.gradient
   return (
     <svg
@@ -58,6 +62,7 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, className
           ))}
         </g>
         <path d={s.nose} fill={c.ink} />
+        {festive && <SantaHat transform={SANTA_HAT_ON_HEAD} />}
       </g>
       {/* Without the badge behind it, a soft outline keeps the white pages visible on light screens. */}
       <g stroke={variant === 'mark' ? c.spine : undefined} strokeOpacity={0.25} strokeWidth={6} strokeLinejoin="round">

@@ -694,6 +694,15 @@ The user picks one of four themes in **Profile → Theme**. The choice is a per-
   - author countries pop in by intensity
   - tooltips glide
 
+### Seasonal: December
+
+An Easter egg for the whole of December, by the device's local date (`src/domain/season.ts`, `src/ui/season/`):
+- Zico wears a Santa hat wherever he appears: the logo, the Home buddy and the barking beagle. The hat is one SVG group (`src/ui/brand/SantaHat.tsx`) placed by a transform per artwork; its tip and pom-pom bob, faster when he trots, barks or is tapped. It is never part of the generated app icons.
+- Every 3 to 6 minutes a gentle snow shower drifts over the app, the first one 2.5 s after opening. A shower lasts about 14 s, eases in and tapers off, and is drawn on one canvas that takes no taps. Flakes are dots and a few six-armed crystals with parallax and wind. Colours come from the theme tokens `--snow` and `--snow-glow`: white with a glow in the theme's colour on dark pages, a pale tint with a white halo on light pages.
+- With reduced motion the hat stays (still) and there is no snow.
+- The app re-checks the date around midnight, so the hat goes on by itself on 1 December.
+- Demo mode only: Profile > Demo mode has a "December mode" switch (setting `demoDecember`, stored in the demo database so the real library never sees it) and a "Make it snow" button.
+
 ## Tech stack
 
 | Concern | Choice |
@@ -788,3 +797,4 @@ The TypeScript types in this document are meant to be used directly. Code is org
 | 2026-11-25 | "Owned" is a flag on each book, not a fifth status, because owning is independent of reading (an owned book can be to read, reading, finished or DNF). Format is the edition's existing format. Library gets an Owned chip that combines with the status chips, and stats get an "Owned but not read" card. No backup format change: the field is optional and absent means not owned |
 | 2026-11-25 | Cover photos: when a book has no cover or a bad one, the reader takes a photo or picks an image, crops it to 2:3 and it is saved on the device as a JPEG (at most 600 × 900) in a separate `covers` table, shown through the `coverUrl` override so removing it brings the source cover back. Included in backups (format version 3; older backups still import) |
 | 2026-11-26 | Goodreads import from the standard CSV export: adds to the library (duplicates by ISBN or title and author are skipped), matches Open Library by ISBN then title and author with manual books as fallback, maps shelves to statuses, owned, favourite, genres and lists, and makes dated reads from Date Read and Read Count. Reads without a known start are flagged `startUnknown` so time-to-finish stats skip them. Series detection then runs for the imported books, with the Goodreads series label as fallback |
+| 2026-11-26 | December Easter egg: for all of December (local date) Zico wears a Santa hat everywhere and snow falls now and then (respecting reduced motion, tinted per theme). A demo-only switch on the Profile screen forces it on for testing |
