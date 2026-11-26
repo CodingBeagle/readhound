@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isBedtime, isDecember, msUntilBedtimeChange, msUntilRecheck, nextShowerGap, showerIntensity, SNOW } from './season'
+import { bedtimePhase, demoBedtimePhase, isBedtime, isDecember, msUntilBedtimeChange, msUntilRecheck, nextShowerGap, showerIntensity, SNOW } from './season'
 
 describe('isDecember', () => {
   it('is true for every day of December in local time', () => {
@@ -68,11 +68,31 @@ describe('msUntilBedtimeChange', () => {
   it('wakes just after the next 18:00 or 06:00', () => {
     expect(msUntilBedtimeChange(at('17:59:00'), tz)).toBe(61 * 1000)
     expect(msUntilBedtimeChange(at('05:58:30'), tz)).toBe(91 * 1000)
-    expect(msUntilBedtimeChange(at('23:30:00'), tz)).toBe(60 * 60 * 1000)
+    expect(msUntilBedtimeChange(at('23:59:00'), tz)).toBe(61 * 1000)
   })
 
   it('waits at most an hour', () => {
     expect(msUntilBedtimeChange(at('09:00:00'), tz)).toBe(60 * 60 * 1000)
     expect(msUntilBedtimeChange(at('18:00:01'), tz)).toBe(60 * 60 * 1000)
+  })
+})
+
+describe('bedtimePhase', () => {
+  const at = (time: string) => new Date(`2026-11-26T${time}+01:00`)
+  const tz = 'Europe/Copenhagen'
+  it('is evening from 18:00, night from midnight and day from 06:00', () => {
+    expect(bedtimePhase(at('17:59:59'), tz)).toBe('day')
+    expect(bedtimePhase(at('18:00:00'), tz)).toBe('evening')
+    expect(bedtimePhase(at('23:59:59'), tz)).toBe('evening')
+    expect(bedtimePhase(at('00:00:00'), tz)).toBe('night')
+    expect(bedtimePhase(at('05:59:59'), tz)).toBe('night')
+    expect(bedtimePhase(at('06:00:00'), tz)).toBe('day')
+  })
+
+  it('reads the demo setting, including the older true', () => {
+    expect(demoBedtimePhase('night')).toBe('night')
+    expect(demoBedtimePhase('evening')).toBe('evening')
+    expect(demoBedtimePhase(true)).toBe('evening')
+    expect(demoBedtimePhase(undefined)).toBeUndefined()
   })
 })

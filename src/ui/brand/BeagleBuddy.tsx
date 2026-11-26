@@ -29,7 +29,7 @@ import { useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
 import { useQuoteData, useQuoteSettings } from '@/ui/hooks/useQuotes'
 import { useStatsModel } from '@/ui/hooks/useStats'
 import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
-import { useBedtime, useFestive } from '@/ui/season/season'
+import { useAsleep, useBedtime, useFestive } from '@/ui/season/season'
 
 import { buddyMessage } from './buddyMessages'
 import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
@@ -67,11 +67,14 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const introduced = useLiveQuery(async () => Boolean((await db.settings.get(SETTING_BUDDY_INTRODUCED))?.value), [db])
   /** Set while this visit is the one where Zico says hello; stays on after the setting is saved. */
   const [introducing, setIntroducing] = useState(false)
+  /** Midnight to 06:00 Zico sleeps: no quotes, no cheering (milestones wait for the morning). */
+  const asleep = useAsleep()
   useEffect(() => {
-    if (introduced !== false) return
+    // He says hello when he is awake, not in his sleep.
+    if (introduced !== false || asleep) return
     setIntroducing(true)
     void db.settings.put({ key: SETTING_BUDDY_INTRODUCED, value: true })
-  }, [introduced, db])
+  }, [introduced, db, asleep])
   const weeklyTarget = useWeeklyGoal()
   const today = todayOf(clock)
   const reduce = useReducedMotion()
@@ -95,7 +98,7 @@ export function BeagleBuddy({ className }: { className?: string }) {
   const [skipped, setSkipped] = useState(0)
   const [pokes, setPokes] = useState(0)
   const hasMilestone = Boolean(state?.milestone)
-  const quoting = !introducing && quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
+  const quoting = !asleep && !introducing && quotes.length > 0 && isQuoteTurn(chatter, daySeed, hasMilestone)
   // Each quote turn, and each skip, draws a new random quote, avoiding the ones shown lately (also on earlier visits).
   const [current, setCurrent] = useState<Quote>()
   const pickKey = quoting ? `${chatter}:${skipped}` : undefined
@@ -138,13 +141,13 @@ export function BeagleBuddy({ className }: { className?: string }) {
     else if (introNews.current !== newsKey) setIntroducing(false)
   }, [introducing, newsKey])
   useEffect(() => {
-    if (!milestoneKey || !celebrated || cheered.current === milestoneKey || celebrated.includes(milestoneKey)) return
+    if (asleep || !milestoneKey || !celebrated || cheered.current === milestoneKey || celebrated.includes(milestoneKey)) return
     cheered.current = milestoneKey
     void db.settings.put({ key: SETTING_BUDDY_CELEBRATED, value: [...celebrated, milestoneKey].slice(-KEEP_CELEBRATED) })
     setCheer(true)
     // Achievements already get their own toast with confetti; the buddy just jumps for those.
     if (state?.milestone?.kind !== 'achievement') void celebrateBookAdded()
-  }, [milestoneKey, celebrated, db, state?.milestone?.kind])
+  }, [asleep, milestoneKey, celebrated, db, state?.milestone?.kind])
 
   useEffect(() => {
     if (!cheer) return
@@ -161,9 +164,11 @@ export function BeagleBuddy({ className }: { className?: string }) {
   if (!state) return null
   // A new band, or a new page count, gets a fresh comment; so does every chatter tick.
   const seed = hashOf(`${today}:${state.mood}:${milestoneKey ?? ''}:${state.weekly?.band ?? ''}`) + (state.weekly?.pages ?? 0) + chatter
-  const message = introducing && pokes === 0 ? b.intro[seed % b.intro.length]! : buddyMessage(state, seed, pokes)
-  const drowsy = state.mood === 'sleepy' || state.mood === 'snoozing'
-  const face: BuddyMood = awake && drowsy ? 'curious' : state.mood
+  const sleepLines = awake ? b.asleep.stirred : b.asleep.lines
+  const message = asleep ? sleepLines[(seed + pokes) % sleepLines.length]! : introducing && pokes === 0 ? b.intro[seed % b.intro.length]! : buddyMessage(state, seed, pokes)
+  const drowsy = asleep || state.mood === 'sleepy' || state.mood === 'snoozing'
+  // Asleep he snoozes on his book; a tap only half wakes him, and he soon nods off again.
+  const face: BuddyMood = asleep ? (awake ? 'sleepy' : 'snoozing') : awake && drowsy ? 'curious' : state.mood
 
   const onTap = () => {
     setPoke((n) => n + 1)
@@ -174,11 +179,11 @@ export function BeagleBuddy({ className }: { className?: string }) {
   }
 
   return (
-    <section aria-label={b.label} data-testid="beagle-buddy" data-mood={state.mood} className={cn('animate-rise flex items-center gap-3 surface p-3 pr-4', className)}>
+    <section aria-label={b.label} data-testid="beagle-buddy" data-mood={state.mood} data-asleep={asleep || undefined} className={cn('animate-rise flex items-center gap-3 surface p-3 pr-4', className)}>
       <button
         type="button"
         onClick={onTap}
-        aria-label={`${b.label}: ${b.moods[state.mood]}. ${quote ? b.quotes.tapHint : b.tapHint}`}
+        aria-label={`${b.label}: ${asleep ? b.asleep.mood : b.moods[state.mood]}. ${quote ? b.quotes.tapHint : b.tapHint}`}
         className="relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <BuddyArt key={poke} mood={face} cheer={cheer} poked={poke > 0} className="size-24" />

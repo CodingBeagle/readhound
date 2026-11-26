@@ -2,10 +2,10 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 import { useDemo, useServices } from '@/app/services'
-import { isBedtime, isDecember, msUntilBedtimeChange, msUntilRecheck, SETTING_DEMO_DECEMBER, SETTING_DEMO_PYJAMAS } from '@/domain/season'
+import { bedtimePhase, demoBedtimePhase, isDecember, msUntilBedtimeChange, msUntilRecheck, SETTING_DEMO_DECEMBER, SETTING_DEMO_PYJAMAS, type BedtimePhase } from '@/domain/season'
 
 const FestiveContext = createContext(false)
-const BedtimeContext = createContext(false)
+const BedtimeContext = createContext<BedtimePhase>('day')
 
 /** True while Zico is dressed for December. Outside the provider (tests, icons) he never is. */
 // oxlint-disable-next-line react/only-export-components
@@ -16,6 +16,18 @@ export function useFestive(): boolean {
 /** True while Zico is in his pyjamas (18:00 to 06:00). Outside the provider he never is. */
 // oxlint-disable-next-line react/only-export-components
 export function useBedtime(): boolean {
+  return useContext(BedtimeContext) !== 'day'
+}
+
+/** True while Zico is fast asleep (midnight to 06:00). Outside the provider he never is. */
+// oxlint-disable-next-line react/only-export-components
+export function useAsleep(): boolean {
+  return useContext(BedtimeContext) === 'night'
+}
+
+/** The bedtime phase itself: day, evening (pyjamas) or night (asleep). */
+// oxlint-disable-next-line react/only-export-components
+export function useBedtimePhase(): BedtimePhase {
   return useContext(BedtimeContext)
 }
 
@@ -24,7 +36,7 @@ export function useBedtime(): boolean {
  * have changed, and whenever the app comes back to the screen (a phone that
  * slept through 18:00 may have held the timer back).
  */
-function useLocalClock(test: (now: Date, timeZone: string) => boolean, wait: (now: Date, timeZone: string) => number): boolean {
+function useLocalClock<T>(test: (now: Date, timeZone: string) => T, wait: (now: Date, timeZone: string) => number): T {
   const { clock } = useServices()
   const [value, setValue] = useState(() => test(clock.now(), clock.timeZone()))
   useEffect(() => {
@@ -65,16 +77,19 @@ function useRootFlag(name: string, on: boolean) {
 export function FestiveProvider({ children }: { children: ReactNode }) {
   const demo = useDemo()
   const december = useLocalClock(isDecember, msUntilRecheck)
-  const night = useLocalClock(isBedtime, msUntilBedtimeChange)
+  const clockPhase = useLocalClock(bedtimePhase, msUntilBedtimeChange)
   const forcedDecember = useDemoDecember()
   const forcedPyjamas = useDemoPyjamas()
   const festive = december || (demo.active && forcedDecember === true)
-  const bedtime = night || (demo.active && forcedPyjamas === true)
+  const forcedPhase = demo.active ? forcedPyjamas : undefined
+  // A demo phase only ever adds bedtime: forcing evening at 02:00 still leaves him asleep.
+  const phase: BedtimePhase = clockPhase === 'night' || forcedPhase === 'night' ? 'night' : clockPhase === 'evening' || forcedPhase ? 'evening' : 'day'
   useRootFlag('data-festive', festive)
-  useRootFlag('data-bedtime', bedtime)
+  useRootFlag('data-bedtime', phase !== 'day')
+  useRootFlag('data-asleep', phase === 'night')
   return (
     <FestiveContext value={festive}>
-      <BedtimeContext value={bedtime}>{children}</BedtimeContext>
+      <BedtimeContext value={phase}>{children}</BedtimeContext>
     </FestiveContext>
   )
 }
@@ -102,11 +117,28 @@ function useSetDemoSwitch(key: string) {
 export const useDemoDecember = () => useDemoSwitch(SETTING_DEMO_DECEMBER)
 // oxlint-disable-next-line react/only-export-components
 export const useSetDemoDecember = () => useSetDemoSwitch(SETTING_DEMO_DECEMBER)
-/** The pyjama demo toggle's value (always false outside demo mode), undefined while loading. */
+/**
+ * The bedtime phase the demo forces: 'evening' (pyjamas), 'night' (asleep), or
+ * null for the real clock (always null outside demo mode); undefined while loading.
+ */
 // oxlint-disable-next-line react/only-export-components
-export const useDemoPyjamas = () => useDemoSwitch(SETTING_DEMO_PYJAMAS)
+export function useDemoPyjamas(): 'evening' | 'night' | null | undefined {
+  const { db } = useServices()
+  const demo = useDemo()
+  return useLiveQuery(async () => (demo.active ? (demoBedtimePhase((await db.settings.get(SETTING_DEMO_PYJAMAS))?.value) ?? null) : null), [db, demo.active])
+}
+
+/** Saves the demo bedtime phase (null for the real clock), in the demo database only. */
 // oxlint-disable-next-line react/only-export-components
-export const useSetDemoPyjamas = () => useSetDemoSwitch(SETTING_DEMO_PYJAMAS)
+export function useSetDemoPyjamas() {
+  const { db } = useServices()
+  const demo = useDemo()
+  return async (phase: 'evening' | 'night' | null) => {
+    if (!demo.active) return
+    if (phase) await db.settings.put({ key: SETTING_DEMO_PYJAMAS, value: phase })
+    else await db.settings.delete(SETTING_DEMO_PYJAMAS)
+  }
+}
 
 type Listener = () => void
 const snowListeners = new Set<Listener>()

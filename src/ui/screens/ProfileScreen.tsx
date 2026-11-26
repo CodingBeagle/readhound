@@ -22,7 +22,7 @@ import { LevelCard } from '@/ui/achievements/LevelCard'
 import { useAchievements } from '@/ui/achievements/useAchievements'
 import { Section } from '@/ui/layout/Section'
 import { prefersReducedMotion } from '@/ui/motion/bookAddedConfetti'
-import { letItSnow, useBedtime, useDemoDecember, useDemoPyjamas, useFestive, useSetDemoDecember, useSetDemoPyjamas } from '@/ui/season/season'
+import { letItSnow, useBedtimePhase, useDemoDecember, useDemoPyjamas, useFestive, useSetDemoDecember, useSetDemoPyjamas } from '@/ui/season/season'
 import { barkSoundEnabled, saveBarkSound, subscribeBarkSound } from '@/ui/motion/bookAddedBark'
 import { ThemePicker } from '@/ui/theme/ThemePicker'
 import { useSetWeeklyGoal, useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
@@ -96,21 +96,29 @@ function DemoDecember() {
   )
 }
 
-/** Demo only: put Zico in his pyjamas whatever the time. */
+/** Demo only: put Zico in his pyjamas, or to sleep, whatever the time. */
 function DemoPyjamas() {
   const demo = useDemo()
   const forced = useDemoPyjamas()
   const setForced = useSetDemoPyjamas()
-  const bedtime = useBedtime()
+  const phase = useBedtimePhase()
   if (!demo.active || forced === undefined) return null
   const d = p.demo
+  // What the real clock says on its own, so a switch it already turns on shows as on and locked.
+  const realEvening = phase !== 'day' && !forced
+  const realNight = phase === 'night' && forced !== 'night'
   return (
     <div className="mt-4 border-t pt-4">
       <label className="flex min-h-11 cursor-pointer items-center justify-between gap-4">
         <span className="font-medium">{d.pyjamas}</span>
-        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={forced || bedtime} disabled={bedtime && !forced} onChange={(e) => void setForced(e.target.checked)} />
+        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={phase !== 'day'} disabled={realEvening} onChange={(e) => void setForced(e.target.checked ? 'evening' : null)} />
       </label>
-      <p className="mt-1 text-sm text-muted-foreground">{bedtime && !forced ? d.pyjamasOn : d.pyjamasHint}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{realEvening ? d.pyjamasOn : d.pyjamasHint}</p>
+      <label className="mt-2 flex min-h-11 cursor-pointer items-center justify-between gap-4">
+        <span className="font-medium">{d.asleep}</span>
+        <input type="checkbox" role="switch" className="size-5 accent-[var(--primary)]" checked={phase === 'night'} disabled={realNight} onChange={(e) => void setForced(e.target.checked ? 'night' : forced ? 'evening' : null)} />
+      </label>
+      <p className="mt-1 text-sm text-muted-foreground">{realNight ? d.asleepOn : d.asleepHint}</p>
     </div>
   )
 }

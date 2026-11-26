@@ -705,12 +705,13 @@ An Easter egg for the whole of December, by the device's local date (`src/domain
 
 ### Seasonal: bedtime pyjamas
 
-From 18:00 until 06:00 by the device's local clock (`isBedtime` in `src/domain/season.ts`), Zico wears his pyjamas wherever he appears:
+By the device's local clock (`bedtimePhase` in `src/domain/season.ts`): from 18:00 to midnight (`evening`) Zico wears his pyjamas wherever he appears, from midnight to 06:00 (`night`) he is fast asleep in them, and from 06:00 (`day`) he is awake and dressed as usual:
 - The logo and Home buddy get a striped nightcap (placed with the Santa hat's transform) and striped pyjama sleeves with cuffs under his paws; the barking beagle gets a striped pyjama body, collar, buttons and trouser cuffs. Art and colours live in `src/ui/brand/Pyjamas.tsx`; never part of the app icons.
-- The switch is live: the app checks again just after the next 06:00 or 18:00 (at most an hour away) and whenever it comes back to the screen.
+- Asleep, the logo shuts his eyes, nods his head onto the book with slow breaths and lets z's drift up (`data-asleep`, `.hound-asleep`). The Home buddy uses its snoozing face and only says sleepy lines; no quotes, and milestone cheers wait for the morning. A tap half wakes him (sleepy face, a mumbled line) before he nods off again. The barking beagle still trots in, awake, when a book is added: the new book woke him.
+- The switch is live: the app checks again just after the next 06:00, 18:00 or midnight (at most an hour away) and whenever it comes back to the screen.
 - In December the Santa hat replaces the nightcap and the pyjamas turn Christmas red with cream stripes and green trim.
 - The nightcap's pom-pom sways gently, faster when he trots or is tapped; still with reduced motion.
-- Demo mode only: Profile > Demo mode has a "Pyjama time" switch (setting `demoPyjamas` in the demo database).
+- Demo mode only: Profile > Demo mode has "Pyjama time" and "Fast asleep" switches (setting `demoPyjamas` in the demo database: `'evening'` or `'night'`; an older `true` means evening).
 
 ## Tech stack
 

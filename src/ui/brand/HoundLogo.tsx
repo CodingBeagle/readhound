@@ -2,7 +2,7 @@ import { useId } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { useBedtime, useFestive } from '@/ui/season/season'
+import { useAsleep, useBedtime, useFestive } from '@/ui/season/season'
 
 import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
 import { Nightcap, PyjamaSleeves } from './Pyjamas'
@@ -31,15 +31,19 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, outfit, c
   const seasonBedtime = useBedtime()
   const festive = outfit ? outfit === 'santa' : seasonFestive
   const bedtime = outfit ? outfit === 'pyjamas' : seasonBedtime
+  // Midnight to 06:00 he sleeps in his pyjamas: eyes shut, slow breaths, z's drifting up.
+  const seasonAsleep = useAsleep()
+  const asleep = !outfit && seasonAsleep
   const [from, via, to] = c.gradient
   return (
     <svg
       viewBox={`0 0 ${HOUND_VIEWBOX} ${HOUND_VIEWBOX}`}
-      className={cn('hound shrink-0', motion !== 'none' && `hound-${motion}`, className)}
+      className={cn('hound shrink-0', motion !== 'none' && `hound-${motion}`, asleep && 'hound-asleep', className)}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
       data-testid="hound-logo"
+      data-asleep={asleep || undefined}
     >
       {variant === 'badge' && (
         <>
@@ -60,12 +64,16 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, outfit, c
         <path className="hound-ear hound-ear-left" d={s.earLeft} fill={c.ear} />
         <path className="hound-ear hound-ear-right" d={s.earRight} fill={c.ear} />
         <g className="hound-eyes">
-          {s.eyes.map((e) => (
-            <g key={e.cx}>
-              <circle cx={e.cx} cy={e.cy} r={s.eyeRadius} fill={c.ink} />
-              <circle cx={e.cx + s.glintOffset.dx} cy={e.cy + s.glintOffset.dy} r={s.glintOffset.r} fill="#fff" />
-            </g>
-          ))}
+          {s.eyes.map((e) =>
+            asleep ? (
+              <path key={e.cx} d={`M${e.cx - 15} ${e.cy}q15 12 30 0`} stroke={c.ink} strokeWidth={9} strokeLinecap="round" fill="none" />
+            ) : (
+              <g key={e.cx}>
+                <circle cx={e.cx} cy={e.cy} r={s.eyeRadius} fill={c.ink} />
+                <circle cx={e.cx + s.glintOffset.dx} cy={e.cy + s.glintOffset.dy} r={s.glintOffset.r} fill="#fff" />
+              </g>
+            ),
+          )}
         </g>
         <path d={s.nose} fill={c.ink} />
         {festive ? <SantaHat transform={SANTA_HAT_ON_HEAD} /> : bedtime && <Nightcap transform={SANTA_HAT_ON_HEAD} />}
@@ -83,6 +91,13 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, outfit, c
         ))}
         <path d={s.toes} stroke={c.fur} strokeWidth={4} strokeLinecap="round" />
       </g>
+      {asleep && (
+        <g className="hound-zzz" fill={variant === 'badge' ? '#fff' : c.ear} fontWeight={800} fontFamily="inherit" data-testid="hound-zzz">
+          <text x={392} y={118} fontSize={44}>z</text>
+          <text x={424} y={82} fontSize={56}>z</text>
+          <text x={454} y={48} fontSize={66}>Z</text>
+        </g>
+      )}
     </svg>
   )
 }
