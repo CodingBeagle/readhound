@@ -1,4 +1,4 @@
-import { Layers, LayoutGrid, List } from 'lucide-react'
+import { Layers, LayoutGrid, Library as ShelfIcon, List } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
@@ -6,6 +6,7 @@ import { filterBooks, sortBooks, type LibrarySort } from '@/domain/bookView'
 import type { Status } from '@/domain/types'
 import { t } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { Bookshelf } from '@/ui/books/Bookshelf'
 import { BookGridItem, BookListItem } from '@/ui/books/BookListItem'
 import { Button } from '@/ui/components/ui/button'
 import { Input, Select } from '@/ui/components/ui/input'
@@ -22,6 +23,14 @@ const STATUS_FILTERS: { value: Status | ''; label: string }[] = [
   { value: 'finished', label: t.status.finished },
   { value: 'dnf', label: t.screens.library.dnfPile },
 ]
+const VIEWS = [
+  { value: 'list', label: t.screens.library.list, Icon: List },
+  { value: 'grid', label: t.screens.library.grid, Icon: LayoutGrid },
+  { value: 'shelf', label: t.screens.library.shelf, Icon: ShelfIcon },
+] as const
+type View = (typeof VIEWS)[number]['value']
+const isView = (v: string | null): v is View => VIEWS.some((x) => x.value === v)
+
 const SORTS = Object.entries(t.screens.library.sorts) as [LibrarySort, string][]
 
 export function LibraryScreen() {
@@ -30,7 +39,8 @@ export function LibraryScreen() {
   const [params, setParams] = useSearchParams()
   const status = (params.get('status') ?? '') as Status | ''
   const sort = (params.get('sort') ?? 'added') as LibrarySort
-  const view = params.get('view') === 'grid' ? 'grid' : 'list'
+  const rawView = params.get('view')
+  const view: View = isView(rawView) ? rawView : 'list'
   const text = params.get('q') ?? ''
   const language = params.get('lang') ?? ''
   const listId = params.get('list') ?? ''
@@ -167,29 +177,41 @@ export function LibraryScreen() {
             ))}
           </Select>
         )}
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0"
-          aria-label={view === 'grid' ? t.screens.library.list : t.screens.library.grid}
-          onClick={() => set('view', view === 'grid' ? '' : 'grid')}
-        >
-          {view === 'grid' ? <List /> : <LayoutGrid />}
-        </Button>
       </div>
 
       {books && books.length === 0 && <EmptyState>{t.screens.library.empty}</EmptyState>}
       {books && books.length > 0 && shown.length === 0 && <EmptyState>{t.screens.library.noMatches}</EmptyState>}
       {shown.length > 0 && (
         <>
-          <p className="mb-2 text-sm text-muted-foreground" aria-live="polite">
-            {t.screens.library.count(shown.length)}
-          </p>
-          <ul className={cn(view === 'grid' ? 'grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5' : 'flex flex-col gap-1')}>
-            {shown.map((book) => (
-              <li key={book.entry.id}>{view === 'grid' ? <BookGridItem book={book} /> : <BookListItem book={book} />}</li>
-            ))}
-          </ul>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              {t.screens.library.count(shown.length)}
+            </p>
+            <div role="group" aria-label={t.screens.library.view} className="flex shrink-0 gap-0.5 rounded-lg border bg-background p-0.5">
+              {VIEWS.map(({ value, label, Icon }) => (
+                <Button
+                  key={value}
+                  variant={view === value ? 'default' : 'ghost'}
+                  size="icon"
+                  className="size-11 rounded-md"
+                  aria-label={label}
+                  aria-pressed={view === value}
+                  onClick={() => set('view', value === 'list' ? '' : value)}
+                >
+                  <Icon />
+                </Button>
+              ))}
+            </div>
+          </div>
+          {view === 'shelf' ? (
+            <Bookshelf books={shown} />
+          ) : (
+            <ul className={cn(view === 'grid' ? 'grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5' : 'flex flex-col gap-1')}>
+              {shown.map((book) => (
+                <li key={book.entry.id}>{view === 'grid' ? <BookGridItem book={book} /> : <BookListItem book={book} />}</li>
+              ))}
+            </ul>
+          )}
         </>
       )}
     </>

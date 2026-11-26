@@ -32,6 +32,14 @@ export const en = {
     audiobook: 'Audiobook',
     other: 'Other',
   },
+  shelf: {
+    label: 'Bookshelf',
+    spine: (title: string, author: string) => `${title} by ${author}`,
+    open: (title: string) => `Open ${title}`,
+    openBook: 'Open book',
+    putBack: 'Put back',
+    pages: (n: number) => `${n} pages`,
+  },
   owned: {
     section: 'My copy',
     own: 'I own this book',
@@ -123,6 +131,8 @@ export const en = {
       sorts: { added: 'Recently added', title: 'Title', author: 'Author', finished: 'Finished date', rating: 'Rating' },
       grid: 'Grid view',
       list: 'List view',
+      shelf: 'Shelf view',
+      view: 'View',
       count: (n: number) => (n === 1 ? '1 book' : `${n} books`),
       anyList: 'All lists',
       anyCategory: 'All categories',
