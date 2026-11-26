@@ -11,7 +11,7 @@ import type { SearchResult } from '@/sources/types'
 import { useOnline } from '@/ui/hooks/useDebounced'
 import { useSeriesViews } from '@/ui/hooks/useSeries'
 import { useStatsModel } from '@/ui/hooks/useStats'
-import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
+import { celebrateNewBook } from '@/ui/motion/bookAddedBark'
 
 /** Work ids of picks the reader said "not for me" to. Part of the backup like every setting. */
 export const SETTING_DISMISSED_PICKS = 'recommendationsDismissed'
@@ -98,7 +98,7 @@ export function usePickActions() {
         { edition, work: { firstPublishYear: result.firstPublishYear, medianPageCount: result.medianPageCount, subjects: result.subjects }, fallbackCoverUrl: result.coverUrl },
         { status: 'to_read' },
       )
-      if (!existing) void celebrateBookAdded()
+      if (!existing) celebrateNewBook()
       return entryId
     },
     async dismiss(workId: string) {

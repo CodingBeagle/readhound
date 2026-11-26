@@ -13,12 +13,16 @@ test('the library as a bookshelf: filters apply and a spine pulls out and opens'
   const spines = shelf.getByRole('button', { name: / by / })
 
   // Every book in the filtered library gets a spine.
+  const bookCount = async () => Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
+  const total = await bookCount()
   await page.getByRole('group', { name: 'Status' }).getByRole('button', { name: 'Finished' }).click()
-  const count = Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
+  // Wait for the filter to re-render the count before reading it.
+  await expect.poll(bookCount).toBeLessThan(total)
+  const count = await bookCount()
   await expect(spines).toHaveCount(count)
   await page.getByRole('button', { name: 'Owned' }).click()
-  const owned = Number((await page.getByText(/^\d+ books?$/).textContent())!.split(' ')[0])
-  expect(owned).toBeLessThan(count)
+  await expect.poll(bookCount).toBeLessThan(count)
+  const owned = await bookCount()
   await expect(spines).toHaveCount(owned)
 
   // The view sticks in the URL, so it survives going to a book and back.

@@ -10,7 +10,7 @@ import { BackLink } from '@/ui/books/BackLink'
 import { Button } from '@/ui/components/ui/button'
 import { Field, Input, Select } from '@/ui/components/ui/input'
 import { CoverPhotoPicker } from '@/ui/covers/CoverPhotoPicker'
-import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
+import { celebrateNewBook } from '@/ui/motion/bookAddedBark'
 
 const FORMATS = Object.keys(t.formats) as EditionFormat[]
 const optionalNumber = (v: string) => (v.trim() ? Number(v) : undefined)
@@ -73,7 +73,7 @@ export function ManualEntryScreen() {
       },
       { owned },
     )
-    void celebrateBookAdded()
+    celebrateNewBook()
     navigate(`/book/${entryId}`, { replace: true })
   }
 
