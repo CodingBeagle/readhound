@@ -29,10 +29,11 @@ import { useWeeklyGoal } from '@/ui/hooks/useWeeklyGoal'
 import { useQuoteData, useQuoteSettings } from '@/ui/hooks/useQuotes'
 import { useStatsModel } from '@/ui/hooks/useStats'
 import { celebrateBookAdded } from '@/ui/motion/bookAddedConfetti'
-import { useFestive } from '@/ui/season/season'
+import { useBedtime, useFestive } from '@/ui/season/season'
 
 import { buddyMessage } from './buddyMessages'
 import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
+import { Nightcap, PyjamaSleeves } from './Pyjamas'
 import { SantaHat } from './SantaHat'
 
 const b = t.buddy
@@ -255,6 +256,7 @@ function QuoteBubble({ quote, data, favourites, onAnother }: { quote: Quote; dat
 export function BuddyArt({ mood, cheer, poked, className }: { mood: BuddyMood; cheer?: boolean; poked?: boolean; className?: string }) {
   const openEyes = mood === 'happy' || mood === 'curious'
   const festive = useFestive()
+  const bedtime = useBedtime()
   return (
     <svg
       viewBox={`0 0 ${HOUND_VIEWBOX} ${HOUND_VIEWBOX}`}
@@ -272,13 +274,14 @@ export function BuddyArt({ mood, cheer, poked, className }: { mood: BuddyMood; c
           <Eyes mood={mood} />
           <path d={s.nose} fill={c.ink} />
           <Mouth mood={mood} />
-          {festive && <SantaHat transform={SANTA_HAT_ON_HEAD} />}
+          {festive ? <SantaHat transform={SANTA_HAT_ON_HEAD} /> : bedtime && <Nightcap transform={SANTA_HAT_ON_HEAD} />}
         </g>
         <g stroke={c.spine} strokeOpacity={0.25} strokeWidth={6} strokeLinejoin="round">
           <path d={s.pageLeft} fill={c.page} />
           <path d={s.pageRight} fill={c.pageShade} />
         </g>
         <path d={s.spine} stroke={c.spine} strokeOpacity={0.35} strokeWidth={6} strokeLinecap="round" />
+        {bedtime && <PyjamaSleeves festive={festive} />}
         <g className="hound-paws">
           {s.paws.map((p) => (
             <ellipse key={p.cx} {...p} {...s.pawSize} fill={c.cream} />

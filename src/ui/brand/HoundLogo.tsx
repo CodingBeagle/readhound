@@ -2,9 +2,10 @@ import { useId } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { useFestive } from '@/ui/season/season'
+import { useBedtime, useFestive } from '@/ui/season/season'
 
 import { HOUND_VIEWBOX, houndColors as c, houndShapes as s, SANTA_HAT_ON_HEAD } from './houndArt'
+import { Nightcap, PyjamaSleeves } from './Pyjamas'
 import { SantaHat } from './SantaHat'
 
 type Props = {
@@ -25,6 +26,7 @@ type Props = {
 export function HoundLogo({ variant = 'badge', motion = 'idle', label, className }: Props) {
   const gradientId = useId()
   const festive = useFestive()
+  const bedtime = useBedtime()
   const [from, via, to] = c.gradient
   return (
     <svg
@@ -62,7 +64,7 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, className
           ))}
         </g>
         <path d={s.nose} fill={c.ink} />
-        {festive && <SantaHat transform={SANTA_HAT_ON_HEAD} />}
+        {festive ? <SantaHat transform={SANTA_HAT_ON_HEAD} /> : bedtime && <Nightcap transform={SANTA_HAT_ON_HEAD} />}
       </g>
       {/* Without the badge behind it, a soft outline keeps the white pages visible on light screens. */}
       <g stroke={variant === 'mark' ? c.spine : undefined} strokeOpacity={0.25} strokeWidth={6} strokeLinejoin="round">
@@ -70,6 +72,7 @@ export function HoundLogo({ variant = 'badge', motion = 'idle', label, className
         <path d={s.pageRight} fill={c.pageShade} />
       </g>
       <path d={s.spine} stroke={c.spine} strokeOpacity={0.35} strokeWidth={6} strokeLinecap="round" />
+      {bedtime && <PyjamaSleeves festive={festive} />}
       <g className="hound-paws">
         {s.paws.map((p) => (
           <ellipse key={p.cx} {...p} {...s.pawSize} fill={c.cream} />
